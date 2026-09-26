@@ -2,11 +2,15 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   DROP_HINT,
+  ENGINE_WAIT,
+  LIST_WAIT,
   NO_FILE,
+  SCORES_WAIT,
   TAGLINE,
   discardNotice,
   dropText,
   importError,
+  importingText,
   loadedLabel,
   manyUnscored,
   stripNotes,
@@ -99,4 +103,15 @@ test('the loaded strip names each problem in a few words', () => {
 test('the loaded strip leaves the no-stats count to the warning when more than 2% have no stats', () => {
   assert.deepEqual(stripNotes({ items: 100, known: 97, unresolved: 0 }), [])
   assert.deepEqual(stripNotes({ items: 20000, known: 18765, unresolved: 1234 }), ["1,234 couldn't be read"])
+})
+
+test('while a wardrobe is read, the drop zone says so, and says when the engine has to start first', () => {
+  assert.equal(importingText(true), 'Reading your wardrobe…')
+  assert.equal(importingText(false), 'Starting the engine, then reading your wardrobe…')
+  assert.equal(ENGINE_WAIT, 'Engine still loading · you can drop your file now')
+})
+
+test('the lists that are still loading say which one, and never promise a time', () => {
+  assert.equal(LIST_WAIT, 'Loading the item list…')
+  assert.equal(SCORES_WAIT, 'Loading the best possible scores…')
 })

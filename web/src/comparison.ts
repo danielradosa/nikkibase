@@ -115,3 +115,14 @@ export function copyLines(row: Pick<ComparisonRow, 'mine' | 'best' | 'same'>): C
 export function expandLabel(slot: string): string {
   return `Show alternatives for ${slot}`
 }
+
+export const FINDING = 'Finding your best outfit…'
+
+export const NAMES_WAIT = 'Loading item names…'
+
+export type ResultView = 'none' | 'first' | 'stale' | 'ready'
+
+export function resultView({ owned, chosen, outfit, busy }: { owned: number; chosen: boolean; outfit: boolean; busy: boolean }): ResultView {
+  if (outfit) return busy ? 'stale' : 'ready'
+  return chosen && owned > 0 && busy ? 'first' : 'none'
+}

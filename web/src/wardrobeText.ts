@@ -45,6 +45,16 @@ export function dropText(phone: boolean): string {
   return phone ? 'Tap to choose your clothes_date file' : 'Drop or choose your clothes_date file'
 }
 
+export function importingText(engineReady: boolean): string {
+  return engineReady ? 'Reading your wardrobe…' : 'Starting the engine, then reading your wardrobe…'
+}
+
+export const ENGINE_WAIT = 'Engine still loading · you can drop your file now'
+
+export const LIST_WAIT = 'Loading the item list…'
+
+export const SCORES_WAIT = 'Loading the best possible scores…'
+
 export function loadedLabel(count: number): string {
   return `Wardrobe loaded: ${count.toLocaleString('en-US')} ${count === 1 ? 'item' : 'items'}`
 }

@@ -1,6 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  FINDING,
+  NAMES_WAIT,
   alternativesLabel,
   bestNote,
   closeCall,
@@ -9,6 +11,7 @@ import {
   copyLines,
   expandLabel,
   outfitText,
+  resultView,
   rowOpens,
   unwornLabel,
 } from '../src/comparison.ts'
@@ -169,4 +172,16 @@ test('an opened row on a phone offers each name in it to copy', () => {
 
 test('the button that opens a row says which slot it opens', () => {
   assert.equal(expandLabel('Hair'), 'Show alternatives for Hair')
+})
+
+test('a first search shows a placeholder, a later one dims the outfit it replaces', () => {
+  const view = (owned: number, chosen: boolean, outfit: boolean, busy: boolean) => resultView({ owned, chosen, outfit, busy })
+  assert.equal(view(10, true, false, true), 'first')
+  assert.equal(view(10, true, true, true), 'stale')
+  assert.equal(view(10, true, true, false), 'ready')
+  assert.equal(view(10, true, false, false), 'none')
+  assert.equal(view(0, true, false, true), 'none')
+  assert.equal(view(10, false, false, true), 'none')
+  assert.equal(FINDING, 'Finding your best outfit…')
+  assert.equal(NAMES_WAIT, 'Loading item names…')
 })
