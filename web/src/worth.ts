@@ -59,6 +59,41 @@ export const filterSuits = (filter: WorthFilter) => filter.suits === true
 
 export const rankingStatus = (bySuit: boolean) => (bySuit ? 'Ranking suits…' : 'Ranking items…')
 
+export const waitPercent = (done: number, total: number) => (total ? Math.floor((done / total) * 100) : 0)
+
+export const checkingText = (done: number, total: number) =>
+  `Step 1 of 2 · Checking stages ${done.toLocaleString('en-US')} of ${total.toLocaleString('en-US')}`
+
+export function rankingText({
+  suits,
+  mode,
+  where,
+  got,
+  of,
+  first,
+}: {
+  suits: boolean
+  mode: string
+  where?: string | null
+  got?: number
+  of?: number
+  first: boolean
+}): string {
+  const what = suits ? 'suits' : 'items'
+  const count = got && of ? ` · ${got.toLocaleString('en-US')} of ${of.toLocaleString('en-US')}` : ''
+  if (first) return `Step 2 of 2 · Ranking ${what}${count}`
+  return `Ranking ${mode === ALL_MODES ? what : `${mode} ${what}`}${where ? ` for ${where}` : ''}${count}`
+}
+
+export const MORE_WAIT = 'Ranking 50 more…'
+
+export function rankSteps(suits: boolean, from: number, to: number): number[] {
+  if (!suits) return from === 0 && to > 10 ? [10, to] : [to]
+  const steps: number[] = []
+  for (let n = from + 10; n < to; n += 10) steps.push(n)
+  return [...steps, to]
+}
+
 export function worthSuits(items: readonly { id: number; suit: string; scoreable: boolean }[]): WorthSuit[] {
   const bySuit = new Map<string, number[]>()
   for (const it of items) {
@@ -532,6 +567,41 @@ export function askRanking(
       if (live && !noSession(e)) settle(null, message(e))
     },
   )
+  return () => {
+    live = false
+  }
+}
+
+export type Stepped = { ranking: WorthRanking | null; error: string | null; got: number; of: number; streaming: boolean }
+
+export function askSteps(
+  runner: Pick<WorthRunner, 'rank'>,
+  run: WorthRun,
+  active: boolean,
+  filter: WorthFilter,
+  steps: readonly number[],
+  settle: (step: Stepped) => void,
+): (() => void) | undefined {
+  if (!active || !rankReady(run) || !steps.length) return undefined
+  let live = true
+  const of = steps[steps.length - 1]
+  const ask = async () => {
+    for (let i = 0; i < steps.length && live; i++) {
+      let ranking: WorthRanking
+      try {
+        ranking = await runner.rank(filter, steps[i])
+      } catch (e) {
+        if (live && !noSession(e)) settle({ ranking: null, error: message(e), got: 0, of, streaming: false })
+        return
+      }
+      if (!live) return
+      const got = ranking.rows.length
+      const streaming = i < steps.length - 1 && got >= steps[i]
+      settle({ ranking, error: null, got, of, streaming })
+      if (!streaming) return
+    }
+  }
+  void ask()
   return () => {
     live = false
   }

@@ -10,6 +10,7 @@ import {
   neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote, rankingStatus,
   recipeText, rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
   worthSuits, type AcquireTable, type WorthApi,
+  MORE_WAIT, askSteps, checkingText, rankSteps, rankingText, waitPercent, type Stepped,
 } from '../src/worth.ts'
 
 const W = [1, 2, 3, 4, 5]
@@ -326,7 +327,16 @@ test('an ingredient a recipe lists twice is shown once, with both amounts added'
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0))
 
-function fakeEngine(total: number) {
+const rankedRow = (i: number): WorthRow => ({
+  items: [i],
+  places: [0],
+  worth: 1000 - i,
+  stages: 1,
+  best: { key: 'Story/1-1', points: 1000 - i, pct: 1 },
+  examples: [],
+})
+
+function fakeEngine(total: number, ranked?: { rows: number; held?: boolean }) {
   let session = 100
   let live: number | null = null
   let done = 0
@@ -372,7 +382,9 @@ function fakeEngine(total: number) {
         throw e
       }
       if (id !== live) throw new Error('no session')
-      return ranking
+      if (!ranked) return ranking
+      const rows = () => ({ rows: Array.from({ length: Math.min(limit, ranked.rows) }, (_, i) => rankedRow(i)), needed: [] })
+      return ranked.held ? later(rows) : rows()
     },
   }
   return {
@@ -814,4 +826,156 @@ test('suit pieces that share one plain way are listed together under it, and pie
   assert.equal(pieceList([{ name: 'Odd (constructor)', place: 'Hair' }]), 'Odd (constructor) (Hair)')
   assert.equal(groupTail({ past: true, pieces: [locks, aspiration, ring] }), '· may have ended (3)')
   assert.equal(groupTail({ past: false, pieces: [shoes] }), '(1)')
+})
+
+test('the stage check counts stages as step 1 of 2, with a bar that never rounds up', () => {
+  assert.equal(checkingText(544, 605), 'Step 1 of 2 · Checking stages 544 of 605')
+  assert.equal(checkingText(1234, 2181), 'Step 1 of 2 · Checking stages 1,234 of 2,181')
+  assert.equal(waitPercent(544, 605), 89)
+  assert.equal(waitPercent(604, 605), 99)
+  assert.equal(waitPercent(605, 605), 100)
+  assert.equal(waitPercent(0, 0), 0)
+})
+
+test('the first ranking of a run is step 2 of 2, later ones name what is being ranked', () => {
+  assert.equal(rankingText({ suits: false, mode: 'Story', first: true }), 'Step 2 of 2 · Ranking items')
+  assert.equal(rankingText({ suits: true, mode: ALL_MODES, got: 20, of: 50, first: true }), 'Step 2 of 2 · Ranking suits · 20 of 50')
+  assert.equal(rankingText({ suits: true, mode: ALL_MODES, got: 0, of: 50, first: true }), 'Step 2 of 2 · Ranking suits')
+  assert.equal(rankingText({ suits: false, mode: 'Story', first: false }), 'Ranking Story items')
+  assert.equal(rankingText({ suits: true, mode: ALL_MODES, got: 20, of: 50, first: false }), 'Ranking suits · 20 of 50')
+  assert.equal(
+    rankingText({ suits: true, mode: 'Commission', where: 'Hair', got: 30, of: 50, first: false }),
+    'Ranking Commission suits for Hair · 30 of 50',
+  )
+  assert.equal(rankingText({ suits: false, mode: ALL_MODES, where: 'Hair', first: false }), 'Ranking items for Hair')
+  assert.equal(MORE_WAIT, 'Ranking 50 more…')
+})
+
+test('suits are ranked ten at a time, items first ten and then the rest', () => {
+  assert.deepEqual(rankSteps(true, 0, 50), [10, 20, 30, 40, 50])
+  assert.deepEqual(rankSteps(true, 50, 100), [60, 70, 80, 90, 100])
+  assert.deepEqual(rankSteps(false, 0, 50), [10, 50])
+  assert.deepEqual(rankSteps(false, 50, 200), [200])
+})
+
+const stepLog = (settled: string[]) => (step: Stepped) =>
+  settled.push(step.error ?? `${step.got} of ${step.of}${step.streaming ? ' +' : ''}`)
+
+test('the steps are asked in order, and each one shows its rows at once', async () => {
+  const fake = fakeEngine(10, { rows: 500 })
+  const runner = worthRunner(fake.api, 32)
+  runner.ensure(request('k1', 10))
+  await fake.drive(runner, 'done')
+  const settled: string[] = []
+  askSteps(runner, runner.get(), true, { suits: true }, rankSteps(true, 0, 50), stepLog(settled))
+  for (let i = 0; i < 10; i++) await flush()
+  assert.deepEqual(
+    fake.calls.filter((c) => c.startsWith('rank')).map((c) => c.split(' ').at(-1)),
+    ['10', '20', '30', '40', '50'],
+  )
+  assert.deepEqual(settled, ['10 of 50 +', '20 of 50 +', '30 of 50 +', '40 of 50 +', '50 of 50'])
+})
+
+test('items ask for ten rows and then fifty, and Show more asks for the rest in one go', async () => {
+  const fake = fakeEngine(10, { rows: 500 })
+  const runner = worthRunner(fake.api, 32)
+  runner.ensure(request('k1', 10))
+  await fake.drive(runner, 'done')
+  const settled: string[] = []
+  askSteps(runner, runner.get(), true, {}, rankSteps(false, 0, 50), stepLog(settled))
+  for (let i = 0; i < 5; i++) await flush()
+  askSteps(runner, runner.get(), true, {}, rankSteps(false, 50, 200), stepLog(settled))
+  for (let i = 0; i < 5; i++) await flush()
+  assert.deepEqual(fake.calls.filter((c) => c.startsWith('rank')), ['rank 101 {} 10', 'rank 101 {} 50', 'rank 101 {} 200'])
+  assert.deepEqual(settled, ['10 of 50 +', '50 of 50', '200 of 200'])
+})
+
+test('a short step ends the stream, since there is nothing more to rank', async () => {
+  const fake = fakeEngine(10, { rows: 25 })
+  const runner = worthRunner(fake.api, 32)
+  runner.ensure(request('k1', 10))
+  await fake.drive(runner, 'done')
+  const settled: string[] = []
+  askSteps(runner, runner.get(), true, { suits: true }, rankSteps(true, 0, 50), stepLog(settled))
+  for (let i = 0; i < 10; i++) await flush()
+  assert.equal(fake.count('rank'), 3)
+  assert.deepEqual(settled, ['10 of 50 +', '20 of 50 +', '25 of 50'])
+})
+
+test('a new filter or a hidden tab stops after the step in flight, and coming back replays what was ranked', async () => {
+  const fake = fakeEngine(10, { rows: 500, held: true })
+  const runner = worthRunner(fake.api, 32)
+  runner.ensure(request('k1', 10))
+  await fake.drive(runner, 'done')
+  const settled: string[] = []
+  assert.equal(askSteps(runner, runner.get(), false, { suits: true }, rankSteps(true, 0, 50), stepLog(settled)), undefined)
+  assert.equal(fake.count('rank'), 0, 'a hidden tab asks nothing')
+  const stop = askSteps(runner, runner.get(), true, { suits: true }, rankSteps(true, 0, 50), stepLog(settled))
+  await fake.release()
+  assert.equal(fake.count('rank'), 2)
+  stop?.()
+  await fake.release()
+  await flush()
+  assert.equal(fake.count('rank'), 2, 'no step is sent once the view has changed')
+  assert.deepEqual(settled, ['10 of 50 +'])
+  askSteps(runner, runner.get(), true, { suits: true }, rankSteps(true, 0, 50), stepLog(settled))
+  for (let i = 0; i < 5; i++) await flush()
+  assert.equal(fake.count('rank'), 3, 'the first two steps come from the memo')
+  await fake.release()
+  assert.deepEqual(settled, ['10 of 50 +', '10 of 50 +', '20 of 50 +', '30 of 50 +'])
+})
+
+test('a step that fails shows its error and ends the stream', async () => {
+  const fake = fakeEngine(10, { rows: 500 })
+  const runner = worthRunner(fake.api, 32)
+  runner.ensure(request('k1', 10))
+  await fake.drive(runner, 'done')
+  const settled: string[] = []
+  fake.crash(new Error('boom'))
+  askSteps(runner, runner.get(), true, {}, rankSteps(false, 0, 50), stepLog(settled))
+  for (let i = 0; i < 5; i++) await flush()
+  assert.deepEqual(settled, ['boom'])
+  assert.equal(fake.count('rank'), 1)
+})
+
+test('steps are not asked before the ranking is ready, and a step that lands after the view was left is dropped', async () => {
+  const fake = fakeEngine(40, { rows: 500, held: true })
+  const runner = worthRunner(fake.api, 32)
+  const settled: string[] = []
+  runner.ensure(request('k1', 40))
+  await fake.release()
+  await fake.release()
+  assert.equal(runner.get().phase, 'running')
+  assert.equal(askSteps(runner, runner.get(), true, {}, [50], stepLog(settled)), undefined)
+  await flush()
+  assert.equal(fake.count('rank'), 0)
+  await fake.drive(runner, 'done')
+  const stop = askSteps(runner, runner.get(), true, {}, [50], stepLog(settled))
+  stop?.()
+  await fake.release()
+  await flush()
+  assert.equal(fake.count('rank'), 1)
+  assert.deepEqual(settled, [])
+})
+
+test('a step the engine answers with "no session" settles nothing, and neither does an error after the view was left', async () => {
+  const fake = fakeEngine(10, { rows: 500 })
+  const runner = worthRunner(fake.api, 32)
+  runner.ensure(request('k1', 10))
+  await fake.drive(runner, 'done')
+  const settled: string[] = []
+  fake.crash(new Error('boom'))
+  const stop = askSteps(runner, runner.get(), true, {}, [50], stepLog(settled))
+  stop?.()
+  for (let i = 0; i < 5; i++) await flush()
+  assert.deepEqual(settled, [])
+  const gone = fakeEngine(10, { rows: 500 })
+  const restarted = worthRunner(gone.api, 32)
+  restarted.ensure(request('k1', 10))
+  await gone.drive(restarted, 'done')
+  gone.end()
+  askSteps(restarted, restarted.get(), true, {}, [50], stepLog(settled))
+  for (let i = 0; i < 5; i++) await flush()
+  assert.equal(gone.count('rank'), 1)
+  assert.deepEqual(settled, [])
 })
