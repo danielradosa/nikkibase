@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo } from 'react'
 import { Alert, Empty } from 'antd'
 import { useStore } from './store'
 import { ATTRS, SLOTS, type Item } from './items'
-import { comparisonRows, outfitText, type Place } from './comparison'
+import { FINDING, comparisonRows, outfitText, resultView, type Place } from './comparison'
 import { skillsLine } from './skills'
 import { missingMessage, stageKey, type Stage } from './stages'
 import { manyUnscored, unscored } from './wardrobeText'
@@ -10,7 +10,9 @@ import WardrobeImport from './WardrobeImport'
 import StagePicker from './StagePicker'
 import StageSummary from './StageSummary'
 import OutfitScore from './OutfitScore'
+import ScoreWait from './ScoreWait'
 import ComparisonTable from './ComparisonTable'
+import WaitLine from './WaitLine'
 
 type Props = {
   stages: Stage[]
@@ -30,6 +32,7 @@ export default function BestOutfitTab({ stages, items, tagNames, places, onFile 
     () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, places, SLOTS, skillsLine(outfit?.skills, ATTRS)),
     [outfit, ideal, chosen, difficulty, names, places],
   )
+  const view = resultView({ owned: owned.length, chosen: !!chosen, outfit: !!outfit, busy })
 
   useLayoutEffect(() => {
     if (!jump) return
@@ -69,20 +72,26 @@ export default function BestOutfitTab({ stages, items, tagNames, places, onFile 
 
       {chosen && <StageSummary stage={chosen} tagNames={tagNames} names={names} />}
 
+      {view === 'first' && <ScoreWait />}
+      {view === 'first' && <WaitLine text={FINDING} className="nb-outfit-wait" />}
+
       {outfit ? (
-        <>
-          {outfit.missing?.length ? (
-            <Alert
-              type="warning"
-              showIcon
-              className="nb-alert"
-              message={missingMessage(outfit.missing, names)}
-              description="The outfit below can't pass the stage."
-            />
-          ) : null}
-          <OutfitScore outfit={outfit} ideal={ideal} copyText={copyText} />
-          <ComparisonTable rows={rows} busy={busy} names={names} />
-        </>
+        <div className="nb-result-box">
+          {view === 'stale' && <WaitLine text={FINDING} className="nb-outfit-wait is-over" />}
+          <div className={view === 'stale' ? 'nb-result is-stale' : 'nb-result'} aria-busy={view === 'stale' || undefined}>
+            {outfit.missing?.length ? (
+              <Alert
+                type="warning"
+                showIcon
+                className="nb-alert"
+                message={missingMessage(outfit.missing, names)}
+                description="The outfit below can't pass the stage."
+              />
+            ) : null}
+            <OutfitScore outfit={outfit} ideal={ideal} copyText={copyText} busy={busy} />
+            <ComparisonTable rows={rows} names={names} />
+          </div>
+        </div>
       ) : (
         owned.length > 0 &&
         !busy && (

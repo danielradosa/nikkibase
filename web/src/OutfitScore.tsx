@@ -9,9 +9,9 @@ import { MAX_LEVELS, bestElsewhere, levelsShort, placementPhrases } from './skil
 import { useStore } from './store'
 import type { Ideal } from './stages'
 
-type Props = { outfit: Outfit; ideal: Ideal | null; copyText: string }
+type Props = { outfit: Outfit; ideal: Ideal | null; copyText: string; busy: boolean }
 
-export default function OutfitScore({ outfit, ideal, copyText }: Props) {
+export default function OutfitScore({ outfit, ideal, copyText, busy }: Props) {
   const reachable = ideal && ideal.score > 0 ? outfit.score / ideal.score : null
   const close = closeCall(outfit)
   const skills = outfit.skills
@@ -61,7 +61,7 @@ export default function OutfitScore({ outfit, ideal, copyText }: Props) {
             <Progress percent={Math.min(100, Math.round(reachable * 100))} status="normal" />
           </div>
         )}
-        <Button icon={<CopyOutlined />} onClick={copy}>
+        <Button icon={<CopyOutlined />} onClick={copy} disabled={busy}>
           Copy outfit
         </Button>
       </div>

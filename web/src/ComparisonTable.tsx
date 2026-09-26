@@ -4,7 +4,7 @@ import { alternativesLabel, bestNote, copyLines, expandLabel, rowOpens, type Com
 import type { Alternative } from './engine'
 import { usePhone } from './usePhone'
 
-type Props = { rows: ComparisonRow[]; busy: boolean; names: ReadonlyMap<number, string> }
+type Props = { rows: ComparisonRow[]; names: ReadonlyMap<number, string> }
 
 type DetailsProps = { row: ComparisonRow; phone: boolean; names: ReadonlyMap<number, string> }
 
@@ -39,7 +39,7 @@ function Details({ row, phone, names }: DetailsProps) {
   )
 }
 
-export default function ComparisonTable({ rows, busy, names }: Props) {
+export default function ComparisonTable({ rows, names }: Props) {
   const phone = usePhone()
 
   return (
@@ -47,7 +47,6 @@ export default function ComparisonTable({ rows, busy, names }: Props) {
       size="small"
       className="nb-outfit-table"
       pagination={false}
-      loading={busy}
       dataSource={rows}
       rowClassName={(row: ComparisonRow) => (rowOpens(row, phone) ? 'nb-row-tap' : '')}
       columns={[
