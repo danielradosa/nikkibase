@@ -10,6 +10,8 @@
   --gold-300: #eec978;
   --ink: #4a2c3a;
   --ink-soft: #8b6b78;
+  --skel: #eee2e8;
+  --skel-hi: #fbf5f8;
   --edge: rgba(217, 83, 138, 0.14);
   --card: #ffffff;
   --shadow-soft: 0 1px 2px rgba(147, 60, 100, 0.05), 0 8px 24px -12px rgba(147, 60, 100, 0.18);
@@ -418,14 +420,353 @@ h5,
   transition: opacity 240ms ease-out;
 }
 
+.nb-first-spin {
+  animation: nb-first-spin 1.1s linear infinite;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+@keyframes nb-first-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nb-petals {
+  display: inline-flex;
+  flex: none;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.nb-petals svg {
+  overflow: visible;
+  transform-origin: 50% 50%;
+  animation: nb-petals-spin 1.1s linear infinite;
+}
+
+.nb-pt {
+  fill: var(--rose-500);
+  animation: nb-petals-pulse 1s ease-in-out infinite;
+}
+
+.nb-pt.d1 {
+  animation-delay: -0.75s;
+}
+
+.nb-pt.d2 {
+  animation-delay: -0.5s;
+}
+
+.nb-pt.d3 {
+  animation-delay: -0.25s;
+}
+
+@keyframes nb-petals-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nb-petals-pulse {
+  0%,
+  50%,
+  100% {
+    opacity: 0.675;
+  }
+  25% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes nb-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.nb-wait {
+  margin-bottom: 16px;
+  animation: nb-appear 0.2s ease-out 0.15s both;
+}
+
+.nb-worth-lead {
+  position: relative;
+  min-height: 32px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 575px) {
+  .nb-worth-lead {
+    min-height: 54px;
+  }
+}
+
+.nb-worth-lead > .nb-wait,
+.nb-worth-lead > .ant-typography {
+  margin-bottom: 0;
+}
+
+.nb-worth-lead.is-waiting > .ant-typography {
+  position: absolute;
+  inset: 0 0 auto;
+  animation: nb-vanish 1ms step-end 0.15s both;
+}
+
+.nb-worth-lead.is-now > .nb-wait {
+  animation: none;
+}
+
+.nb-worth-lead.is-now > .ant-typography {
+  animation: none;
+  visibility: hidden;
+}
+
+@keyframes nb-vanish {
+  from {
+    visibility: visible;
+  }
+  to {
+    visibility: hidden;
+  }
+}
+
+.nb-wait-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.nb-wait-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ant-btn.nb-wait-stop {
+  flex: none;
+  min-width: 44px;
+  padding-inline: 0;
+  justify-content: flex-end;
+}
+
+.nb-wait-bar {
+  position: relative;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--blush-100);
+  overflow: hidden;
+}
+
+.nb-wait-fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 30%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--rose-400), var(--gold-300));
+  animation: nb-wait-slide 1.4s ease-in-out infinite;
+}
+
+.nb-wait-bar.is-known .nb-wait-fill {
+  animation: none;
+  transition: width 0.6s ease;
+}
+
+@keyframes nb-wait-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(333.34%);
+  }
+}
+
+.nb-skel {
+  display: inline-block;
+  vertical-align: middle;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--skel) 25%, var(--skel-hi) 50%, var(--skel) 75%);
+  background-size: 300% 100%;
+  animation:
+    nb-shim 1.4s ease-in-out infinite,
+    nb-appear 0.2s ease-out 0.15s both;
+}
+
+@keyframes nb-shim {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+.nb-skel-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-block: 4px;
+}
+
+.nb-skel-lines .nb-skel,
+.nb-skel-row .nb-skel {
+  display: block;
+}
+
+.nb-skel-rows {
+  margin-top: 8px;
+}
+
+.nb-skel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--edge);
+}
+
+.nb-skel-row .nb-skel:nth-child(1) {
+  height: 10px;
+}
+
+.nb-skel-row .nb-skel:nth-child(2) {
+  height: 7px;
+}
+
+.nb-skel-row .nb-skel:nth-child(4) {
+  height: 4px;
+}
+
+.nb-skel.nb-skel-score {
+  width: 96px;
+  height: 18px;
+}
+
+.nb-skel.nb-skel-reach {
+  display: block;
+  margin-block: 7px;
+}
+
+.nb-result-box {
+  position: relative;
+}
+
+.nb-wait.nb-outfit-wait.is-over {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 1;
+  margin: 0;
+  padding: 10px 12px 12px;
+  background: var(--card);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.nb-worth-table.is-stale,
+.nb-result.is-stale {
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s ease 0.15s;
+}
+
+.ant-upload-wrapper.nb-import.is-busy .ant-upload-drag,
+.ant-upload-wrapper.nb-import.is-busy .ant-upload-drag .ant-upload {
+  cursor: progress;
+}
+
+.ant-upload-wrapper.nb-import.is-busy .ant-upload-hint {
+  visibility: hidden;
+}
+
+.ant-upload-drag-icon .nb-petals {
+  height: 48px;
+  align-items: center;
+}
+
+.ant-btn.nb-worth-more:disabled,
+.nb-score-row .ant-btn:disabled {
+  background: var(--blush-50);
+  border-color: var(--edge);
+  color: var(--ink-soft);
+}
+
+.ant-btn.nb-worth-more.ant-btn-loading {
+  opacity: 1;
+}
+
+.ant-btn.nb-worth-more .ant-btn-icon {
+  margin-inline-end: 8px;
+}
+
+@media (hover: hover) {
+  .ant-upload-wrapper.nb-import.is-busy .ant-upload-drag:hover {
+    border-color: var(--blush-300) !important;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nb-spark,
-  .nb-score-pop {
+  .nb-spark {
     animation: none !important;
     display: none;
   }
+  .nb-score-pop {
+    animation: none !important;
+  }
   .ant-upload-wrapper .ant-upload-drag:hover {
     transform: none;
+  }
+  .nb-first-spin,
+  .nb-petals svg,
+  .nb-pt,
+  .nb-wait-fill {
+    animation: none !important;
+  }
+  .nb-first-spin circle:nth-child(1),
+  .nb-pt.d0 {
+    opacity: 1;
+  }
+  .nb-first-spin circle:nth-child(2),
+  .nb-pt.d1 {
+    opacity: 0.8;
+  }
+  .nb-first-spin circle:nth-child(3),
+  .nb-pt.d2 {
+    opacity: 0.6;
+  }
+  .nb-first-spin circle:nth-child(4),
+  .nb-pt.d3 {
+    opacity: 0.4;
+  }
+  .nb-wait {
+    animation: nb-appear 1ms step-end 0.15s both;
+  }
+  .nb-skel {
+    animation: nb-appear 1ms step-end 0.15s both;
+    background: var(--skel);
+  }
+  .nb-wait-bar.is-known .nb-wait-fill {
+    transition: none;
+  }
+  .nb-worth-table.is-stale,
+  .nb-result.is-stale {
+    transition: opacity 0s linear 0.15s;
   }
 }
 
@@ -792,21 +1133,6 @@ h5,
 .ant-typography.nb-worth-skills {
   font-size: 13px;
   margin-bottom: 16px;
-}
-
-.nb-worth-progress {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  margin-bottom: 16px;
-  font-variant-numeric: tabular-nums;
-}
-
-.ant-progress.nb-worth-progress-bar {
-  flex: 1;
-  min-width: 120px;
-  margin: 0;
 }
 
 .ant-typography.nb-worth-note {
