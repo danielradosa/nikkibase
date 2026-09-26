@@ -1,15 +1,22 @@
 import { Alert, Typography, Upload } from 'antd'
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons'
+import Petals from './Petals'
 import { useStore } from './store'
+import { useLate } from './useLate'
 import { usePhone } from './usePhone'
-import { DROP_HINT, NO_FILE, TAGLINE, dropText, loadedLabel, stripNotes } from './wardrobeText'
+import WaitLine from './WaitLine'
+import { DROP_HINT, ENGINE_WAIT, NO_FILE, TAGLINE, dropText, importingText, loadedLabel, stripNotes } from './wardrobeText'
 
 export default function WardrobeImport({ onFile }: { onFile: (text: string) => Promise<void> }) {
   const owned = useStore((s) => s.owned)
   const decoded = useStore((s) => s.decoded)
+  const importing = useStore((s) => s.importing)
+  const engine = useStore((s) => s.engine)
   const set = useStore((s) => s.set)
   const phone = usePhone()
   const loaded = owned.length > 0
+  const slow = useLate(importing)
+  const reading = importingText(engine === 'ready')
   const openItems = () => {
     set({ tab: 'items' })
     if (phone) window.scrollTo({ top: 0 })
@@ -21,35 +28,41 @@ export default function WardrobeImport({ onFile }: { onFile: (text: string) => P
         accept="*"
         maxCount={1}
         showUploadList={false}
+        openFileDialogOnClick={!importing}
         beforeUpload={async (file) => {
+          if (useStore.getState().importing) return false
           await onFile(await file.text())
           return false
         }}
-        className={loaded ? 'nb-import is-loaded' : 'nb-import'}
+        className={`nb-import${loaded ? ' is-loaded' : ''}${slow ? ' is-busy' : ''}`}
       >
         {loaded ? (
           <span className="nb-strip">
-            <UploadOutlined className="nb-strip-icon" />
-            <span className="nb-strip-text">
-              <strong>{loadedLabel(owned.length)}</strong>
-              {stripNotes(decoded).map((note) => (
-                <span key={note} className="nb-strip-note">
-                  · {note}
-                </span>
-              ))}
-            </span>
-            <span className="nb-strip-replace">Replace</span>
+            {slow ? <Petals size={14} className="nb-strip-icon" /> : <UploadOutlined className="nb-strip-icon" />}
+            {slow ? (
+              <span className="nb-strip-text">{reading}</span>
+            ) : (
+              <span className="nb-strip-text">
+                <strong>{loadedLabel(owned.length)}</strong>
+                {stripNotes(decoded).map((note) => (
+                  <span key={note} className="nb-strip-note">
+                    · {note}
+                  </span>
+                ))}
+              </span>
+            )}
+            {!slow && <span className="nb-strip-replace">Replace</span>}
           </span>
         ) : (
           <>
-            <p className="ant-upload-drag-icon">
-              <InboxOutlined />
-            </p>
-            <p className="ant-upload-text">{dropText(phone)}</p>
+            <p className="ant-upload-drag-icon">{slow ? <Petals size={32} /> : <InboxOutlined />}</p>
+            <p className="ant-upload-text">{slow ? reading : dropText(phone)}</p>
             <p className="ant-upload-hint">{DROP_HINT}</p>
           </>
         )}
       </Upload.Dragger>
+
+      {engine === 'loading' && !loaded && !importing && <WaitLine text={ENGINE_WAIT} className="nb-engine-wait" />}
 
       {!loaded && phone && <Typography.Paragraph className="nb-tagline nb-tagline-under">{TAGLINE}</Typography.Paragraph>}
 
