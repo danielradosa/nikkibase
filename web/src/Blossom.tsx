@@ -1,16 +1,25 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
+  BLOOM_KEY,
   DOT,
   PETAL,
+  PLACES,
   SIDE_PETAL,
   SPIN,
   bloomFrame,
+  bloomSeen,
+  blossomExit,
   budOutline,
   circleOutline,
   dotOpacity,
+  fadeFrame,
+  frameStep,
+  markBloomed,
   morphOutline,
   petalOutline,
   settleAngle,
+  spinAngle,
+  spinOrigin,
   toPath,
 } from './petal'
 
@@ -18,7 +27,6 @@ const DOT_SHAPE = circleOutline(DOT.orbit, DOT.radius)
 const PETAL_SHAPE = petalOutline(PETAL.length, PETAL.halfWidth, PETAL.notch, PETAL.base)
 const BUD_SHAPE = budOutline(PETAL.length, PETAL.halfWidth, PETAL.base)
 const DOT_PATH = toPath(DOT_SHAPE)
-const PLACES = [45, 135, 225, 315]
 const STAMENS = [0, 72, 144, 216, 288]
 const QUIET_FADE = 240
 
@@ -35,6 +43,16 @@ export default function Blossom({
   const [quiet] = useState(
     () => typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
   )
+  const [seen] = useState(() => bloomSeen(() => localStorage.getItem(BLOOM_KEY)))
+  const [origin] = useState(() => {
+    try {
+      return spinOrigin(document.querySelector('.nb-first-spin')?.getAnimations?.()[0], document.timeline?.currentTime)
+    } catch {
+      return null
+    }
+  })
+  const [startAngle] = useState(() => (origin === null ? 0 : spinAngle(performance.now(), origin)))
+  const exit = blossomExit(quiet, seen)
   const screen = useRef<HTMLDivElement>(null)
   const turn = useRef<SVGGElement>(null)
   const shape = useRef<SVGPathElement>(null)
@@ -57,19 +75,25 @@ export default function Blossom({
     uncover()
   }, [failed]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useLayoutEffect(() => {
+    if (origin !== null) turn.current?.setAttribute('transform', `rotate(${spinAngle(performance.now(), origin).toFixed(2)})`)
+  }, [origin])
+
   useEffect(() => {
     if (quiet || failed || gone) return
     let frame = 0
-    let last = performance.now()
-    let angle = 0
+    let last: number | null = null
+    let born: number | null = null
+    let angle = startAngle
     let doneAt: number | null = null
     let angleAtDone = 0
     let drawnMorph = 0
     let finalLength = PLACES.map(() => 1)
 
     const tick = (now: number) => {
-      const dt = Math.min(now - last, 64)
+      const dt = frameStep(now, last)
       last = now
+      const age = now - (born ??= now)
       if (doneAt === null && doneRef.current) {
         doneAt = now
         angleAtDone = angle
@@ -82,10 +106,11 @@ export default function Blossom({
       let scale = 1
       let opacity = 1
       if (doneAt === null) {
-        angle = (angle + SPIN * dt) % 360
+        angle = origin === null ? (angle + SPIN * dt) % 360 : spinAngle(performance.now(), origin)
       } else {
-        const f = bloomFrame(now - doneAt, angleAtDone)
+        const f = exit === 'fade' ? fadeFrame(now - doneAt, angleAtDone) : bloomFrame(now - doneAt, angleAtDone)
         if (f.finished) {
+          if (exit === 'bloom') markBloomed(() => localStorage.setItem(BLOOM_KEY, '1'))
           uncover()
           setGone(true)
           return
@@ -109,7 +134,7 @@ export default function Blossom({
         drawnMorph = morph
       }
       petals.current.forEach((el, i) => {
-        const o = dotOpacity(i, now) * (1 - morph) + morph
+        const o = dotOpacity(i, age) * (1 - morph) + morph
         el?.setAttribute('opacity', o.toFixed(3))
         if (changed) {
           const length = 1 + (finalLength[i] - 1) * morph
@@ -122,7 +147,7 @@ export default function Blossom({
     }
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [quiet, failed, gone])
+  }, [quiet, failed, gone, exit, startAngle, origin])
 
   useEffect(() => {
     if (!quiet || !done || failed) return
@@ -157,7 +182,7 @@ export default function Blossom({
             strokeLinejoin="round"
           />
         </defs>
-        <g ref={turn}>
+        <g ref={turn} transform={`rotate(${startAngle.toFixed(2)})`}>
           {PLACES.map((deg, i) => (
             <use
               key={deg}
