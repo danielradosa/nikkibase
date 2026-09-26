@@ -673,7 +673,7 @@ h5,
   background: var(--card);
   border: 1px solid var(--edge);
   border-radius: 12px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 0 0 6px var(--card), var(--shadow-soft);
 }
 
 .nb-worth-table.is-stale,
