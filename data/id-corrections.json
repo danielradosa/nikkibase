@@ -1,0 +1,504 @@
+{
+  "note": "Hand-verified corrections for item IDs that more than one source claims. Derived from the 2026-09-22 bundle (web/public/data/2026-09-22/items.bin and items.json), which ships 34,018 rows for 33,999 distinct IDs -- 19 IDs carried by two garments each. Each of those 19 duplicates was traced to two Fandom Clothing pages resolving to the same game ID because one of the two has a mistyped 'wardrobe nr' or 'type' in its infobox; six more (22414, 22576, 31367, 72361, 89667, 90846, found 2026-09-23) and 51204 (found 2026-09-25) are single wiki pages whose mistyped number or type lands on another garment's ID, clashing with every other source rather than with another page -- pipeline.CheckGarments, which holds every row against the packed table and Nikki Calc, now fails the build on any such row not listed here; the genuine owner of each ID was established independently from Nikki Calc's key list (ni-ids-v0.14.json + items-v0.14.json) and from the wiki's own item lists (the WIL entries on its Hairs, Dresses and other list pages), with the packed table's grades as a further check where it carries the garment, and a resolution is marked 'proven' only where Nikki Calc and the wiki's lists agree, or, where the wiki's list gives the number to both garments, Nikki Calc and the packed table's name and grades agree. correctIdForDropped is the dropped garment's real game ID where it could be established, 0 otherwise. RULE FOR THE PIPELINE: for each id listed under duplicates, take the row whose name does not match the ID's owner off that ID -- that is, keep 'keep' and discard 'drop' there, wherever the dropped garment appears -- and fail the build on any duplicate ID that is not listed here, so a new source error cannot pass silently. Where correctIdForDropped is given, the dropped row is read at that ID instead of discarded: in acquire.json always, and in the catalogue when that ID's slot is the row's own and the row's source has no other row there. A page whose mistyped field is 'type' states the wrong slot, so its catalogue row is still discarded and that ID keeps the other sources' row. An id listed under slotOverrides (none today) has its Item.Slot forced to 'slot' regardless of what the source's type field says: an override restores the slot the item's ID encodes and must also give the wearable place; where that place cannot be established the item is listed under excluded (none today) instead.",
+  "derivedOn": "2026-09-23",
+  "duplicates": [
+    {
+      "id": 11470,
+      "keep": "Wind and Moon (Hair)",
+      "drop": "Warm as Spring",
+      "dropWikiPage": "Warm as Spring",
+      "correctIdForDropped": 11460,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 11470 = 'Wind and Moon', and the wiki's own Hairs list gives 1470 to it; the packed table's 11470 (风月绵绵) has the kept page's grades. Fandom page 'Warm as Spring' carries '|wardrobe nr = 1470' and resolves to 11470 as well; the number is a typo for 1460 -- nikkicalc H1460 names 11460 'Warm as Spring' (hair). The wiki's Hairs list gives 1460 to it too, and the packed table's 11460 (温暖如春) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 21519,
+      "keep": "Glance of Charm",
+      "drop": "Shriveling Bloom",
+      "dropWikiPage": "Shriveling Bloom",
+      "correctIdForDropped": 51519,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 21519 = 'Glance of Charm', and the wiki's own Dresses list gives 1519 to it; the packed table's 21519 (倾倒众生) has the kept page's grades. Fandom page 'Shriveling Bloom' carries '|wardrobe nr = 1519' and resolves to 21519 as well; here the mistyped infobox field is 'type' (Dress) rather than the number: nikkicalc B1519 names 51519 'Shriveling Bloom' (bottom), so the page should read type = Bottom with the same nr 1519.",
+      "confidence": "proven"
+    },
+    {
+      "id": 22414,
+      "keep": "Rapid Star Trip",
+      "drop": "Starting Point of Dream",
+      "dropWikiPage": "Starting Point of Dream",
+      "correctIdForDropped": 22131,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 22414 = 'Rapid Star Trip', and the wiki's own Dresses list gives 2414 to it. Fandom page 'Starting Point of Dream' carries '|wardrobe nr = 2414' and resolves to 22414; the number is a typo -- nikkicalc names 22131 'Starting Point of Dream' (dress), where the garment also ships. The wiki's Dresses list gives 2131 to it too, and the packed table's 22131 (梦境起点) has the dropped page's grades. This is a single wiki page against every other source, not two pages on one ID: the wiki's precedence in the merge kept 'Starting Point of Dream' under 22414, so 'Rapid Star Trip' had no row at all and 'Starting Point of Dream' could be scored at two IDs. Found 2026-09-23 by CheckGarments.",
+      "confidence": "proven"
+    },
+    {
+      "id": 22576,
+      "keep": "The School of Romance",
+      "drop": "Holy Heart",
+      "dropWikiPage": "Holy Heart",
+      "correctIdForDropped": 22476,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 22576 = 'The School of Romance', and the wiki's own Dresses list gives 2576 to it. Fandom page 'Holy Heart' carries '|wardrobe nr = 2576' and resolves to 22576; the number is a typo -- nikkicalc names 22476 'Holy Heart' (dress), where the garment also ships. The wiki's Dresses list gives 2476 to it too, and the packed table's 22476 (皎洁圣心) has the dropped page's grades. This is a single wiki page against every other source, not two pages on one ID: the wiki's precedence in the merge kept 'Holy Heart' under 22576, so 'The School of Romance' had no row at all and 'Holy Heart' could be scored at two IDs. Found 2026-09-23 by CheckGarments.",
+      "confidence": "proven"
+    },
+    {
+      "id": 23278,
+      "keep": "Sweet Spring (Sweet Spring)",
+      "drop": "Vernal Radiance",
+      "dropWikiPage": "Vernal Radiance",
+      "correctIdForDropped": 23279,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 23278 = 'Sweet Spring', and the wiki's own Dresses list gives 3278 to it; the packed table's 23278 (春日蜜语) has the kept page's grades. Fandom page 'Vernal Radiance' carries '|wardrobe nr = 3278' and resolves to 23278 as well; the number is a typo for 3279 -- nikkicalc D3279 names 23279 'Vernal Radiance' (dress). The wiki's Dresses list gives 3279 to it too, and the packed table's 23279 (春晖同沐) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 23513,
+      "keep": "Lustrous Grace",
+      "drop": "Pearly Elegance (Dress)",
+      "dropWikiPage": "Pearly Elegance (Dress)",
+      "correctIdForDropped": 23512,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 23513 = 'Lustrous Grace', and the wiki's own Dresses list gives 3513 to it; the packed table's 23513 (灯下伊人) has the kept page's grades. Fandom page 'Pearly Elegance (Dress)' carries '|wardrobe nr = 3513' and resolves to 23513 as well; the number is a typo for 3512 -- nikkicalc D3512 names 23512 'Pearly Elegance' (dress). The wiki's Dresses list gives 3512 to it too, and the packed table's 23512 (明珠雅韵) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 31327,
+      "keep": "Star and Moon Gift - Epic",
+      "drop": "Moonlight Serenade",
+      "dropWikiPage": "Moonlight Serenade",
+      "correctIdForDropped": 81327,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 31327 = 'Star and Moon Gift - Epic', and the packed table's 31327 (星月赠礼·珍稀, Star and Moon Gift · Epic) has the kept page's grades. The wiki's own Coats list cannot settle it: it gives 1327 both to Star and Moon Gift - Epic and to Moonlight Serenade, repeating the dropped page's wrong type. Fandom page 'Moonlight Serenade' carries '|wardrobe nr = 1327' and resolves to 31327 as well; here the mistyped infobox field is 'type' (Coat) rather than the number: nikkicalc A1327 names 81327 'Moonlight Serenade' (accessory), so the page should read type = Accessory with the same nr 1327.",
+      "confidence": "proven"
+    },
+    {
+      "id": 31367,
+      "keep": "Heart of Flame",
+      "drop": "Tender Promise",
+      "dropWikiPage": "Tender Promise",
+      "correctIdForDropped": 41367,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 31367 = 'Heart of Flame', and the wiki's own Coats list gives 1367 to it. Fandom page 'Tender Promise' carries '|type = Coat' with '|wardrobe nr = 1367' and resolves to 31367; here the mistyped infobox field is 'type' rather than the number: nikkicalc names 41367 'Tender Promise' (top), where the garment also ships. The wiki's Tops list gives 1367 to it too, and the packed table's 41367 (柔情许诺) has the dropped page's grades. This is a single wiki page against every other source, not two pages on one ID: the wiki's precedence in the merge kept 'Tender Promise' under 31367, so 'Heart of Flame' had no row at all and 'Tender Promise' could be scored at two IDs. Found 2026-09-23 by CheckGarments.",
+      "confidence": "proven"
+    },
+    {
+      "id": 41484,
+      "keep": "Relaxing Fabric",
+      "drop": "Divine Verdant Flute (Top)",
+      "dropWikiPage": "Divine Verdant Flute (Top)",
+      "correctIdForDropped": 41485,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 41484 = 'Relaxing Fabric', and the wiki's own Tops list gives 1484 to it. Fandom page 'Divine Verdant Flute (Top)' carries '|wardrobe nr = 1484' and resolves to 41484 as well; the number is a typo for 1485 -- nikkicalc T1485 names 41485 'Divine Verdant Flute' (top). The wiki's Tops list gives 1485 to it too, and the packed table's 41485 (青箫仙音) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 51204,
+      "keep": "Guardian of Time - Glow",
+      "drop": "Voice of Hunting - Rare",
+      "dropWikiPage": "Voice of Hunting - Rare",
+      "correctIdForDropped": 50540,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key B1204 -> items-v0.14.json name) gives 51204 = 'Guardian of Time - Glow', and the packed table (wardrobe.js) names 51204 岁月守护·焕, customized from 51203 岁月守护 (Guardian of Time). Fandom page 'Voice of Hunting - Rare' carries '|wardrobe nr = 1204' and resolves to 51204; the number is a typo for 540 -- nikkicalc B540 names 50540 'Voice of Hunting · Rare' (bottom), the wiki's Bottoms list gives 540 to it, the packed table's 50540 猎之音·华丽 has the page's grades B/SS/A/SS/A, and both that row and nikkiup2u's 540 'Voice of Hunting·Rare' evolve from 50539 Voice of Hunting, and 50541 Voice of Hunting - Epic from 50540, as the page's Evolution section says. This is a single wiki page against every other source, not two pages on one ID: the wiki's precedence in the merge kept 'Voice of Hunting - Rare' under 51204, so 'Guardian of Time - Glow' had no row at all and 'Voice of Hunting - Rare' could be scored at two IDs.",
+      "confidence": "probable"
+    },
+    {
+      "id": 61967,
+      "keep": "Abstruse Nature",
+      "drop": "Unyielding Journey",
+      "dropWikiPage": "Unyielding Journey",
+      "correctIdForDropped": 71967,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 61967 = 'Abstruse Nature', and the wiki's own Hosiery list gives 1967 to it; the packed table's 61967 (自然谜题) has the kept page's grades. Fandom page 'Unyielding Journey' carries '|wardrobe nr = 1967' and resolves to 61967 as well; here the mistyped infobox field is 'type' ('Hosiery, Leglet') rather than the number: nikkicalc S1967 names 71967 'Unyielding Journey' (shoes), so the page should read type = Shoes with the same nr 1967. The wiki's Shoes list gives 1967 to it too, and the packed table's 71967 (不屈旅途) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 71396,
+      "keep": "Good Friends",
+      "drop": "Swaying Grass",
+      "dropWikiPage": "Swaying Grass",
+      "correctIdForDropped": 61396,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 71396 = 'Good Friends', and the wiki's own Shoes list gives 1396 to it; the packed table's 71396 (大家都是好朋友) has the kept page's grades. Fandom page 'Swaying Grass' carries '|wardrobe nr = 1396' and resolves to 71396 as well; here the mistyped infobox field is 'type' (Shoes) rather than the number: nikkicalc P1396 names 61396 'Swaying Grass' (hosiery), so the page should read type = Hosiery with the same nr 1396. The wiki's Hosiery list gives 1396 to it too, and the packed table's 61396 (草木飘摇) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 72361,
+      "keep": "Gold as Stone",
+      "drop": "Dance of Steam- Epic",
+      "dropWikiPage": "Dance of Steam- Epic",
+      "correctIdForDropped": 82361,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 72361 = 'Gold as Stone', and the wiki's own Shoes list gives 2361 to it. Fandom page 'Dance of Steam- Epic' carries '|type = Shoes' with '|wardrobe nr = 2361' and resolves to 72361; here the mistyped infobox field is 'type' rather than the number: nikkicalc names 82361 'Dance of Steam- Epic' (accessory, gloves; spelled 'Dance of Steam· Epic'), where the garment also ships. The wiki's Bracelets/Gloves list gives 2361 to it too, and the packed table's 82361 (蒸汽之舞·珍稀) has the dropped page's grades. This is a single wiki page against every other source, not two pages on one ID: the wiki's precedence in the merge kept 'Dance of Steam- Epic' under 72361, so 'Gold as Stone' had no row at all and 'Dance of Steam- Epic' could be scored at two IDs. Found 2026-09-23 by CheckGarments.",
+      "confidence": "proven"
+    },
+    {
+      "id": 73221,
+      "keep": "Windward Walk",
+      "drop": "Maple Viewing",
+      "dropWikiPage": "Maple Viewing",
+      "correctIdForDropped": 83221,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 73221 = 'Windward Walk', and the packed table's 73221 (风中独行, Windward Walk) has the kept page's grades. The wiki's own Shoes list cannot settle it: it gives 3221 both to Windward Walk and to Maple Viewing, repeating the dropped page's wrong type. Fandom page 'Maple Viewing' carries '|wardrobe nr = 3221' and resolves to 73221 as well; here the mistyped infobox field is 'type' (Shoes) rather than the number: nikkicalc A3221 names 83221 'Maple Viewing' (accessory), so the page should read type = Accessory with the same nr 3221.",
+      "confidence": "proven"
+    },
+    {
+      "id": 83045,
+      "keep": "Pendulum of Memory",
+      "drop": "Trim the Snow",
+      "dropWikiPage": "Trim the Snow",
+      "correctIdForDropped": 180942,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 83045 = 'Pendulum of Memory', and the wiki's own Ground Items list gives 3045 to it; the packed table's 83045 (记忆钟摆) has the kept page's grades. Fandom page 'Trim the Snow' carries '|wardrobe nr = 3045' and resolves to 83045 as well; the packed table files 83045 in the same place as the kept page's type 'Accessory, Ground'. The dropped page's number is wrong outright, not by one digit: nikkicalc Z10942 names 180942 'Trim the Snow' (accessory, waist decoration), matching that page's own type 'Accessory, Waist'. The wiki's Waist list gives 10942 to it too, and the packed table's 180942 (裁冰剪雪) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 85234,
+      "keep": "Close Decompression",
+      "drop": "Close Whisper",
+      "dropWikiPage": "Close Whisper",
+      "correctIdForDropped": 85237,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 85234 = 'Close Decompression', and the wiki's own Bracelets/Gloves list gives 5234 to it; the packed table's 85234 (零距离减压) has the kept page's grades. Fandom page 'Close Whisper' carries '|wardrobe nr = 5234' and resolves to 85234 as well; the number is a typo for 5237 -- nikkicalc A5237 names 85237 'Close Whisper' (accessory, gloves). The wiki's Bracelets/Gloves list gives 5237 to it too, and the packed table's 85237 (零距离倾诉) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 88592,
+      "keep": "Messenger of Spring (Earrings)",
+      "drop": "Poolside Maiden",
+      "dropWikiPage": "Poolside Maiden",
+      "correctIdForDropped": 88593,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 88592 = 'Messenger of Spring', and the wiki's own Earrings list gives 8592 to it; the packed table's 88592 (春日信使) has the kept page's grades. Fandom page 'Poolside Maiden' carries '|wardrobe nr = 8592' and resolves to 88592 as well; the packed table files 88592 in the same place as the kept page's type 'Accessory, Earrings'. The number is a typo for 8593 -- nikkicalc A8593 names 88593 'Poolside Maiden' (accessory, scarf), matching that page's own type 'Accessory, Scarf'. The wiki's Neckwear/Scarf list gives 8593 to it too, and the packed table's 88593 (池畔少女) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 89667,
+      "keep": "Glazed Feather",
+      "drop": "Blade of Judgment (Polar Day Echo)",
+      "dropWikiPage": "Blade of Judgment (Polar Day Echo)",
+      "correctIdForDropped": 89677,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A9667 -> items-v0.14.json name) gives 89667 = 'Glazed Feather', and the wiki's own Head Ornaments list gives 9667 to it. Fandom page 'Blade of Judgment (Polar Day Echo)' carries '|wardrobe nr = 9667' and resolves to 89667; the number is a typo for 9677 -- nikkicalc A9677 names 89677 'Blade of Judgment' (accessory, right handheld), and no wiki item page carries 9677. The wiki's Handheld/Right list gives 9677 to it too, and the packed table's 89677 (审判之锋) has the dropped page's grades. Unlike the other entries here, this is not two wiki pages on one ID: the page is the only wiki row for 89667, and it clashes with every other source. The wiki's precedence in the merge kept the scythe under the head ornament's ID, and the place check then filed it as headwear, where it could be worn beside the real 89677.",
+      "confidence": "proven"
+    },
+    {
+      "id": 90846,
+      "keep": "Springtide Shadow",
+      "drop": "Emerald Gaze",
+      "dropWikiPage": "Emerald Gaze",
+      "correctIdForDropped": 90946,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 90846 = 'Springtide Shadow', and the wiki's own Makeup list gives 846 to it. Fandom page 'Emerald Gaze' carries '|wardrobe nr = 846' and resolves to 90846; the number is a typo -- nikkicalc names 90946 'Emerald Gaze' (makeup), where the garment also ships. The wiki's Makeup list gives 946 to it too, and the packed table's 90946 (眉黛青颦) has the dropped page's grades. This is a single wiki page against every other source, not two pages on one ID: the wiki's precedence in the merge kept 'Emerald Gaze' under 90846, so 'Springtide Shadow' had no row at all and 'Emerald Gaze' could be scored at two IDs. Found 2026-09-23 by CheckGarments.",
+      "confidence": "proven"
+    },
+    {
+      "id": 90889,
+      "keep": "Shimmering Gaze",
+      "drop": "Engraved Charm",
+      "dropWikiPage": "Engraved Charm",
+      "correctIdForDropped": 90899,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 90889 = 'Shimmering Gaze', and the wiki's own Makeup list gives 889 to it; the packed table's 90889 (流转眸光) has the kept page's grades. Fandom page 'Engraved Charm' carries '|wardrobe nr = 889' and resolves to 90889 as well; the number is a typo for 899 -- nikkicalc M899 names 90899 'Engraved Charm' (makeup). The wiki's Makeup list gives 899 to it too, and the packed table's 90899 (镂刻神思) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 90903,
+      "keep": "Ingenious Wonder",
+      "drop": "Enraptured Daze",
+      "dropWikiPage": "Enraptured Daze",
+      "correctIdForDropped": 90905,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 90903 = 'Ingenious Wonder', and the wiki's own Makeup list gives 903 to it; the packed table's 90903 (巧手遐思) has the kept page's grades. Fandom page 'Enraptured Daze' carries '|wardrobe nr = 903' and resolves to 90903 as well; the number is a typo for 905 -- nikkicalc M905 names 90905 'Enraptured Daze' (makeup). The wiki's Makeup list gives 905 to it too, and the packed table's 90905 (醉心畅想) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 183213,
+      "keep": "Lost Heart - Evergreen",
+      "drop": "Lost Heart - Dawnlight",
+      "dropWikiPage": "Lost Heart - Dawnlight",
+      "correctIdForDropped": 183221,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 183213 = 'Lost Heart - Evergreen', and the wiki's own Brooches list gives 13213 to it; the packed table's 183213 (沉落之心·长青) has the kept page's grades. Fandom page 'Lost Heart - Dawnlight' carries '|wardrobe nr = 13213' and resolves to 183213 as well; the number is a typo for 13221 -- nikkicalc Z13221 names 183221 'Lost Heart - Dawnlight' (accessory, brooch). The wiki's Brooches list gives 13221 to it too, and the packed table's 183221 (沉落之心·曦光) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 183958,
+      "keep": "Eternal Fondness",
+      "drop": "Tacit Moment",
+      "dropWikiPage": "Tacit Moment",
+      "correctIdForDropped": 183955,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 183958 = 'Eternal Fondness', and the wiki's own Neckwear/Necklaces list gives 13958 to it; the packed table's 183958 (朝夕相念) has the kept page's grades. Fandom page 'Tacit Moment' carries '|wardrobe nr = 13958' and resolves to 183958 as well; the packed table files 183958 in the same place as the kept page's type 'Accessory, Necklace'. The number is a typo for 13955 -- nikkicalc Z13955 names 183955 'Tacit Moment' (accessory, hair ornament), matching that page's own type 'Accessory, Hair Ornament'. The wiki's Hair Ornaments list gives 13955 to it too, and the packed table's 183955 (灵犀双牵) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 183989,
+      "keep": "Tempest Shadow - Azure",
+      "drop": "Seashore Chant - Azure",
+      "dropWikiPage": "Seashore Chant - Azure",
+      "correctIdForDropped": 183988,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 183989 = 'Tempest Shadow - Azure', and the wiki's own Bracelets/Gloves list gives 13989 to it; the packed table's 183989 (风暴掠影·碧) has the kept page's grades. Fandom page 'Seashore Chant - Azure' carries '|wardrobe nr = 13989' and resolves to 183989 as well; the packed table files 183989 in the same place as the kept page's type 'Accessory, Gloves'. The number is a typo for 13988 -- nikkicalc Z13988 names 183988 'Seashore Chant - Azure' (accessory, earrings), matching that page's own type 'Accessory, Earrings'. The wiki's Earrings list gives 13988 to it too, and the packed table's 183988 (遥岸远歌·碧) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 185282,
+      "keep": "Bygone Ballad",
+      "drop": "Graceful Hymn",
+      "dropWikiPage": "Graceful Hymn",
+      "correctIdForDropped": 185283,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 185282 = 'Bygone Ballad', and the wiki's own Earrings list gives 15282 to it; the packed table's 185282 (逝水长歌) has the kept page's grades. Fandom page 'Graceful Hymn' carries '|wardrobe nr = 15282' and resolves to 185282 as well; the packed table files 185282 in the same place as the kept page's type 'Accessory, Earrings'. The number is a typo for 15283 -- nikkicalc Z15283 names 185283 'Graceful Hymn' (accessory, necklace), matching that page's own type 'Accessory, Necklace'. The wiki's Neckwear/Necklaces list gives 15283 to it too, and the packed table's 185283 (仙音雅颂) has the dropped page's grades.",
+      "confidence": "proven"
+    },
+    {
+      "id": 185961,
+      "keep": "Rosebud Shadow",
+      "drop": "Shadowy Verdure",
+      "dropWikiPage": "Shadowy Verdure",
+      "correctIdForDropped": 185959,
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 185961 = 'Rosebud Shadow', and the wiki's own Ground Items list gives 15961 to it; the packed table's 185961 (胭脂花影) has the kept page's grades. Fandom page 'Shadowy Verdure' carries '|wardrobe nr = 15961' and resolves to 185961 as well; the packed table files 185961 in the same place as the kept page's type 'Accessory, Ground'. The number is a typo for 15959 -- nikkicalc Z15959 names 185959 'Shadowy Verdure', and so does the wiki's Head Ornaments list; the packed table's 185959 (疏影横枝) has the dropped page's grades.",
+      "confidence": "proven"
+    }
+  ],
+  "nameOverrides": [
+    {
+      "id": 89121,
+      "name": "Depicting Summer",
+      "was": "Memory of Summer",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A9121 -> items-v0.14.json name) gives 89121 = 'Depicting Summer'; the packed table (wardrobe.js) names 89121 夏季描绘 (Depicting Summer); the wiki's own Earrings list reads '{{WIL|9121|Depicting Summer}}'. Fandom page 'Memory of Summer' carries '|wardrobe nr = 9121', and page 'Depicting Summer' carries 9126: the two pages' numbers are swapped, and so are their 'how to obtain' fields, which follow the numbers. The page on 9121 says the Midsummer Festival event; that event's page lists Depicting Summer among its rewards, the suit page Summer Night Lavender lists it among the suit's parts, and the packed table has 89121 crafted like the suit's other event parts. So the page on 9121 carries 89121's number and how-to-obtain, while its title, caption and image belong to 89126. 89121 and 89126 have the same grades, slot and place in the wiki and the packed table, and the same rarity in Nikki Calc, so only the name changes."
+    },
+    {
+      "id": 89126,
+      "name": "Memory of Summer",
+      "was": "Depicting Summer",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A9126 -> items-v0.14.json name) gives 89126 = 'Memory of Summer'; the packed table (wardrobe.js) names 89126 兰夏回忆 (Memory of Summer); the wiki's own Earrings list reads '{{WIL|9126|Memory of Summer}}'. Fandom page 'Depicting Summer' carries '|wardrobe nr = 9126', and page 'Memory of Summer' carries 9121: the two pages' numbers are swapped, and so are their 'how to obtain' fields, which follow the numbers. The page on 9126 says the Styling Gift Box; the suit page Summer Night Lavender gives Memory of Summer in its Styling Gift Box, and the packed table has 89126 given by that suit. So the page on 9126 carries 89126's number and how-to-obtain, while its title, caption and image belong to 89121. 89121 and 89126 have the same grades, slot and place in the wiki and the packed table, and the same rarity in Nikki Calc, so only the name changes."
+    }
+  ],
+  "nameOverridesNote": "Wiki item pages whose title names another garment while everything else on the page describes the garment of the ID the page lands on. The ID keeps the page's row and the page's lines in acquire.json, under the name the other sources give that ID; wherever a row at that ID carries the page's title, it takes 'name' instead, and acquire.json reads the page under 'name' too, so other pages that name either garment point at the right ID.",
+  "displayNames": [
+    {
+      "id": 181937,
+      "name": "Rare Classic Treasure",
+      "was": "Classic Rare Treasure",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key Z11937 -> items-v0.14.json name) gives 181937 = 'Rare Classic Treasure'; so does the wiki's Hair Ornaments list ('{{WIL|11937|Rare Classic Treasure}}'). Only the wiki's item page, whose title the catalogue took, and the event and suit pages copied from it put the two adjectives the other way round ('Classic Rare Treasure'). Nikki Calc and the wiki's item page carry the same description."
+    },
+    {
+      "id": 181600,
+      "name": "Cookie Sweet Dream",
+      "was": "Biscuits & Sweet Dream",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key Z11600 -> items-v0.14.json name) gives 181600 = 'Cookie Sweet Dream', with a description that has the item's buns cookie-shaped; the wiki page, titled 'Biscuits & Sweet Dream', has a different description, in which the bun is shaped like a biscuit. Nikki Calc's name fits its own description; the packed table's 饼干甜梦 fits either word."
+    },
+    {
+      "id": 80824,
+      "name": "Jasmine Hairpin (Jasmine)",
+      "was": "Jasmine Hairpin",
+      "basis": "Fandom page 'Jasmine Hairpin (Jasmine)' carries '|type = Accessory, Hair Ornament' and '|wardrobe nr = 824' and resolves to 80824; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 80824 is named by Nikki Calc, which gives 'Jasmine Hairpin' without the wiki's qualifier; the packed table names it 银钗茉莉. The qualifier tells it from 86450 Jasmine Hairpin (Lotus Dumpling Shop, 织锦茉莉簪), which is worn in the same place."
+    },
+    {
+      "id": 82467,
+      "name": "Dazzling Bracelet (Gloves)",
+      "was": "Dazzling Bracelet",
+      "basis": "Fandom page 'Dazzling Bracelet (Gloves)' carries '|type = Accessory, Gloves' and '|wardrobe nr = 2467' and resolves to 82467; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 82467 is named by Nikki Calc, which gives 'Dazzling Bracelet' without the wiki's qualifier; the packed table names it 炫彩手环. The qualifier tells it from 81743 'Dazzling Bracelet (Bracelet)'."
+    },
+    {
+      "id": 85797,
+      "name": "Blazing End (Earrings)",
+      "was": "Blazing End",
+      "basis": "Fandom page 'Blazing End (Earrings)' carries '|type = Accessory, Earrings' and '|wardrobe nr = 5797' and resolves to 85797; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85797 is named by Nikki Calc, which gives 'Blazing End' without the wiki's qualifier; the packed table names it 业火穷劫. The qualifier tells it from 186256 Blazing End, a hair ornament."
+    },
+    {
+      "id": 85993,
+      "name": "Summer Dream (Bracelet)",
+      "was": "Summer Dream",
+      "basis": "Fandom page 'Summer Dream (Bracelet)' carries '|type = Accessory, Bracelet (Left)' and '|wardrobe nr = 5993' and resolves to 85993; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85993 is named by Nikki Calc, which gives 'Summer Dream' without the wiki's qualifier; the packed table names it 夏日梦想. The qualifier tells it from 13534 Summer Dream (hair) and 11621."
+    },
+    {
+      "id": 85995,
+      "name": "Strawberry Cake (Face)",
+      "was": "Strawberry Cake",
+      "basis": "Fandom page 'Strawberry Cake (Face)' carries '|type = Accessory, Face' and '|wardrobe nr = 5995' and resolves to 85995; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85995 is named by Nikki Calc, which gives 'Strawberry Cake' without the wiki's qualifier; the packed table names it 草莓雪糕. The qualifier tells it from 80240 'Strawberry Cake (Hair Ornament)'."
+    },
+    {
+      "id": 85999,
+      "name": "Ocean Echo (Bracelet)",
+      "was": "Ocean Echo",
+      "basis": "Fandom page 'Ocean Echo (Bracelet)' carries '|type = Accessory, Bracelet (Left)' and '|wardrobe nr = 5999' and resolves to 85999; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85999 is named by Nikki Calc, which gives 'Ocean Echo' without the wiki's qualifier; the packed table names it 深海余音. The qualifier tells it from 86973 Ocean Echo, a necklace."
+    },
+    {
+      "id": 86649,
+      "name": "Frost Feather (Gloves)",
+      "was": "Frost Feather",
+      "basis": "Fandom page 'Frost Feather (Gloves)' carries '|type = Accessory, Gloves' and '|wardrobe nr = 6649' and resolves to 86649; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 86649 is named by Nikki Calc, which gives 'Frost Feather' without the wiki's qualifier; the packed table names it 霜华雪翎. The qualifier tells it from 81767 'Frost Feather (Hair Ornament)' and 11814 Frost Feather (hair)."
+    },
+    {
+      "id": 86663,
+      "name": "Bloody Flame (Foreground)",
+      "was": "Bloody Flame",
+      "basis": "Fandom page 'Bloody Flame (Foreground)' carries '|type = Accessory, Foreground' and '|wardrobe nr = 6663' and resolves to 86663; four of its five grades match the packed table's row (Warm A on the page, S in that row). The item parser skips the page because its Attributes template starts on a new line, so 86663 is named by Nikki Calc, which gives 'Bloody Flame' without the wiki's qualifier; the packed table names it 血色焰火. The qualifier tells it from 84482 Bloody Flame, a tattoo."
+    },
+    {
+      "id": 21119,
+      "name": "Star Fall (Dress)",
+      "was": "Star Fall",
+      "basis": "Fandom page 'Star Fall (Dress)' carries '|type = Dress' and '|wardrobe nr = 1119' and resolves to 21119; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 21119 is named by Nikki Calc, which gives 'Star Fall' without the wiki's qualifier; the packed table names it 星落. The qualifier tells it from 88371 Star Fall, a necklace."
+    },
+    {
+      "id": 11732,
+      "name": "Innocent Daydream (Interesting Trends)",
+      "was": "Innocent Daydream",
+      "basis": "Fandom page 'Innocent Daydream (Interesting Trends)' carries '|type = Hair' and '|wardrobe nr = 1732' and resolves to 11732; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 11732 is named by Nikki Calc, which gives 'Innocent Daydream' without the wiki's qualifier; the packed table names it 纯真浅梦. The qualifier tells it from 11107 'Innocent Daydream (Cruise Fairy Tale)', also a hair."
+    },
+    {
+      "id": 12066,
+      "name": "Summer Time (Hair)",
+      "was": "Summer Time",
+      "basis": "Fandom page 'Summer Time (Hair)' carries '|type = Hair' and '|wardrobe nr = 2066' and resolves to 12066; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 12066 is named by Nikki Calc, which gives 'Summer Time' without the wiki's qualifier; the packed table names it 夏日时光. The qualifier tells it from 21808 'Summer Time (Dress)'."
+    },
+    {
+      "id": 12219,
+      "name": "Luminous Night (Hair)",
+      "was": "Luminous Night",
+      "basis": "Fandom page 'Luminous Night (Hair)' carries '|type = Hair' and '|wardrobe nr = 2219' and resolves to 12219; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 12219 is named by Nikki Calc, which gives 'Luminous Night' without the wiki's qualifier; the packed table names it 夜之灼光. The qualifier tells it from 30819 'Luminous Night (Coat)'."
+    },
+    {
+      "id": 11316,
+      "name": "Quiet Night Poem (Night)",
+      "was": "Quiet Night Poem/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key H1316 -> items-v0.14.json name) gives 11316 and its day form 11315 the same name, 'Quiet Night Poem'; the packed table names 11316 幽夜诗[夜] and 11315 幽夜诗[昼], marking night (夜) and day (昼). Fandom page 'Quiet Night Poem/Night' carries '|wardrobe nr = 1316', and the wiki's list reads '{{WIL|1316|Quiet Night Poem/Night|Quiet Night Poem}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 11316 from 11315, which keeps the plain name."
+    },
+    {
+      "id": 11319,
+      "name": "Beauty (Night)",
+      "was": "Beauty/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key H1319 -> items-v0.14.json name) gives 11319 and its day form 11317 the same name, 'Beauty'; the packed table names 11319 红颜[夜] and 11317 红颜[昼], marking night (夜) and day (昼). Fandom page 'Beauty/Night' carries '|wardrobe nr = 1319', and the wiki's list reads '{{WIL|1319|Beauty/Night|Beauty}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 11319 from 11317, which keeps the plain name."
+    },
+    {
+      "id": 21112,
+      "name": "Lord of Underworld (Night)",
+      "was": "Lord of Underworld/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1112 -> items-v0.14.json name) gives 21112 and its day form 21110 the same name, 'Lord of Underworld'; the packed table names 21112 鬼域之主[夜] and 21110 鬼域之主[昼], marking night (夜) and day (昼). Fandom page 'Lord of Underworld/Night' carries '|wardrobe nr = 1112', and the wiki's list reads '{{WIL|1112|Lord of Underworld/Night|Lord of Underworld}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 21112 from 21110, which keeps the plain name."
+    },
+    {
+      "id": 21116,
+      "name": "Bone Allure (Night)",
+      "was": "Bone Allure/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1116 -> items-v0.14.json name) gives 21116 and its day form 21114 the same name, 'Bone Allure'; the packed table names 21116 白骨倾城[夜] and 21114 白骨倾城[昼], marking night (夜) and day (昼). Fandom page 'Bone Allure/Night' carries '|wardrobe nr = 1116', and the wiki's list reads '{{WIL|1116|Bone Allure/Night|Bone Allure}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 21116 from 21114, which keeps the plain name."
+    },
+    {
+      "id": 60526,
+      "name": "Bone (Night)",
+      "was": "Bone/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key P526 -> items-v0.14.json name) gives 60526 and its day form 60525 the same name, 'Bone'; the packed table names 60526 枯骨[夜] and 60525 枯骨[昼], marking night (夜) and day (昼). Fandom page 'Bone/Night' carries '|wardrobe nr = 526', and the wiki's list reads '{{WIL|526|Bone/Night|Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 60526 from 60525, which keeps the plain name."
+    },
+    {
+      "id": 71177,
+      "name": "Rebirth Song (Night)",
+      "was": "Rebirth Song/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key S1177 -> items-v0.14.json name) gives 71177 and its day form 71176 the same name, 'Rebirth Song'; the packed table names 71177 往生歌[夜] and 71176 往生歌[昼], marking night (夜) and day (昼). Fandom page 'Rebirth Song/Night' carries '|wardrobe nr = 1177', and the wiki's list reads '{{WIL|1177|Rebirth Song/Night|Rebirth Song}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 71177 from 71176, which keeps the plain name."
+    },
+    {
+      "id": 71179,
+      "name": "Soul (Night)",
+      "was": "Soul/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key S1179 -> items-v0.14.json name) gives 71179 and its day form 71178 the same name, 'Soul'; the packed table names 71179 魂兮[夜] and 71178 魂兮[昼], marking night (夜) and day (昼). Fandom page 'Soul/Night' carries '|wardrobe nr = 1179', and the wiki's list reads '{{WIL|1179|Soul/Night|Soul}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 71179 from 71178, which keeps the plain name."
+    },
+    {
+      "id": 90154,
+      "name": "Quiet Night Dream (Night)",
+      "was": "Quiet Night Dream/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key M154 -> items-v0.14.json name) gives 90154 and its day form 90153 the same name, 'Quiet Night Dream'; the packed table names 90154 幽夜之梦[夜] and 90153 幽夜之梦[昼], marking night (夜) and day (昼). Fandom page 'Quiet Night Dream/Night' carries '|wardrobe nr = 154', and the wiki's list reads '{{WIL|154|Quiet Night Dream}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 90154 from 90153, which keeps the plain name."
+    },
+    {
+      "id": 90156,
+      "name": "Bone Painting (Night)",
+      "was": "Bone Painting/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key M156 -> items-v0.14.json name) gives 90156 and its day form 90155 the same name, 'Bone Painting'; the packed table names 90156 白骨画颜[夜] and 90155 白骨画颜[昼], marking night (夜) and day (昼). Fandom page 'Bone Painting/Night' carries '|wardrobe nr = 156', and the wiki's list reads '{{WIL|156|Bone Painting}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 90156 from 90155, which keeps the plain name."
+    },
+    {
+      "id": 82828,
+      "name": "Dark Crown (Night)",
+      "was": "Dark Crown/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2828 -> items-v0.14.json name) gives 82828 and its day form 82820 the same name, 'Dark Crown'; the packed table names 82828 逢魔之冠[夜] and 82820 逢魔之冠[昼], marking night (夜) and day (昼). Fandom page 'Dark Crown/Night' carries '|wardrobe nr = 2828', and the wiki's list reads '{{WIL|2828|Dark Crown/Night|Dark Crown}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82828 from 82820, which keeps the plain name."
+    },
+    {
+      "id": 82829,
+      "name": "Bone Pendant (Night)",
+      "was": "Bone Pendant/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2829 -> items-v0.14.json name) gives 82829 and its day form 82821 the same name, 'Bone Pendant'; the packed table names 82829 白骨坠[夜] and 82821 白骨坠[昼], marking night (夜) and day (昼). Fandom page 'Bone Pendant/Night' carries '|wardrobe nr = 2829', and the wiki's list reads '{{WIL|2829|Bone Pendant/Night|Bone Pendant}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82829 from 82821, which keeps the plain name."
+    },
+    {
+      "id": 82830,
+      "name": "Soul Bone Dream (Night)",
+      "was": "Soul Bone Dream/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2830 -> items-v0.14.json name) gives 82830 and its day form 82822 the same name, 'Soul Bone Dream'; the packed table names 82830 魂骨梦[夜] and 82822 魂骨梦[昼], marking night (夜) and day (昼). Fandom page 'Soul Bone Dream/Night' carries '|wardrobe nr = 2830', and the wiki's list reads '{{WIL|2830|Soul Bone Dream/Night|Soul Bone Dream}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82830 from 82822, which keeps the plain name."
+    },
+    {
+      "id": 82831,
+      "name": "Bone Within (Night)",
+      "was": "Bone Within/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2831 -> items-v0.14.json name) gives 82831 and its day form 82823 the same name, 'Bone Within'; the packed table names 82831 白骨珞[夜] and 82823 白骨珞[昼], marking night (夜) and day (昼). Fandom page 'Bone Within/Night' carries '|wardrobe nr = 2831', and the wiki's list reads '{{WIL|2831|Bone Within/Night|Bone Within}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82831 from 82823, which keeps the plain name."
+    },
+    {
+      "id": 82832,
+      "name": "Flurried Soul (Night)",
+      "was": "Flurried Soul/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2832 -> items-v0.14.json name) gives 82832 and its day form 82824 the same name, 'Flurried Soul'; the packed table names 82832 落荒魂[夜] and 82824 落荒魂[昼], marking night (夜) and day (昼). Fandom page 'Flurried Soul/Night' carries '|wardrobe nr = 2832', and the wiki's list reads '{{WIL|2832|Flurried Soul/Night|Flurried Soul}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82832 from 82824, which keeps the plain name."
+    },
+    {
+      "id": 82833,
+      "name": "Beauty Village (Night)",
+      "was": "Beauty Village/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2833 -> items-v0.14.json name) gives 82833 and its day form 82826 the same name, 'Beauty Village'; the packed table names 82833 美人乡[夜] and 82826 美人乡[昼], marking night (夜) and day (昼). Fandom page 'Beauty Village/Night' carries '|wardrobe nr = 2833', and the wiki's list reads '{{WIL|2833|Beauty Village/Night|Beauty Village}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82833 from 82826, which keeps the plain name."
+    },
+    {
+      "id": 82834,
+      "name": "Bone Grave (Night)",
+      "was": "Bone Grave/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2834 -> items-v0.14.json name) gives 82834 and its day form 82836 the same name, 'Bone Grave'; the packed table names 82834 枯骨冢[夜] and 82836 枯骨冢[昼], marking night (夜) and day (昼). Fandom page 'Bone Grave/Night' carries '|wardrobe nr = 2834', and the wiki's list reads '{{WIL|2834|Bone Grave/Night|Bone Grave}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82834 from 82836, which keeps the plain name."
+    },
+    {
+      "id": 82835,
+      "name": "Prison of Life and death (Night)",
+      "was": "Prison of Life and death/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2835 -> items-v0.14.json name) gives 82835 and its day form 82825 the same name, 'Prison of Life and death'; the packed table names 82835 死生牢[夜] and 82825 死生牢[昼], marking night (夜) and day (昼). Fandom page 'Prison of Life and death/Night' carries '|wardrobe nr = 2835', and the wiki's list reads '{{WIL|2835|Prison of Life and death/Night|Prison of Life and death}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82835 from 82825, which keeps the plain name. The lower-case 'death' is the spelling of Nikki Calc and the wiki's list."
+    },
+    {
+      "id": 21117,
+      "name": "Miss Bone (Dress) (Night)",
+      "was": "Miss Bone (Dress)/Night",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1117 -> items-v0.14.json name) gives 21117 and its day form 21115 the same name, 'Miss Bone'; the packed table names 21117 白骨夫人[夜] and 21115 白骨夫人[昼], marking night (夜) and day (昼). Fandom page 'Miss Bone (Dress)/Night' carries '|wardrobe nr = 1117', and the wiki's list reads '{{WIL|1117|Miss Bone (Dress)/Night|Miss Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 21117 from 21115, which keeps the wiki's '(Dress)' (page 'Miss Bone' is the suit)."
+    },
+    {
+      "id": 21113,
+      "name": "Nether Fairy (Night)",
+      "was": "Nether Fairy",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1113 -> items-v0.14.json name) gives 21113 the plain name 'Nether Fairy', which is also the name of its day form 21111; the packed table names 21113 幽冥仙主[夜], marking it night (夜) against 21111's day (昼). The wiki has no item page for it; its list reads '{{WIL|1113|Nether Fairy/Night|Nether Fairy}}'. '(Night)' tells 21113 from 21111, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82812,
+      "name": "Underworld Fire (Night)",
+      "was": "Underworld Fire",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2812 -> items-v0.14.json name) gives 82812 the plain name 'Underworld Fire', which is also the name of its day form 82804; the packed table names 82812 鬼域冥火[夜], marking it night (夜) against 82804's day (昼). The wiki has no item page for it; its list reads '{{WIL|2812|Underworld Fire/Night|Underworld Fire}}'. '(Night)' tells 82812 from 82804, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82813,
+      "name": "Regret Pendant (Night)",
+      "was": "Regret Pendant",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2813 -> items-v0.14.json name) gives 82813 the plain name 'Regret Pendant', which is also the name of its day form 82810; the packed table names 82813 长恨坠[夜], marking it night (夜) against 82810's day (昼). The wiki has no item page for it; its list reads '{{WIL|2813|Regret Pendant/Night|Regret Pendant}}'. '(Night)' tells 82813 from 82810, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82814,
+      "name": "Pearl of Exorcism (Night)",
+      "was": "Pearl of Exorcism",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2814 -> items-v0.14.json name) gives 82814 the plain name 'Pearl of Exorcism', which is also the name of its day form 82811; the packed table names 82814 镇魔珠[夜], marking it night (夜) against 82811's day (昼). The wiki has no item page for it; its list reads '{{WIL|2814|Pearl of Exorcism/Night|Pearl of Exorcism}}'. '(Night)' tells 82814 from 82811, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82815,
+      "name": "Grudge Doll (Night)",
+      "was": "Grudge Doll",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2815 -> items-v0.14.json name) gives 82815 the plain name 'Grudge Doll', which is also the name of its day form 82808; the packed table names 82815 咒怨人偶[夜], marking it night (夜) against 82808's day (昼). The wiki has no item page for it; its list reads '{{WIL|2815|Grudge Doll/Night|Grudge Doll}}'. '(Night)' tells 82815 from 82808, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82816,
+      "name": "Exorcism Bracelet (Night)",
+      "was": "Exorcism Bracelet",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2816 -> items-v0.14.json name) gives 82816 the plain name 'Exorcism Bracelet', which is also the name of its day form 82809; the packed table names 82816 镇妖镯[夜], marking it night (夜) against 82809's day (昼). The wiki has no item page for it; its list reads '{{WIL|2816|Exorcism Bracelet/Night|Exorcism Bracelet}}'. '(Night)' tells 82816 from 82809, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82817,
+      "name": "Immortal Poem (Night)",
+      "was": "Immortal Poem",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2817 -> items-v0.14.json name) gives 82817 the plain name 'Immortal Poem', which is also the name of its day form 82807; the packed table names 82817 无灭诗[夜], marking it night (夜) against 82807's day (昼). The wiki has no item page for it; its list and disambiguation page give 2817 as 'Immortal Poem (Hair Ornament)/Night'. '(Night)' tells 82817 from 82807, which keeps the plain name, as for the night forms of the same suits that have a wiki page. The name 'Immortal Poem' is also the plain name of 61297 (hosiery)."
+    },
+    {
+      "id": 82818,
+      "name": "Exorcism Coffin (Night)",
+      "was": "Exorcism Coffin",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2818 -> items-v0.14.json name) gives 82818 the plain name 'Exorcism Coffin', which is also the name of its day form 82806; the packed table names 82818 镇魂棺[夜], marking it night (夜) against 82806's day (昼). The wiki has no item page for it; its list reads '{{WIL|2818|Exorcism Coffin/Night|Exorcism Coffin}}'. '(Night)' tells 82818 from 82806, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    },
+    {
+      "id": 82819,
+      "name": "Blood Silk Temple (Night)",
+      "was": "Blood Silk Temple",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2819 -> items-v0.14.json name) gives 82819 the plain name 'Blood Silk Temple', which is also the name of its day form 82805; the packed table names 82819 血绫殿[夜], marking it night (夜) against 82805's day (昼). The wiki has no item page for it; its list reads '{{WIL|2819|Blood Silk Temple/Night|Blood Silk Temple}}'. '(Night)' tells 82819 from 82805, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+    }
+  ],
+  "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where two items share a name and the wiki tells them apart with a qualifier its item page carries, where one source swaps the names of two items, and where the night form of a day and night pair would read like its day form or like the wiki's page address ('/Night'). 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling."
+}

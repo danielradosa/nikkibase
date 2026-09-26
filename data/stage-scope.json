@@ -1,0 +1,15 @@
+{
+  "note": "The stages released on the Global server. The stage source is kept against the Chinese server, which runs ahead, so only the stages listed here ship: Story Volume I chapters 1-19, Volume II chapters 1-15, Volume III chapters 1-2 and the part of chapter 3 released so far; Commission acts 1-20; every Arena and Co-op stage. Event and Dream Weaver stages are not kept. Widen a range, or add a chapter's stages, as Global releases them. cmd/bundle fails if any entry here matches no stage in the source.",
+  "asOf": "2026-09-23",
+  "story": [
+    {"volume": 1, "chapters": [1, 19]},
+    {"volume": 2, "chapters": [1, 15]},
+    {"volume": 3, "chapters": [1, 2]},
+    {"volume": 3, "chapters": [3, 3], "stages": ["1", "2", "3", "4", "5", "支1", "支2"]}
+  ],
+  "commissionActs": [1, 20],
+  "whole": ["Arena", "Co-op"],
+  "exclude": [
+    {"stage": "II-6-2", "reason": "Not a styling stage: the source holds a placeholder vector of five equal weights for it, and the wiki gives its attributes as N/A."}
+  ]
+}

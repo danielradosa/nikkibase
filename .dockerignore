@@ -1,0 +1,9 @@
+.git/
+.ai
+.claude/
+.codex/
+node_modules/
+web/node_modules/
+web/src/
+web/public/
+*.log

@@ -1,0 +1,33 @@
+# Both builds of the engine must render exactly this for the fixture in
+# parity_test.go. Regenerate with: go test ./wasm/parity -update
+
+wardrobe items=18 unresolved=0 known=18
+
+owned score=4126
+  item=10001 slot=0
+  item=30001 slot=2
+  item=60001 slot=5
+  item=70001 slot=6
+  item=80001 slot=7
+  item=880001 slot=9
+  item=20001 slot=1
+  item=170001 slot=8
+  item=170009 slot=8
+  item=170003 slot=8
+  item=170004 slot=8
+  item=170002 slot=8
+
+all score=4422
+  item=10002 slot=0
+  item=30001 slot=2
+  item=60001 slot=5
+  item=70001 slot=6
+  item=80001 slot=7
+  item=880001 slot=9
+  item=20001 slot=1
+  item=170001 slot=8
+  item=170008 slot=8
+  item=170007 slot=8
+  item=170003 slot=8
+  item=170004 slot=8
+  item=170002 slot=8

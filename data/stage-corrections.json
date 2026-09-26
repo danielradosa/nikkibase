@@ -1,0 +1,133 @@
+{
+  "note": "Weight corrections, and outliers acknowledged. A correction replaces a stage's weight vector with one in the unit every other stage uses, and bonusDivisor divides that stage's addBonusInfo multipliers to match; each needs its basis. There are none today: the thirteen stages once corrected here store small weights because the game does, and the exact stage values state them. Twelve of them are tag stages, acknowledged below; the thirteenth, 3-Side 2, is an ordinary stage at its real weights. cmd/bundle refuses a stage with both a correction and exact stage values, since one would be discarded.",
+  "derivedOn": "2026-09-23",
+  "corrections": [],
+  "acknowledged": [
+    {
+      "stage": "15-9",
+      "mode": "Story",
+      "covers": "weights",
+      "value": 1518,
+      "reason": "Its weights sum to 1,518 where the median Story stage sums to about 130, with ordinary tag multipliers, so the vector itself is an order of magnitude larger rather than a multiplier compensating for one. The exact stage values state the same vector and awards of 150,000 and 50,000, and the stage source's note describes a stage passed by wearing required items and accumulating 150,000 points over repeated clears: the size is the stage's own.",
+      "effect": "Every score on this stage, and both tag awards, are roughly ten times their neighbours'. The required items and the repeated clears are not modelled."
+    },
+    {
+      "stage": "II-4-7",
+      "mode": "Story",
+      "covers": "awards",
+      "value": 149996,
+      "awards": 2,
+      "reason": "Both tag multipliers are 10 where the other Volume II stages use 0.1 to 1. The exact stage values state the same size, 149,996 per tag, and the stage source the same multiplier, so it is the stage's own rather than a mistyped figure.",
+      "effect": "A tagged item is rewarded about ten times a typical award here, so the tagged items decide the outfit."
+    },
+    {
+      "stage": "2-7",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 2,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 6,000 for Homewear and 22,000 for Pajamas, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match. In addition, the stage source's note asks for the Pajamas tag.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "3-6",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 2,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 22,000 for Kimono and 25,500 for Shower, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "4-8",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 1,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 21,000 for Paramedics, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "4-12",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 11,
+      "awards": 1,
+      "reason": "A tag stage: its weights sum to 11 where an ordinary Story stage sums to about 130, and it pays 35,000 for Bunny, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "5-7",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 7,
+      "awards": 1,
+      "reason": "A tag stage: its weights sum to 7 where an ordinary Story stage sums to about 130, and it pays 25,000 for Bohemia, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "5-11",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 1,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 35,000 for Swordsman, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "5-支3",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 1,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 25,000 for Paramedics, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "6-8",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 2,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 25,000 for Swimsuit and 10,000 for Modern China, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "6-支3",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 9,
+      "awards": 2,
+      "reason": "A tag stage: its weights sum to 9 where an ordinary Story stage sums to about 130, and it pays 30,000 for Dancer and 10,000 for Multicultural, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "7-7",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 11,
+      "awards": 2,
+      "reason": "A tag stage: its weights sum to 11 where an ordinary Story stage sums to about 130, and it pays 15,000 each for European and Evening Gown, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "7-8",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 11,
+      "awards": 2,
+      "reason": "A tag stage: its weights sum to 11 where an ordinary Story stage sums to about 130, and it pays 15,000 each for Chinese Classical and Swordsman, so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    },
+    {
+      "stage": "7-支3",
+      "mode": "Story",
+      "covers": "tag",
+      "value": 7,
+      "awards": 1,
+      "reason": "A tag stage: its weights sum to 7 where an ordinary Story stage sums to about 130, and it pays 30,000 for Army at Princess (Maiden's weights and halved tag are a variant), so wearing the tag decides the outfit. The exact stage values state these figures, and the stage source the same small vector with multipliers to match.",
+      "effect": "The tagged items dominate the best outfit; the attribute weights barely separate the rest."
+    }
+  ],
+  "acknowledgedNote": "Stages whose numbers sit far enough from their peers that CheckInvariants refuses them, with the reason each is the stage's own. Each names what it covers -- 'weights' for the weight sum, 'awards' for every tag award, 'tag' for a tag stage, which is both -- and the value it was acknowledged at: the build fails if that value moves by more than 1% or the number of awards changes, so a changed source does not ride on an old explanation. A tag stage's Maiden variant is held to the same acknowledgement."
+}

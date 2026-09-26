@@ -1,0 +1,157 @@
+{
+  "note": "Story stages whose Maiden numbers differ from Princess's. A stage's own numbers are Princess's; each entry here gives Maiden's, where they differ. 'weights' (in the stage source's unit and order: simple, cute, lively, pure, cool) replace the stage's; 'bonus' replaces its tag calls, priced on Maiden's weights, or 'keepAwards' keeps Princess's awards as they stand. Every other story stage scores the same at both difficulties. A 'quote' must still appear in the stage source, and every note there giving one difficulty's numbers for a released stage must be modelled here, or cmd/bundle fails.",
+  "variants": [
+    {
+      "stage": "2-支2",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "A",
+          "multiplier": 2,
+          "tag": "中性风"
+        }
+      ],
+      "basis": "The stage source's note for 2-Side 2 gives Maiden's tag as A x2; its own table, like the stage's numbers here, is Princess's.",
+      "quote": "少女级tag是加分Ax2"
+    },
+    {
+      "stage": "3-10",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "C",
+          "multiplier": 0.5,
+          "tag": "动物系"
+        }
+      ],
+      "basis": "The stage source's note for 3-10 gives Maiden's tag as C x0.5; its own table, like the stage's numbers here, is Princess's.",
+      "quote": "少女级tag是加分Cx0.5"
+    },
+    {
+      "stage": "3-11",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "A",
+          "multiplier": 0.5,
+          "tag": "欧式古典"
+        }
+      ],
+      "basis": "The stage source's note for 3-11 gives Maiden's tag as A x0.5; its own table, like the stage's numbers here, is Princess's.",
+      "quote": "少女级tag是加分Ax0.5"
+    },
+    {
+      "stage": "4-1",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "SS",
+          "multiplier": 1,
+          "tag": "雨季装备"
+        }
+      ],
+      "basis": "The stage source's note for 4-1 gives Maiden's tag as SS x1; its own table, like the stage's numbers here, is Princess's. The same note says the stage can be passed at S without a Rain item.",
+      "quote": "少女级tag是加分SSx1"
+    },
+    {
+      "stage": "5-12",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "A",
+          "multiplier": 1,
+          "tag": "中式现代"
+        },
+        {
+          "grade": "A",
+          "multiplier": 1,
+          "tag": "民国服饰"
+        }
+      ],
+      "basis": "The wiki's 5-12 page gives Maiden's tags as Modern China and Republic of China, and Princess's as Modern China and Chinese Classical, which is what the exact stage values pay. The sizes are nikkiup2u's, whose table for this stage holds Maiden's tags: A x1 each."
+    },
+    {
+      "stage": "6-7",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "B",
+          "multiplier": 0.25,
+          "tag": "中式现代"
+        },
+        {
+          "grade": "C",
+          "multiplier": 0.25,
+          "tag": "中式古典"
+        }
+      ],
+      "basis": "The stage source's own table for 6-7 is Maiden's: its note says Princess's tag is very light, and the wiki gives Maiden's tags as Modern China and Chinese Classical and Princess's as none, which is what the exact stage values pay.",
+      "quote": "公主级tag很轻"
+    },
+    {
+      "stage": "6-9",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "F",
+          "multiplier": 31.4,
+          "tag": "旗袍"
+        },
+        {
+          "grade": "F",
+          "multiplier": 35.5,
+          "tag": "民国服饰"
+        }
+      ],
+      "basis": "The stage source's own table for 6-9 is Maiden's: the wiki gives Maiden's tags as Republic of China and Cheongsam, and Princess's as Republic of China and Multicultural, which is what the exact stage values pay. That table prices Maiden's two tags by grade, C x0.5 each; the exact values give Princess's as factors, F 35.5 for Republic of China and F 31.4 for Multicultural. Maiden's are paid at those factors, Cheongsam at Multicultural's. On every tag both sources carry at C x0.5, the exact factor is between 30.1 and 40.5, never the grade's 27.25.",
+      "quote": "addBonusInfo('C', 0.5, \"旗袍\"), addBonusInfo('C', 0.5, \"民国服饰\")"
+    },
+    {
+      "stage": "6-10",
+      "difficulty": "maiden",
+      "weights": [
+        -0.67,
+        1,
+        -0.8,
+        0.67,
+        -0.8
+      ],
+      "keepAwards": true,
+      "basis": "The stage source's note for 6-10 gives Maiden's weights (0.67, 1, 0.8, 0.67, 0.8, on the table's sides) and says its tags weigh more, with no figure. Keeping Princess's awards on Maiden's lighter weights makes them weigh about twice as much against the weights, without inventing a size.",
+      "quote": "少女级权重是0.67,1,0.8,0.67,0.8，tag更重"
+    },
+    {
+      "stage": "7-9",
+      "difficulty": "maiden",
+      "bonus": [
+        {
+          "grade": "A",
+          "multiplier": 1,
+          "tag": "冬装"
+        }
+      ],
+      "basis": "The stage source's note for 7-9 gives Maiden's tag as A x1; its own table, like the stage's numbers here, is Princess's.",
+      "quote": "少女级tag是加分Ax1"
+    },
+    {
+      "stage": "7-支3",
+      "difficulty": "maiden",
+      "weights": [
+        0.2,
+        -0.2,
+        0.13,
+        -0.13,
+        0.13
+      ],
+      "bonus": [
+        {
+          "grade": "SS",
+          "multiplier": 10,
+          "tag": "军装"
+        }
+      ],
+      "basis": "The stage source's note for 7-Side 3 gives Maiden's weights (0.2, 0.2, 0.13, 0.13, 0.13, on the table's sides) and halves the tag: SS x10 against its table's SS x20, which is Princess's.",
+      "quote": "少女级权重0.2,0.2,0.13,0.13,0.13，tag减半"
+    }
+  ]
+}

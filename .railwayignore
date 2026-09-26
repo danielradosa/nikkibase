@@ -1,0 +1,13 @@
+.git/
+.ai
+.claude/
+.codex/
+CLAUDE.md
+AGENTS.md
+node_modules/
+web/node_modules/
+!web/dist
+!web/dist/**
+core/wardrobe/testdata/
+*.log
+.DS_Store

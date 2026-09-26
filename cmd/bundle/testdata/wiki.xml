@@ -1,0 +1,21 @@
+<mediawiki>
+<page>
+  <title>Test Ribbon Hair</title>
+  <ns>0</ns>
+  <revision><text>{{Clothing
+|type = Hair
+|wardrobe nr = 1
+|how to obtain = [[Clothes Store]]&lt;br&gt;[[Ribbon Party]] event
+}}
+{{Attributes|Simple|S|Lively|A|Cute|A|Pure|A|Warm|A}}</text></revision>
+</page>
+<page>
+  <title>Test Plain Dress</title>
+  <ns>0</ns>
+  <revision><text>{{Clothing
+|type = Dress
+|wardrobe nr = 2
+}}
+{{Attributes|G|SS|E|A|M|B|Se|C|Co|A}}</text></revision>
+</page>
+</mediawiki>

@@ -1,0 +1,583 @@
+{
+  "note": "Items a stage requires, by game item ID. Each set in 'require' is a choice: the outfit must wear one of its items, so a one-item set names that exact item, and every set must be met. 'source' says where the requirement is stated: 'wiki quest field' is the quest field of the stage's page on the Love Nikki Wiki, used wherever it names items; 'stage source note' is the stage source's note for the stage, which must still say 'quote'. 'difficulty' narrows an entry to Maiden; without it the entry holds at both. 'basis' explains a reading that is not literal. cmd/bundle fails if a stage is not in the bundle, an item is not in the catalogue, a set mixes slots other than dress, top and bottom, or two sets can never be worn together.",
+  "rules": [
+    {
+      "stage": "2-7",
+      "mode": "Story",
+      "require": [[40080], [50091]],
+      "source": "stage source note",
+      "quote": "推荐熊猫睡衣，高分且过关必做",
+      "basis": "The note asks for the Pajamas tag and names Panda PJs as what passing with a high score requires; the entry's list of wearable items gives its top and its pants."
+    },
+    {
+      "stage": "4-12",
+      "mode": "Story",
+      "require": [[20165]],
+      "source": "stage source note",
+      "quote": "必穿兔女郎"
+    },
+    {
+      "stage": "7-2",
+      "mode": "Story",
+      "require": [[20126]],
+      "source": "wiki quest field",
+      "quote": "Dragon Maiden\n: [[Ancient Tomb]]"
+    },
+    {
+      "stage": "10-8",
+      "mode": "Story",
+      "require": [[20520]],
+      "source": "stage source note",
+      "quote": "连衣裙要求学士服",
+      "basis": "The note requires Bachelor Gown as the dress and refers to exceptions; the entry's list of wearable items also names two dresses, Treble Clef and Chocolate Story. Only Bachelor Gown is required here."
+    },
+    {
+      "stage": "11-3",
+      "mode": "Story",
+      "require": [[40413, 20617], [50380, 20617]],
+      "source": "stage source note",
+      "quote": "要求方中矩、圆中规，或者含露低垂",
+      "basis": "The note allows The Square with Compass, or Melancholy Flower. As two sets that Melancholy Flower meets alone: the dress answers both, and otherwise the top and the bottom must both be worn."
+    },
+    {
+      "stage": "11-5",
+      "mode": "Story",
+      "require": [[20577, 20617]],
+      "source": "stage source note",
+      "quote": "要求亚尼拉海盗，或者含露低垂"
+    },
+    {
+      "stage": "11-8",
+      "mode": "Story",
+      "require": [[20576, 20617]],
+      "source": "stage source note",
+      "quote": "要求红莓绢蝶，或者含露低垂"
+    },
+    {
+      "stage": "12-3",
+      "mode": "Story",
+      "require": [[20650]],
+      "source": "stage source note",
+      "quote": "必做桃心骑士"
+    },
+    {
+      "stage": "12-5",
+      "mode": "Story",
+      "require": [[40438], [50403]],
+      "source": "stage source note",
+      "quote": "必做滑板战衣+短裤",
+      "basis": "The note names the shorts only as 短裤; they are read as Skateboard Shorts (滑板短裤), the shorts that go with Skateboard Tee."
+    },
+    {
+      "stage": "12-8",
+      "mode": "Story",
+      "require": [[40437], [50402]],
+      "source": "stage source note",
+      "quote": "必做机械之心·上+下"
+    },
+    {
+      "stage": "13-3",
+      "mode": "Story",
+      "require": [[40445], [50409]],
+      "source": "stage source note",
+      "quote": "要求月之咒语·上+下"
+    },
+    {
+      "stage": "13-5",
+      "mode": "Story",
+      "require": [[20672]],
+      "source": "stage source note",
+      "quote": "要求苍穹之鹰"
+    },
+    {
+      "stage": "13-9",
+      "mode": "Story",
+      "require": [[20671]],
+      "source": "stage source note",
+      "quote": "要求森林之歌"
+    },
+    {
+      "stage": "14-3",
+      "mode": "Story",
+      "require": [[20763], [70830]],
+      "source": "stage source note",
+      "quote": "必做：暖椿、椿履"
+    },
+    {
+      "stage": "14-5",
+      "mode": "Story",
+      "require": [[40469], [50430]],
+      "source": "stage source note",
+      "quote": "必做：性感丛林·衣+裤"
+    },
+    {
+      "stage": "14-8",
+      "mode": "Story",
+      "require": [[10926], [20762], [70829]],
+      "source": "wiki quest field",
+      "quote": "Wasteland Seer\n: [[Exotic Traveller]]\n: [[Art of Fountain]]\n: [[Lost Journey]]"
+    },
+    {
+      "stage": "15-3",
+      "mode": "Story",
+      "require": [[20786], [70855]],
+      "source": "wiki quest field",
+      "quote": "Apple Federal Madam Dress\n: [[Cloud Empire Romance]]\n: [[Enchanted Passion]]"
+    },
+    {
+      "stage": "15-7",
+      "mode": "Story",
+      "require": [[20787], [30400]],
+      "source": "stage source note",
+      "quote": "必做千鸟时光+蔷薇梦想"
+    },
+    {
+      "stage": "15-9",
+      "mode": "Story",
+      "require": [[20798], [30404], [81624]],
+      "source": "stage source note",
+      "quote": "必做荣耀同行+风暴披风,必带赠送的黎明之刃"
+    },
+    {
+      "stage": "16-4",
+      "mode": "Story",
+      "require": [[20830], [30414]],
+      "source": "stage source note",
+      "quote": "必做苍蓝长裙+苍穹之慧"
+    },
+    {
+      "stage": "16-6",
+      "mode": "Story",
+      "require": [[40485], [50446], [30413]],
+      "source": "stage source note",
+      "quote": "必做齿轮牛仔+暗纹牛仔+超能续航"
+    },
+    {
+      "stage": "16-9",
+      "mode": "Story",
+      "require": [[20831], [70895]],
+      "source": "wiki quest field",
+      "quote": "Seek ''Nobility Cocktail Party Dress''\n:[[Tipsy as Snow (Dress)|Tipsy as Snow]]\n:[[Lady's Steps]]"
+    },
+    {
+      "stage": "17-2",
+      "mode": "Story",
+      "require": [[20886], [70948]],
+      "source": "stage source note",
+      "quote": "必做鸢尾礼裙+刺绣缎鞋"
+    },
+    {
+      "stage": "17-5",
+      "mode": "Story",
+      "require": [[20888], [70950]],
+      "source": "stage source note",
+      "quote": "必做森之魔法师+魔法短靴"
+    },
+    {
+      "stage": "17-9",
+      "mode": "Story",
+      "require": [[20887], [70949], [81901]],
+      "source": "stage source note",
+      "quote": "必做/必穿联邦女警、女警步伐、联邦警枪"
+    },
+    {
+      "stage": "18-2",
+      "mode": "Story",
+      "require": [[40536], [50494]],
+      "source": "wiki quest field",
+      "quote": "Seek Professional Dresser<br/>\n:[[Plain Coat]] (Top)\n:[[Retro Wide Leg Pants]] (Bottom)"
+    },
+    {
+      "stage": "18-4",
+      "mode": "Story",
+      "require": [[30478], [40535], [50493]],
+      "source": "wiki quest field",
+      "quote": "Seek Baseball Costume<br/>\n:[[Ace Pitcher (Coat)|Ace Pitcher]] (Coat)\n:[[Baseball Game]] (Top)\n:[[Clear Sky Shorts]] (Bottom)"
+    },
+    {
+      "stage": "18-9",
+      "mode": "Story",
+      "require": [[30480], [40537], [50495]],
+      "source": "wiki quest field",
+      "quote": "Seek Adventurer<br/>\n:[[Pioneering Spirit]] (Coat)\n:[[Improved Jacket]] (Top)\n:[[Explorer's Journey]] (Bottom)"
+    },
+    {
+      "stage": "19-2",
+      "mode": "Story",
+      "require": [[21059], [60495]],
+      "source": "stage source note",
+      "quote": "必做童话甜点师+坚果物语"
+    },
+    {
+      "stage": "19-4",
+      "mode": "Story",
+      "require": [[11258], [21057], [71120]],
+      "source": "wiki quest field",
+      "quote": "Seek Veteran Ninja\n:[[Shadow of the Crane]]\n:[[Blood Moon Exit the Clouds]]\n:[[Disappearing Moon]]"
+    },
+    {
+      "stage": "19-9",
+      "mode": "Story",
+      "require": [[11263], [21064], [71125]],
+      "source": "wiki quest field",
+      "quote": "Seek Taisho Dress\n:[[Future Capriccio (Hair)|Future Capriccio]]\n:[[New Fashion]]\n:[[Gear Memory]]"
+    },
+    {
+      "stage": "II-1-2",
+      "mode": "Story",
+      "require": [[21134], [30543]],
+      "source": "wiki quest field",
+      "quote": "Seek Apple Lady's Dress\n: [[Elegant Fragrance of Orchid]]\n: [[Budding Orchid]]"
+    },
+    {
+      "stage": "II-1-5",
+      "mode": "Story",
+      "require": [[11337], [21133], [71195]],
+      "source": "wiki quest field",
+      "quote": "Seek Pigeon Pastoral Dress in the Rain\n:[[Sunshine in Forest]]\n:[[Colored White Porcelain]]\n:[[A Stroll in Field]]\n:Umbrella"
+    },
+    {
+      "stage": "II-1-7",
+      "mode": "Story",
+      "require": [[30544], [40580], [50537], [82909]],
+      "source": "wiki quest field",
+      "quote": "Seek Court Doc's Dress<br/>\n:[[Rose Anthem]] (Coat)\n:[[Fine Medical Skills]] (Top)\n:[[Gold Fringe]] (Bottom)\n:[[Crow's Beak]] (Face)"
+    },
+    {
+      "stage": "II-2-2",
+      "mode": "Story",
+      "require": [[83283, 83287]],
+      "source": "wiki quest field",
+      "quote": "Seek ''Hat or Staff''\n: [[Deliberate Sandalwood]] '''OR''' [[Causality]]"
+    },
+    {
+      "stage": "II-2-4",
+      "mode": "Story",
+      "require": [[11422], [21213]],
+      "source": "wiki quest field",
+      "quote": "Seek Theme: Carnival\n:[[Knotted Bun]]\n:[[Pleasure Magic]]"
+    },
+    {
+      "stage": "II-2-7",
+      "mode": "Story",
+      "require": [[40601], [50557], [71271]],
+      "source": "wiki quest field",
+      "quote": "Theme: Elven\n: [[Dead Leaf]]\n: [[Pleated Bloomers]]\n: [[Moth Grain Boots]]"
+    },
+    {
+      "stage": "II-3-2",
+      "mode": "Story",
+      "require": [[21352], [30668]],
+      "source": "wiki quest field",
+      "quote": "Seek Northern Ethnic Style\n:[[Sound of Spring (Spring in the North)|Sound of Spring]] and [[Echo in Snow Mountain]]"
+    },
+    {
+      "stage": "II-3-4",
+      "mode": "Story",
+      "require": [[21351], [30667]],
+      "source": "wiki quest field",
+      "quote": "Seek Bookish Cloud Clothes\n: [[Inked bamboo Slip (Dress)|Inked bamboo Slip]] and [[Faint Ink Mark]]"
+    },
+    {
+      "stage": "II-3-7",
+      "mode": "Story",
+      "require": [[21353], [71390], [83793]],
+      "source": "wiki quest field",
+      "quote": "Seek Flower Themed Clothes\n: [[Embroidered Shirt Dress]], [[Orchid Sandal]], and [[Sunflowers Bouquet]]"
+    },
+    {
+      "stage": "II-4-2",
+      "mode": "Story",
+      "require": [[40674], [50615]],
+      "source": "wiki quest field",
+      "quote": "Seek ''Be an animal''\n: [[Song of Hunt]]\n: [[Book of Hunt]]"
+    },
+    {
+      "stage": "II-4-4",
+      "mode": "Story",
+      "require": [[40672], [50613], [84169]],
+      "source": "wiki quest field",
+      "quote": "Seek ''Operator suit''\n: [[Bloom]]\n: [[Fashion Revival (Bottoms)|Fashion Revival]]\n: [[Vintage Phone]]"
+    },
+    {
+      "stage": "II-4-6",
+      "mode": "Story",
+      "require": [[21439], [71468]],
+      "source": "wiki quest field",
+      "quote": "Seek ''<nowiki>'Red'</nowiki> clothes''\n: [[Bun Bun - Strawberry]]\n: [[Forest Boots - Strawberry]]"
+    },
+    {
+      "stage": "II-5-2",
+      "mode": "Story",
+      "require": [[40712], [50654]],
+      "source": "wiki quest field",
+      "quote": "Seek Comfortable Pajamas\n: [[Night Gallus]]\n: [[Good Night Pajama Pants]]"
+    },
+    {
+      "stage": "II-5-4",
+      "mode": "Story",
+      "require": [[11778], [40714], [50656], [84713]],
+      "source": "wiki quest field",
+      "quote": "Seek Clothes Fit for Hammer\n: [[Adventure - Departure]]\n: [[Ancient Journey]]\n: [[Discovery Journey]]\n: [[Silver Feather Hammer]]"
+    },
+    {
+      "stage": "II-5-6",
+      "mode": "Story",
+      "require": [[11785], [40716], [50658]],
+      "source": "wiki quest field",
+      "quote": "Seek Flower-Themed Clothes\n: [[Town's Old Dream]]\n: [[Sunny Windy Day]]\n: [[Silent Wilderness]]"
+    },
+    {
+      "stage": "II-6-3",
+      "mode": "Story",
+      "require": [[21687], [30826]],
+      "source": "wiki quest field",
+      "quote": "Cloud Fairy Tale Style\n: [[Meow Planet of Ink]]\n: [[Everlasting Company]]"
+    },
+    {
+      "stage": "II-6-5",
+      "mode": "Story",
+      "require": [[40756], [50697]],
+      "source": "wiki quest field",
+      "quote": "March Themed Clothes\n: [[Unnamed Longing]]\n: [[Dream Diary]]"
+    },
+    {
+      "stage": "II-6-6",
+      "mode": "Story",
+      "require": [[11962], [21747]],
+      "source": "wiki quest field",
+      "quote": "Peace Themed Clothes\n: [[Faithful Prayer (Hair)|Faithful Prayer]]\n: [[God's Pity]]"
+    },
+    {
+      "stage": "II-7-2",
+      "mode": "Story",
+      "require": [[21836], [71807]],
+      "source": "wiki quest field",
+      "quote": "Time-theme clothing\n: [[Deposit of Time]]\n: [[Mark of Gear]]"
+    },
+    {
+      "stage": "II-7-5",
+      "mode": "Story",
+      "require": [[12058], [40783], [50723]],
+      "source": "wiki quest field",
+      "quote": "Black Agent Suit\n: [[Dark Silence (Hair)|Dark Silence]]\n: [[Dark Lurk]]\n: [[Silent Alert]]"
+    },
+    {
+      "stage": "II-7-7",
+      "mode": "Story",
+      "require": [[12056], [21834]],
+      "source": "wiki quest field",
+      "quote": "Gemologist Set\n: [[Nature Whisper (Hair)|Nature Whisper]]\n: [[Secret Mine]]"
+    },
+    {
+      "stage": "II-8-2",
+      "mode": "Story",
+      "require": [[40816], [50755]],
+      "source": "wiki quest field",
+      "quote": "Seek Futuristic Ruins Style\n:[[Mechanical Listening]]\n:[[Data Ocean (Bottom)|Data Ocean]]"
+    },
+    {
+      "stage": "II-8-5",
+      "mode": "Story",
+      "require": [[12152], [21907], [30924]],
+      "source": "wiki quest field",
+      "quote": "Seek Righteous Cloud Swordsman\n:[[Short Song Ballad]]\n:[[Rivers Beyond (Dress)|Rivers Beyond]]\n:[[Autumn Breeze]]"
+    },
+    {
+      "stage": "II-8-6",
+      "mode": "Story",
+      "require": [[12150], [40813], [50752]],
+      "source": "wiki quest field",
+      "quote": "Seek Wasteland Warrior\n:[[Time Flies (Hair)|Time Flies]]\n:[[Ancient Legend]]\n:[[Story of Hide]]"
+    },
+    {
+      "stage": "II-9-3",
+      "mode": "Story",
+      "require": [[40835], [50774]],
+      "source": "wiki quest field",
+      "quote": "Seek Colorful Street Wear\n:[[Expert Nature]]\n:[[Gradient Fantasy (Bottom)|Gradient Fantasy]]"
+    },
+    {
+      "stage": "II-9-5",
+      "mode": "Story",
+      "require": [[12263], [22017], [30984]],
+      "source": "wiki quest field",
+      "quote": "Seek Expedition Theme\n:[[Unkempt Short Hair]]\n:[[Neat Travel]]\n:[[Leather Temperature]]"
+    },
+    {
+      "stage": "II-9-7",
+      "mode": "Story",
+      "require": [[12255], [40833], [50772]],
+      "source": "wiki quest field",
+      "quote": "Seek Violinist\n:[[Duet]]\n:[[Sonata in the Rain]]\n:[[Melodious Piano]]"
+    },
+    {
+      "stage": "II-10-2",
+      "mode": "Story",
+      "require": [[22078], [72024]],
+      "source": "wiki quest field",
+      "quote": "Seek Virtual Space Equipment\n: [[Communication Control]]\n: [[Command Transmission]]"
+    },
+    {
+      "stage": "II-10-4",
+      "mode": "Story",
+      "require": [[40866], [50801], [87208]],
+      "source": "wiki quest field",
+      "quote": "Seek Wasteland Tribal Costume\n: [[Boundless Wasteland]]\n: [[Heaven-bestowed Destiny]]\n: [[Tribal Celebration]]"
+    },
+    {
+      "stage": "II-10-6",
+      "mode": "Story",
+      "require": [[40868], [50803], [87216]],
+      "source": "wiki quest field",
+      "quote": "Seek Orange Picking Outfit\n: [[Countryside Lady]]\n: [[Suburb Greenery]]\n: [[Fruitful Harvest]]"
+    },
+    {
+      "stage": "II-11-3",
+      "mode": "Story",
+      "require": [[31069], [40920], [50848]],
+      "source": "wiki quest field",
+      "quote": "Seek Apple Federation Style\n: [[Style Icon]]\n: [[Era of Fashion]]\n: [[Gilded Age]]"
+    },
+    {
+      "stage": "II-11-5",
+      "mode": "Story",
+      "require": [[22153], [72114]],
+      "source": "wiki quest field",
+      "quote": "Seek Cloud Empire Style\n:[[Essence of Ice]]\n:[[Frost Moon (Frozen Flower)|Frost Moon]]"
+    },
+    {
+      "stage": "II-11-6",
+      "mode": "Story",
+      "require": [[12444], [22150], [87715]],
+      "source": "wiki quest field",
+      "quote": "Seek Cute Wasteland Style\n:[[Dense Forest]]\n:[[Singing in the Dream]]\n:[[Sacred Feathers]]"
+    },
+    {
+      "stage": "II-12-2",
+      "mode": "Story",
+      "require": [[40963], [50888]],
+      "source": "wiki quest field",
+      "quote": "Seek Everyday Elegant Clothes\n: [[Night Sea of Slight Waves]]\n: [[Corydalis Fluttering]]"
+    },
+    {
+      "stage": "II-12-4",
+      "mode": "Story",
+      "require": [[31125], [40951], [50877]],
+      "source": "wiki quest field",
+      "quote": "Seek Street Sportswear\n: [[Gluttony Froggy]]\n: [[Moment of Leisure]]\n: [[Foraging Action]]"
+    },
+    {
+      "stage": "II-12-6",
+      "mode": "Story",
+      "require": [[12544], [40949], [50875]],
+      "source": "wiki quest field",
+      "quote": "Seek Gorgeous and Elegant Classical Suit\n: [[Golden Ages]]\n: [[Other Side of Clouds]]\n: [[Enchanted Sheet Music]]"
+    },
+    {
+      "stage": "II-13-2",
+      "mode": "Story",
+      "require": [[22326], [88740]],
+      "source": "wiki quest field",
+      "quote": "Seek Palace Maid\n: [[Sweet Raindrop]]\n: [[Memory Trap]]"
+    },
+    {
+      "stage": "II-13-4",
+      "mode": "Story",
+      "require": [[22330], [31180], [88752]],
+      "source": "wiki quest field",
+      "quote": "Seek Clothes Associated with the Stars\n: [[Nebula Dream]]\n: [[Zodiac Cape]]\n: [[Cozy Hat]]"
+    },
+    {
+      "stage": "II-13-6",
+      "mode": "Story",
+      "require": [[22324], [61209], [88732]],
+      "source": "wiki quest field",
+      "quote": "Seek Fast Food Delivery Guy\n: [[Signature Set]]\n: [[Great Passion]]\n: [[Warm Service]]"
+    },
+    {
+      "stage": "II-14-2",
+      "mode": "Story",
+      "require": [[41324], [50972]],
+      "source": "wiki quest field",
+      "quote": "Seek Wasteland Style\n: [[White Silence]]\n: [[Festive Parade]]"
+    },
+    {
+      "stage": "II-14-4",
+      "mode": "Story",
+      "require": [[22441], [31269], [89431]],
+      "source": "wiki quest field",
+      "quote": "Seek Exquisite Ladylike Suit\n: [[Resonance from the Valley]]\n: [[Reveal the Past]]\n: [[Inner Strength]]"
+    },
+    {
+      "stage": "II-14-7",
+      "mode": "Story",
+      "require": [[12809], [41327], [50975]],
+      "source": "wiki quest field",
+      "quote": "Seek Outfit for cake-making\n: [[Cream Mousse]]\n: [[Tender Smile]]\n: [[Tasty Trick]]"
+    },
+    {
+      "stage": "II-15-2",
+      "mode": "Story",
+      "require": [[41385], [51027]],
+      "source": "wiki quest field",
+      "quote": "Seek Desert Traveler style clothing\n: [[Silent Watcher]]\n: [[Endless Desert]]"
+    },
+    {
+      "stage": "II-15-5",
+      "mode": "Story",
+      "require": [[31318], [41388], [51030]],
+      "source": "wiki quest field",
+      "quote": "Seek Windbreaker-style clothing\n: [[Midnight Interview]]\n: [[Uphold the Conviction]]\n: [[Chief Journalist]]"
+    },
+    {
+      "stage": "II-15-6",
+      "mode": "Story",
+      "require": [[12924], [41391], [51033]],
+      "source": "wiki quest field",
+      "quote": "Seek Natural style clothes\n: [[City Twilight Line]]\n: [[Soft Cloth]]\n: [[Leopard Print (Bottom)|Leopard Print]]"
+    },
+    {
+      "stage": "III-1-2",
+      "mode": "Story",
+      "require": [[22607], [31384]],
+      "source": "wiki quest field",
+      "quote": "Seek Northern Traveler's Attire\n: [[Winter Love Letter (Winter Love Letter)|Winter Love Letter]]\n: [[Elegant Demeanor (Coat)|Elegant Demeanor]]"
+    },
+    {
+      "stage": "III-1-3",
+      "mode": "Story",
+      "require": [[22604], [180950]],
+      "source": "wiki quest field",
+      "quote": "Seek Teddy Bear Theme\n: [[Bear Daisy (Dress)|Bear Daisy]]\n: [[Fragrant Embrace]]"
+    },
+    {
+      "stage": "III-1-6",
+      "mode": "Story",
+      "require": [[13063], [22620], [31388]],
+      "source": "wiki quest field",
+      "quote": "Seek Outfit Suited for Snowy Nights\n: [[Song of Hope]]\n: [[Whistling of Flower]]\n: [[Misty Cloud (Coat)|Misty Cloud]]"
+    },
+    {
+      "stage": "III-2-2",
+      "mode": "Story",
+      "require": [[41529], [51158]],
+      "source": "stage source note",
+      "quote": "必做！心图测算，律动节拍"
+    },
+    {
+      "stage": "III-2-4",
+      "mode": "Story",
+      "require": [[41527], [51156]],
+      "source": "stage source note",
+      "quote": "必做！胸中热焰，干练风仪"
+    },
+    {
+      "stage": "III-2-6",
+      "mode": "Story",
+      "require": [[13194], [22720], [31438]],
+      "source": "stage source note",
+      "quote": "必做！寄栖月光，星夜流明，迷蝶幽梦"
+    }
+  ]
+}

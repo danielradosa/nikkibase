@@ -1,0 +1,20 @@
+{
+  "note": "The floor a production bundle must clear. It is committed rather than measured at build time, so a source that goes stale, or a parser that quietly matches less than it used to, fails the build instead of shipping a smaller site. Raise these numbers when coverage genuinely grows; never lower one to make a build pass without saying why in the commit. maxOrphanBonus and maxUnwornTags are ceilings for gaps the sources themselves have, both zero today, so a regression that opens one fails the build. valuedStages is how many stages take exact weights and awards from -stage-values: every stage it carries. subgradedCells is how many item stats a -subgrades sub-grade sets, and maxSubgradeFallbacks is the ceiling on graded stats that keep their letter's value because their sub-grade is missing or names another side or letter; both apply only to builds that read -subgrades. acquisitionItems is how many catalogue items acquire.json says how to get. maxUnmatchedNames is the ceiling on item names the wiki's recipes, evolutions, customizations and suit pages give that match no catalogue item (their lines print the wiki's text without a link, or leave the item out); it applies to builds that read -fandom. suitItems is how many catalogue items items.json places in a suit.",
+  "setOn": "2026-09-23",
+  "items": 33017,
+  "stagesByMode": {
+    "Story": 419,
+    "Commission": 140,
+    "Arena": 17,
+    "Co-op": 19
+  },
+  "taggedStages": 379,
+  "maxOrphanBonus": 0,
+  "maxUnwornTags": 0,
+  "valuedStages": 576,
+  "subgradedCells": 164644,
+  "maxSubgradeFallbacks": 441,
+  "acquisitionItems": 33990,
+  "maxUnmatchedNames": 203,
+  "suitItems": 29444
+}

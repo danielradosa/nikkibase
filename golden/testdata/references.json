@@ -1,0 +1,59 @@
+{
+  "note": "Scores measured outside NikkiBase, and how each may be compared. 'same-model' references come from a calculator scoring the same kind of outfit the same way, and NikkiBase must land within the tolerance. 'in-game-ranked' references are real contest results, with skills and real item stats, so they are not a like-for-like comparison; any gap over 10% must be explained in KNOWN-DEVIATIONS.md rather than accepted silently.",
+  "references": [
+    {
+      "kind": "same-model",
+      "mode": "Story",
+      "stage": "1-1",
+      "value": 119836,
+      "tolerance": 0.05,
+      "source": "nikkicalc.com, Story 1-1 Maiden: the prerendered 'Base score' of its best outfit, which its live scoring API returns exactly for the same 32 items (8 main items, a spirit, 23 accessories). Recorded September 2026."
+    },
+    {
+      "kind": "tag-award",
+      "mode": "Commission",
+      "stage": "1-1",
+      "tag": "Homewear",
+      "value": 7000,
+      "tolerance": 0.05,
+      "source": "nikkicalc.com, Commission 1-1 stage page: Homewear 7000 + Pajamas 7000. Recorded September 2026."
+    },
+    {
+      "kind": "tag-award",
+      "mode": "Commission",
+      "stage": "1-1",
+      "tag": "Pajamas",
+      "value": 7000,
+      "tolerance": 0.05,
+      "source": "nikkicalc.com, Commission 1-1 stage page: Homewear 7000 + Pajamas 7000. Recorded September 2026."
+    },
+    {
+      "kind": "in-game-ranked",
+      "mode": "Story",
+      "stage": "1-1",
+      "value": 183260,
+      "source": "The #1 ranked score, reported by u/mariokartedoff in r/LoveNikki thread 1wnllvn (comment pbg9c4p), 2026-09-22."
+    },
+    {
+      "kind": "in-game-ranked",
+      "mode": "Story",
+      "stage": "1-2",
+      "value": 194384,
+      "source": "The #1 ranked score, reported by u/mariokartedoff in r/LoveNikki thread 1wnllvn (comment pbg9c4p), 2026-09-22."
+    },
+    {
+      "kind": "in-game-ranked",
+      "mode": "Story",
+      "stage": "4-1",
+      "value": 239979,
+      "source": "The #1 ranked score, reported by u/mariokartedoff in r/LoveNikki thread 1wnllvn (comment pbg9c4p), 2026-09-22."
+    },
+    {
+      "kind": "in-game-ranked",
+      "mode": "Story",
+      "stage": "7-7",
+      "value": 212890,
+      "source": "The #1 ranked score, reported by u/mariokartedoff in r/LoveNikki thread 1wnllvn (comment pbg9c4p), 2026-09-22."
+    }
+  ]
+}

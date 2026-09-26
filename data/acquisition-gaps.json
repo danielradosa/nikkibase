@@ -1,0 +1,4 @@
+{
+  "note": "Items the shipped best possible outfits wear although acquire.json cannot say how to get them: the wiki dump has neither an item page for them nor a suit page listing them, and the packed table has no row for them. The golden test fails on any other such item, and on an entry here that is no longer worn or has since gained a line, so the list stays short and current.",
+  "items": []
+}

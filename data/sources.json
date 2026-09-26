@@ -1,0 +1,85 @@
+{
+  "note": "Every input cmd/bundle can read, and on what terms. Statuses: redistributable, permission-required, research-only, proprietary, unknown. Do not mark a source redistributable without an applicable licence or written permission on record. DATA-LICENSE.md must agree with this file; a test checks it.",
+  "sources": [
+    {
+      "id": "love-nikki-wiki",
+      "name": "Love Nikki Wiki",
+      "by": "its editors on Fandom",
+      "url": "https://lovenikki.fandom.com",
+      "flags": ["fandom"],
+      "licence": "CC BY-SA 3.0 Unported",
+      "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "licenceEvidence": "https://www.fandom.com/licensing (Wayback capture, 2026)",
+      "redistribution": "permitted, with attribution and share-alike",
+      "status": "redistributable",
+      "attributionRequired": true,
+      "attribution": "Adapted from the Love Nikki Wiki's item and suit pages (dump of 2026-07-29) by its editors: names, slots, grades, style tags, suits and how each item is obtained extracted, the last rewritten as short lines, names respaced and some corrected, misnumbered pages read at the item they describe or dropped, pages titled after another item renamed, and merged with the sources below. Each item's page is lovenikki.fandom.com/wiki/<item name>. This wiki-derived data is offered under CC BY-SA 3.0.",
+      "fields": ["item names", "slots and wearable places", "letter grades", "style tags", "style codes (Template:S)", "Maiden tags for Story 5-12, 6-7 and 6-9", "items story stages require, from their quest field", "how each item is obtained (shops and prices, crafting recipes, evolutions, customizations, stage drops, events and packs), from item pages and, for items without one, suit pages", "the suit each item belongs to, as its suit page is titled, from the suit pages that list it and its own page's suit field, and the Chinese name of each suit"]
+    },
+    {
+      "id": "aojiao-nikkiup2u3",
+      "name": "nikkiup2u3",
+      "by": "傲娇攻略组 (aojiaogongluezu)",
+      "url": "https://github.com/aojiaogongluezu/nikkiup2u3",
+      "flags": ["packed", "stage-values"],
+      "licence": "none located",
+      "redistribution": "not established",
+      "status": "permission-required",
+      "attributionRequired": false,
+      "attribution": "nikkiup2u3 by 傲娇攻略组 (aojiaogongluezu)",
+      "fields": ["every spirit's flat bonus", "letter grades, style tags and places for ~14,800 items no other source has", "exact weights and tag awards for every stage except co-op", "how to get the ~14,600 items the wiki has no page for, from its source column, in English", "the suit each item belongs to where the wiki places it in none, under the English title of the wiki's suit page that gives the same Chinese name"]
+    },
+    {
+      "id": "lovenikkiusa-nikkiup2u",
+      "name": "nikkiup2u",
+      "by": "lovenikkiusa",
+      "url": "https://github.com/lovenikkiusa/nikkiup2u",
+      "flags": ["stage-names", "items"],
+      "licence": "none located",
+      "redistribution": "not established",
+      "status": "permission-required",
+      "attributionRequired": false,
+      "attribution": "nikkiup2u by lovenikkiusa",
+      "fields": ["English names of arena and co-op stages", "Maiden's tag sizes on Story 5-12"]
+    },
+    {
+      "id": "seal100x-nikkiup2u3-data",
+      "name": "nikkiup2u3_data",
+      "by": "seal100x",
+      "url": "https://github.com/seal100x/nikkiup2u3_data",
+      "flags": ["stages"],
+      "licence": "none located",
+      "redistribution": "not established",
+      "status": "permission-required",
+      "attributionRequired": false,
+      "attribution": "nikkiup2u3_data by seal100x",
+      "fields": ["the stage list, modes and rules", "co-op stage weights and tag awards", "Maiden notes", "items stages require, where the wiki names none"]
+    },
+    {
+      "id": "nikki-calc",
+      "name": "Nikki Calc",
+      "url": "https://nikkicalc.com",
+      "flags": ["names", "keys", "subgrades"],
+      "licence": "none",
+      "permission": "given 2026-09-26, for a site that is free for the community (ads and Patreon are fine; the data is not sold), with credit, and without putting load on nikkicalc.com or its hosting",
+      "permissionUrl": "https://github.com/nikki-calc/nikki-calc-project/issues/33#issuecomment-5843594161",
+      "redistribution": "permitted in writing by the maintainer, on conditions",
+      "status": "permitted",
+      "attributionRequired": true,
+      "attribution": "Nikki Calc (nikkicalc.com)",
+      "fields": ["English item names where no other source has one, and one that data/id-corrections.json shows in place of the wiki's (181600)", "every item's rarity", "the Global item-ID list", "sub-grades (+ and −) that set each item's stats within its letter grade", "its spelling of item names, which decides which hyphenated words in item names stay joined and which hyphens are spaced as separators"]
+    },
+    {
+      "id": "known-id-list",
+      "name": "Hand-supplied known-ID list",
+      "url": "",
+      "flags": ["known"],
+      "licence": "unknown",
+      "redistribution": "unknown",
+      "status": "unknown",
+      "attributionRequired": false,
+      "attribution": "",
+      "fields": ["valid item IDs"]
+    }
+  ]
+}

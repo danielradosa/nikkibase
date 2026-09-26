@@ -1,0 +1,23 @@
+{
+  "note": "Sources included in production bundles WITHOUT an established licence or permission. Each entry is a deliberate, dated decision, not a grant of rights: it records that the project knowingly ships this data, credits it, and will remove it if permission is refused or on request. Remove an entry the moment permission is refused; replace the source's status with redistributable only once written permission is on record.",
+  "exceptions": [
+    {
+      "source": "aojiao-nikkiup2u3",
+      "decidedBy": "Daniel Radosa",
+      "decidedOn": "2026-09-23",
+      "reason": "Every spirit's flat bonus, grades, style tags and places for ~14,800 items no other source has, and exact weights and tag awards for every stage except co-op; from 2026-09-25 also how to get the ~14,600 items the wiki has no page for, from its source column; from 2026-09-26 also the suit of the items the wiki's suit pages don't place, under the English title of the wiki page that gives the same Chinese suit name. Permission to be requested from the maintainers."
+    },
+    {
+      "source": "lovenikkiusa-nikkiup2u",
+      "decidedBy": "Daniel Radosa",
+      "decidedOn": "2026-09-23",
+      "reason": "English names of the arena and co-op stages, and Maiden's tag sizes on Story 5-12. Permission to be requested from the maintainer."
+    },
+    {
+      "source": "seal100x-nikkiup2u3-data",
+      "decidedBy": "Daniel Radosa",
+      "decidedOn": "2026-09-23",
+      "reason": "The stage list, modes and rules, co-op weights and tag awards, and the Maiden notes. Permission to be requested from the maintainer."
+    }
+  ]
+}
