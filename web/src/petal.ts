@@ -5,6 +5,7 @@ export type Outline = readonly Point[]
 export const SEGMENTS = 6
 
 export const DOT = { orbit: 9, radius: 4.2 }
+export const PLACES = [45, 135, 225, 315]
 export const PETAL = { length: 36, halfWidth: 12.5, notch: 6, base: 2 }
 
 export function circleOutline(orbit: number, radius: number): Outline {
@@ -149,6 +150,61 @@ export function bloomFrame(t: number, angleAtDone: number): Frame {
     opacity: 1 - fade,
     finished: t >= BLOOM_END,
   }
+}
+
+export const FADE = 200
+
+export function fadeFrame(t: number, angleAtDone: number): Frame {
+  return {
+    angle: angleAtDone + SPIN * t,
+    morph: 0,
+    stamens: 0,
+    scale: 1,
+    opacity: 1 - easeInOutCubic(t / FADE),
+    finished: t >= FADE,
+  }
+}
+
+export function spinOrigin(
+  anim: { startTime?: unknown; currentTime?: unknown } | undefined,
+  timeline: unknown,
+): number | null {
+  if (!anim) return null
+  if (typeof anim.startTime === 'number') return anim.startTime
+  if (typeof anim.currentTime === 'number' && typeof timeline === 'number') return timeline - anim.currentTime
+  return null
+}
+
+export function spinAngle(now: number, origin: number): number {
+  return ((((now - origin) * SPIN) % 360) + 360) % 360
+}
+
+export function frameStep(now: number, last: number | null): number {
+  return last === null ? 0 : Math.max(0, Math.min(now - last, 64))
+}
+
+export const BLOOM_KEY = 'nikkibase.bloomed'
+
+export function bloomSeen(read: () => string | null): boolean {
+  try {
+    return read() !== null
+  } catch {
+    return false
+  }
+}
+
+export function markBloomed(write: () => void): void {
+  try {
+    write()
+  } catch {
+  }
+}
+
+export type BlossomExit = 'quiet' | 'fade' | 'bloom'
+
+export function blossomExit(quiet: boolean, seen: boolean): BlossomExit {
+  if (quiet) return 'quiet'
+  return seen ? 'fade' : 'bloom'
 }
 
 export function dotOpacity(i: number, now: number): number {

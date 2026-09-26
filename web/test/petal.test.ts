@@ -3,18 +3,29 @@ import assert from 'node:assert/strict'
 import {
   BLOOM,
   BLOOM_END,
+  BLOOM_KEY,
   DOT,
+  FADE,
+  PLACES,
   PETAL,
   SEGMENTS,
   SPIN,
   DIAMOND,
   bloomFrame,
+  bloomSeen,
+  blossomExit,
   budOutline,
   circleOutline,
+  dotOpacity,
+  fadeFrame,
+  frameStep,
   lerpOutline,
+  markBloomed,
   morphOutline,
   petalOutline,
   settleAngle,
+  spinAngle,
+  spinOrigin,
   toPath,
 } from '../src/petal.ts'
 
@@ -94,4 +105,90 @@ test('the bloom slows the spin without a jolt, opens, and fades out', () => {
   assert.equal(at(BLOOM_END).opacity, 0)
   assert.equal(at(BLOOM_END).finished, true)
   assert.equal(at(BLOOM_END - 1).finished, false)
+})
+
+test('the four dots sit on the ring at the corners of a square, each pulsing a quarter second after the last', () => {
+  assert.deepEqual(PLACES, [45, 135, 225, 315])
+  for (let i = 0; i < 4; i++) {
+    for (let t = 0; t < 2000; t += 37) {
+      assert.ok(Math.abs(dotOpacity(i, t) - dotOpacity(0, t - 250 * i)) < 1e-9, `dot ${i} at ${t}ms`)
+    }
+  }
+  assert.deepEqual([0, 1, 2, 3].map((i) => +dotOpacity(i, 0).toFixed(3)), [0.675, 0.35, 0.675, 1])
+})
+
+test('the quick fade keeps the spin going and fades out in 200 ms', () => {
+  assert.equal(FADE, 200)
+  const at = (t: number) => fadeFrame(t, 30)
+  assert.equal(at(0).angle, 30)
+  assert.equal(at(0).opacity, 1)
+  assert.ok(Math.abs(at(100).angle - (30 + SPIN * 100)) < 1e-9)
+  let prev = at(0)
+  for (let t = 5; t <= FADE; t += 5) {
+    const f = at(t)
+    assert.ok(f.opacity <= prev.opacity && f.angle > prev.angle, `at ${t}ms`)
+    assert.equal(f.morph, 0)
+    assert.equal(f.stamens, 0)
+    assert.equal(f.scale, 1)
+    prev = f
+  }
+  assert.ok(at(1).opacity < 1)
+  assert.equal(at(FADE).opacity, 0)
+  assert.equal(at(FADE).finished, true)
+  assert.equal(at(FADE - 1).finished, false)
+})
+
+test('the full bloom plays on the first visit only, and a blocked storage counts as a first visit', () => {
+  assert.equal(BLOOM_KEY, 'nikkibase.bloomed')
+  assert.equal(bloomSeen(() => '1'), true)
+  assert.equal(bloomSeen(() => null), false)
+  assert.equal(
+    bloomSeen(() => {
+      throw new Error('blocked')
+    }),
+    false,
+  )
+  let wrote = 0
+  markBloomed(() => {
+    wrote++
+  })
+  assert.equal(wrote, 1)
+  assert.doesNotThrow(() =>
+    markBloomed(() => {
+      throw new Error('full')
+    }),
+  )
+})
+
+test('reduced motion stays quiet, a return visit fades, a first visit blooms', () => {
+  assert.equal(blossomExit(true, false), 'quiet')
+  assert.equal(blossomExit(true, true), 'quiet')
+  assert.equal(blossomExit(false, true), 'fade')
+  assert.equal(blossomExit(false, false), 'bloom')
+})
+
+test('the React spinner takes over the static spin from its start time, so the hand-off keeps the angle', () => {
+  assert.equal(spinOrigin({ startTime: 120, currentTime: 900 }, 1500), 120)
+  assert.equal(spinOrigin({ startTime: null, currentTime: 900 }, 1500), 600)
+  assert.equal(spinOrigin({ startTime: null, currentTime: null }, 1500), null)
+  assert.equal(spinOrigin({ startTime: null, currentTime: 900 }, null), null)
+  assert.equal(spinOrigin(undefined, 1500), null)
+  assert.equal(spinAngle(120, 120), 0)
+  assert.ok(Math.abs(spinAngle(120 + 550, 120) - 180) < 1e-9)
+  assert.ok(Math.abs(spinAngle(120 + 1100 + 275, 120) - 90) < 1e-9)
+  assert.ok(Math.abs(spinAngle(100, 120) - (360 - 20 * SPIN)) < 1e-9)
+  let prev = spinAngle(1000, 120)
+  for (let now = 1016; now < 1600; now += 16) {
+    const angle = spinAngle(now, 120)
+    assert.ok(angle >= 0 && angle < 360)
+    assert.ok(Math.abs(((angle - prev + 360) % 360) - SPIN * 16) < 1e-9, `at ${now}ms`)
+    prev = angle
+  }
+})
+
+test('a frame step is never negative and never longer than 64 ms, and the first frame does not move', () => {
+  assert.equal(frameStep(500, null), 0)
+  assert.equal(frameStep(516, 500), 16)
+  assert.equal(frameStep(420, 500), 0)
+  assert.equal(frameStep(900, 500), 64)
 })
