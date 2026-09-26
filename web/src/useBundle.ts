@@ -11,12 +11,13 @@ import { discardNotice } from './wardrobeText'
 export type Bundle = {
   stages: Stage[]
   items: Item[] | null
+  itemsFailed: boolean
   tagNames: string[]
   places: Place[]
   version: string
 }
 
-const EMPTY: Bundle = { stages: [], items: null, tagNames: [], places: [], version }
+const EMPTY: Bundle = { stages: [], items: null, itemsFailed: false, tagNames: [], places: [], version }
 
 export function useBundle(): Bundle {
   const set = useStore((s) => s.set)
@@ -25,9 +26,15 @@ export function useBundle(): Bundle {
   useEffect(() => {
     items.then(
       (itemList) => setBundle((b) => ({ ...b, items: itemList })),
-      (e) => set({ error: String(e) }),
+      (e) => {
+        setBundle((b) => ({ ...b, itemsFailed: true }))
+        set({ error: String(e) })
+      },
     )
-    engineReady.catch((e) => set({ error: String(e) }))
+    engineReady.then(
+      () => set({ engine: 'ready' }),
+      (e) => set({ engine: 'failed', error: String(e) }),
+    )
     ;(async () => {
       try {
         const { stages, tagNames, places } = await startup

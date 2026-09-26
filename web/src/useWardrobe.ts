@@ -12,7 +12,7 @@ export function useWardrobe(version: string) {
 
   const adopt = useCallback(
     async (ids: number[], stats: { items: number; unresolved: number; known: number }, src: WardrobeSource) => {
-      set({ owned: ids, source: src, decoded: stats, busy: false, outfit: null, ideal: null })
+      set({ owned: ids, source: src, decoded: stats, importing: false, outfit: null, ideal: null })
       if (version) await saveWardrobe({ version, ids, source: src, savedAt: Date.now() })
     },
     [set, version],
@@ -20,7 +20,8 @@ export function useWardrobe(version: string) {
 
   const ingest = useCallback(
     async (text: string) => {
-      set({ busy: true, error: null, notice: null })
+      if (useStore.getState().importing) return
+      set({ importing: true, error: null, notice: null })
       try {
         if (!text.trimStart().startsWith('@SEL')) {
           const result = await engine.decode(text)
@@ -31,7 +32,7 @@ export function useWardrobe(version: string) {
         await adopt(result.ids, result, 'sel')
       } catch (e) {
         console.warn(e)
-        set({ error: importError(e), busy: false })
+        set({ error: importError(e), importing: false })
       }
     },
     [adopt, set],

@@ -15,6 +15,8 @@ type State = {
   outfit: Outfit | null
   ideal: Ideal | null
   busy: boolean
+  importing: boolean
+  engine: 'loading' | 'ready' | 'failed'
   notice: string | null
   error: string | null
   difficulty: Difficulty
@@ -68,6 +70,8 @@ export const useStore = create<State>((set) => ({
   outfit: null,
   ideal: null,
   busy: false,
+  importing: false,
+  engine: 'loading',
   notice: null,
   error: null,
   difficulty: savedDifficulty(),
