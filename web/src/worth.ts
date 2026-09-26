@@ -57,8 +57,6 @@ export const filterMode = (filter: WorthFilter) => filter.modes?.[0] ?? ALL_MODE
 
 export const filterSuits = (filter: WorthFilter) => filter.suits === true
 
-export const rankingStatus = (bySuit: boolean) => (bySuit ? 'Ranking suits…' : 'Ranking items…')
-
 export const waitPercent = (done: number, total: number) => (total ? Math.floor((done / total) * 100) : 0)
 
 export const checkingText = (done: number, total: number) =>
@@ -87,12 +85,44 @@ export function rankingText({
 
 export const MORE_WAIT = 'Ranking 50 more…'
 
+export function moreText(got: number, of: number, from: number): string {
+  if (got <= from || of <= from) return MORE_WAIT
+  const n = (v: number) => v.toLocaleString('en-US')
+  return `Ranking ${n(of - from)} more · ${n(got - from)} of ${n(of - from)}`
+}
+
 export function rankSteps(suits: boolean, from: number, to: number): number[] {
   if (!suits) return from === 0 && to > 10 ? [10, to] : [to]
   const steps: number[] = []
   for (let n = from + 10; n < to; n += 10) steps.push(n)
   return [...steps, to]
 }
+
+export type WaitState = {
+  raise: boolean
+  loading: boolean
+  current: boolean
+  streaming: boolean
+  limit: number
+  shown: number
+  most: number
+  listed: number
+}
+
+export function worthWait(s: WaitState) {
+  const lead = s.raise ? s.loading : s.loading && !s.current
+  const fetching = s.raise && s.current && s.loading && s.limit > FIRST_ROWS
+  const more =
+    s.raise &&
+    s.current &&
+    (fetching ||
+      (!s.streaming && s.shown < s.most && (s.listed > s.shown || (s.listed === FIRST_ROWS && s.limit === FIRST_ROWS))))
+  return { lead, fetching, more }
+}
+
+export const keptRows = (shown: number, fetching: boolean) => (fetching ? shown - ROW_STEP : shown)
+
+export const handedOver = (was: boolean, checking: boolean, lead: boolean) => checking || (was && lead)
 
 export function worthSuits(items: readonly { id: number; suit: string; scoreable: boolean }[]): WorthSuit[] {
   const bySuit = new Map<string, number[]>()
@@ -550,27 +580,6 @@ export type WorthRunner = ReturnType<typeof worthRunner>
 
 export const rankReady = (run: WorthRun) =>
   (run.phase === 'done' || run.phase === 'stopped') && (run.done > 0 || run.total === 0)
-
-export function askRanking(
-  runner: Pick<WorthRunner, 'rank'>,
-  run: WorthRun,
-  active: boolean,
-  filter: WorthFilter,
-  limit: number,
-  settle: (ranking: WorthRanking | null, error: string | null) => void,
-): (() => void) | undefined {
-  if (!active || !rankReady(run)) return undefined
-  let live = true
-  runner.rank(filter, limit).then(
-    (ranking) => live && settle(ranking, null),
-    (e) => {
-      if (live && !noSession(e)) settle(null, message(e))
-    },
-  )
-  return () => {
-    live = false
-  }
-}
 
 export type Stepped = { ranking: WorthRanking | null; error: string | null; got: number; of: number; streaming: boolean }
 

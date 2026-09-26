@@ -71,11 +71,18 @@ export function inChoice(choice: string, it: Pick<Item, 'slot' | 'place'>): bool
   return (!slots || slots.includes(it.slot)) && (!places || places.includes(it.place))
 }
 
+const capital = (name: string) => name.charAt(0).toUpperCase() + name.slice(1)
+
 export function placeName(it: Pick<Item, 'slot' | 'place'>, places: readonly Place[]): string {
   const place = places[it.place]
   if (place) return place.name
-  const slot = SLOTS[it.slot] ?? `slot ${it.slot}`
-  return slot.charAt(0).toUpperCase() + slot.slice(1)
+  return capital(SLOTS[it.slot] ?? `slot ${it.slot}`)
+}
+
+export function choiceLabel(choice: string, places: readonly Place[]): string | null {
+  const { slots, places: at } = slotChoice(choice)
+  const name = slots ? SLOTS[slots[0]] : at ? places[at[0]]?.name : undefined
+  return name ? capital(name) : null
 }
 
 export function itemsTabLabel(count: number | null, phone: boolean): string {

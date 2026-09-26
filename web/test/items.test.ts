@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  ANY_SLOT, ITEM_STEP, gradesLine, inChoice, itemPage, itemsTabLabel, tickHint, moreItemsText, ownLabel, parseItems, placeName, slotChoice, slotOptions,
+  ANY_SLOT, ITEM_STEP, choiceLabel, gradesLine, inChoice, itemPage, itemsTabLabel, tickHint, moreItemsText, ownLabel, parseItems, placeName, slotChoice, slotOptions,
   type Row,
 } from '../src/items.ts'
 
@@ -122,4 +122,13 @@ test('the tick hint appears or goes only while the Items tab is not shown, so a 
   assert.equal(tickHint(true, false, true), true)
   assert.equal(tickHint(false, true, false), true)
   assert.equal(tickHint(true, false, false), false)
+})
+
+test('a wait names the chosen slot or place with a capital, and says nothing for any slot', () => {
+  assert.equal(choiceLabel('s0', places), 'Hair')
+  assert.equal(choiceLabel('s8', places), 'Accessory')
+  assert.equal(choiceLabel('p10', places), 'Held, right')
+  assert.equal(choiceLabel('p0', [{ name: 'leglets', slot: 5 }]), 'Leglets')
+  assert.equal(choiceLabel('p40', places), null)
+  assert.equal(choiceLabel(ANY_SLOT, places), null)
 })

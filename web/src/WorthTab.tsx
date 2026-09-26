@@ -1,10 +1,12 @@
-import { useLayoutEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
 import { flushSync } from 'react-dom'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
-import { Alert, Button, Empty, Grid, Progress, Segmented, Select, Space, Spin, Switch, Table, Typography } from 'antd'
+import { Alert, Button, Empty, Grid, Segmented, Select, Space, Switch, Table, Typography } from 'antd'
 import type { Place } from './comparison'
 import type { WorthRow } from './engine'
-import { ANY_SLOT, placeName, slotChoice, slotOptions, type Item } from './items'
+import { ANY_SLOT, choiceLabel, placeName, slotChoice, slotOptions, type Item } from './items'
+import Petals from './Petals'
+import Skel from './Skel'
 import { worthSettings, worthSkillsText } from './skills'
 import {
   orderModes, resolveStage, rulesUnchecked, stageKey, variantStages, worthSkip, worthVersions,
@@ -13,12 +15,15 @@ import {
 import { useStore } from './store'
 import { usePhone } from './usePhone'
 import { runner, useAcquire, useIdeals, useWorthRanking, useWorthRun, type Acquire } from './useWorth'
+import WaitLine from './WaitLine'
+import { LIST_WAIT, SCORES_WAIT } from './wardrobeText'
 import {
   ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, PAST_NOTE, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
   detailsLabel, filterMode, filterSuits, gainText, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
-  neededLine, nothingText, openRows, openTarget, ownsAnyPart, pieceList, piecesText, rankedName, rankingNote, rankingStatus, recipeText,
+  neededLine, nothingText, openRows, openTarget, ownsAnyPart, pieceList, piecesText, rankedName, rankingNote, recipeText,
   rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthSuits,
   type AcquireTable, type OpenTarget, type UnlockRow, type WorthRequest,
+  checkingText, handedOver, keptRows, moreText, rankingText, waitPercent, worthWait,
 } from './worth'
 
 type Props = {
@@ -31,6 +36,11 @@ type Props = {
 
 const SETTLED_FRAMES = 5
 const MAX_RESTORE_FRAMES = 60
+const SKEL_ROWS = [
+  [64, 34, 78, 56],
+  [52, 30, 82, 44],
+  [46, 38, 70, 60],
+]
 
 type RankRow = { key: string; rank: number; row: WorthRow }
 type UnlockRank = { key: string; rank: number; row: UnlockRow }
@@ -66,11 +76,15 @@ function Chevron({ open, label, onToggle }: { open: boolean; label: string; onTo
 }
 
 function AcquireWait({ acquire }: { acquire: Acquire }) {
-  return (
-    <Typography.Text type="secondary">
-      {acquire.loading ? 'Loading…' : "How to get items couldn't be loaded. Open this tab again to retry."}
-    </Typography.Text>
-  )
+  if (acquire.loading) {
+    return (
+      <div className="nb-skel-lines">
+        <Skel width="72%" />
+        <Skel width="48%" />
+      </div>
+    )
+  }
+  return <Typography.Text type="secondary">How to get items couldn't be loaded. Open this tab again to retry.</Typography.Text>
 }
 
 function OwnedKey() {
@@ -159,7 +173,7 @@ function Improves({ row, mode, variants, top }: { row: WorthRow; mode: string; v
 }
 
 function FirstWays({ ids, acquire }: { ids: number[]; acquire: Acquire }) {
-  if (acquire.loading) return <Typography.Text type="secondary">…</Typography.Text>
+  if (acquire.loading) return <Skel width="64%" />
   if (!acquire.table) return <Typography.Text type="secondary">—</Typography.Text>
   return (
     <div className="nb-worth-item">
@@ -261,26 +275,50 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
   )
   const most = bySuit ? MORE_SUITS : MORE_ROWS
   const limit = shown > FIRST_ROWS ? most : FIRST_ROWS
-  const { ready, ranking, rankedFilter, error, loading, current } = useWorthRanking(run, active, filter, limit)
+  const { ready, ranking, rankedFilter, error, loading, current, streaming, got, of, first } = useWorthRanking(run, active, filter, limit)
   const rankedMode = filterMode(rankedFilter)
   const rankedSuits = filterSuits(rankedFilter)
 
   const byId = useMemo(() => new Map((items ?? []).map((it) => [it.id, it])), [items])
   const names = useMemo(() => new Map((items ?? []).map((it) => [it.id, it.name])), [items])
 
-  const rows = useMemo<RankRow[]>(
-    () => (ranking?.rows ?? []).slice(0, shown).map((row, i) => ({ key: rowKey(row), rank: i + 1, row })),
-    [ranking, shown],
-  )
-  const top = rows.reduce((most, r) => Math.max(most, r.row.worth), 0)
   const needed = ranking?.needed ?? []
   const unlocks = useMemo<UnlockRank[]>(() => {
     const hard = (id: number) => (acquire.table ? hardToGet(acquire.table[String(id)]) : false)
     return unlockRanking(ranking?.needed ?? [], hard).map((row, i) => ({ key: row.items.join('+'), rank: i + 1, row }))
   }, [ranking, acquire.table])
   const listed = ranking?.rows.length ?? 0
-  const fetching = loading && current
-  const more = current && shown < most && (listed > shown || fetching || (listed === FIRST_ROWS && limit === FIRST_ROWS))
+  const stale = loading && !current
+  const { lead, fetching, more } = worthWait({ raise, loading, current, streaming, limit, shown, most, listed })
+  const kept = keptRows(shown, fetching)
+  const rows = useMemo<RankRow[]>(
+    () => (ranking?.rows ?? []).slice(0, kept).map((row, i) => ({ key: rowKey(row), rank: i + 1, row })),
+    [ranking, kept],
+  )
+  const top = rows.reduce((most, r) => Math.max(most, r.row.worth), 0)
+  const checking = run.phase === 'running' || run.phase === 'stopping'
+  const handoff = useRef(false)
+  handoff.current = handedOver(handoff.current, checking, lead)
+  const leadClass = lead ? (handoff.current ? 'nb-worth-lead is-waiting is-now' : 'nb-worth-lead is-waiting') : 'nb-worth-lead'
+  const ranked = {
+    text: rankingText({
+      suits: filterSuits(filter),
+      mode,
+      where: raise ? choiceLabel(slot, places) : null,
+      got,
+      of,
+      first,
+    }),
+    percent: streaming ? waitPercent(got, of) : null,
+  }
+  const wait = checking
+    ? {
+        text: checkingText(run.done, run.total),
+        percent: waitPercent(run.done, run.total),
+        onStop: runner.stop,
+        stopping: run.phase === 'stopping',
+      }
+    : null
 
   const open = (target: OpenTarget) => openStage(target, window.scrollY)
   const rowElement = (key: string) => document.querySelector(`.nb-worth-table tr[data-row-key="${CSS.escape(key)}"]`)
@@ -346,7 +384,7 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
       </Empty>
     )
   }
-  if (table === undefined) return <Empty description="Loading the best possible scores…" />
+  if (table === undefined) return <WaitLine text={SCORES_WAIT} />
   if (table === null) {
     return (
       <Alert
@@ -358,7 +396,7 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
       />
     )
   }
-  if (!items) return <Empty description="Loading the item list…" />
+  if (!items) return <WaitLine text={LIST_WAIT} />
 
   const columns = [
     {
@@ -600,29 +638,7 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
         </Typography.Paragraph>
       )}
 
-      {(run.phase === 'running' || run.phase === 'stopping') && (
-        <div className="nb-worth-progress" role="status">
-          <Typography.Text>
-            Checking stages… {done} of {total}
-          </Typography.Text>
-          <Progress
-            percent={run.total ? Math.floor((run.done / run.total) * 100) : 0}
-            showInfo={false}
-            size="small"
-            className="nb-worth-progress-bar"
-          />
-          <Button onClick={runner.stop} loading={run.phase === 'stopping'}>
-            {run.phase === 'stopping' ? 'Stopping' : 'Stop'}
-          </Button>
-        </div>
-      )}
-
-      {loading && !current && (
-        <div className="nb-worth-progress" role="status">
-          <Spin size="small" />
-          <Typography.Text>{rankingStatus(raise && bySuit)}</Typography.Text>
-        </div>
-      )}
+      {wait && <WaitLine className="nb-worth-progress" {...wait} />}
 
       {run.phase === 'stopped' && (
         <Alert
@@ -655,28 +671,22 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
 
       {error && <Alert type="error" showIcon className="nb-alert" message={error} />}
 
-      {raise && current && needed.length > 0 && (
-        <div className="nb-worth-needed">
-          <Typography.Text type="secondary">{neededLine(needed.length)}</Typography.Text>
-          <Button type="link" className="nb-worth-needed-link" onClick={() => setView('unlock')}>
-            See what unlocks them
-          </Button>
-        </div>
-      )}
-
       {ready && view === 'unlock' && (
         <>
-          <Typography.Paragraph type="secondary" ellipsis={{ rows: 1, expandable: true, symbol: "how it's ranked" }}>
-            {UNLOCK_NOTE}
-          </Typography.Paragraph>
-          {ranking && !unlocks.length && !loading ? (
+          <div className={leadClass}>
+            {lead && <WaitLine className="nb-worth-progress" {...ranked} />}
+            <Typography.Paragraph type="secondary" ellipsis={{ rows: 1, expandable: true, symbol: "how it's ranked" }}>
+              {UNLOCK_NOTE}
+            </Typography.Paragraph>
+          </div>
+          {ranking && !unlocks.length && !lead ? (
             <Empty description="You can pass every stage here with what you own." />
           ) : (
             <Table<UnlockRank>
               size="small"
               pagination={false}
               rowKey="key"
-              loading={loading && !current}
+              aria-busy={stale || undefined}
               dataSource={unlocks}
               columns={unlockColumns}
               rowClassName="nb-row-tap"
@@ -697,7 +707,7 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
                 expandedRowRender: unlockDetails,
               }}
               locale={{ emptyText: ' ' }}
-              className="nb-worth-table"
+              className={stale ? 'nb-worth-table is-stale' : 'nb-worth-table'}
             />
           )}
         </>
@@ -705,9 +715,21 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
 
       {ready && view === 'raise' && (
         <>
-          <Typography.Paragraph type="secondary" ellipsis={{ rows: 1, expandable: true, symbol: "how it's ranked" }}>
-            {rankingNote(rankedSuits, !!(rankedFilter.slots || rankedFilter.places))}
-          </Typography.Paragraph>
+          <div className={leadClass}>
+            {lead && <WaitLine className="nb-worth-progress" {...ranked} />}
+            <Typography.Paragraph type="secondary" ellipsis={{ rows: 1, expandable: true, symbol: "how it's ranked" }}>
+              {rankingNote(rankedSuits, !!(rankedFilter.slots || rankedFilter.places))}
+            </Typography.Paragraph>
+          </div>
+
+          {needed.length > 0 && (
+            <div className="nb-worth-needed">
+              <Typography.Text type="secondary">{neededLine(needed.length)}</Typography.Text>
+              <Button type="link" className="nb-worth-needed-link" onClick={() => setView('unlock')}>
+                See what unlocks them
+              </Button>
+            </div>
+          )}
 
           {ranking && !rows.length && !loading ? (
             <Empty description={nothingText(rankedSuits)} />
@@ -716,7 +738,7 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
               size="small"
               pagination={false}
               rowKey="key"
-              loading={loading && !current}
+              aria-busy={stale || undefined}
               dataSource={rows}
               columns={columns}
               rowClassName="nb-row-tap"
@@ -737,14 +759,31 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
                 expandedRowRender: details,
               }}
               locale={{ emptyText: ' ' }}
-              className="nb-worth-table"
+              className={stale ? 'nb-worth-table is-stale' : 'nb-worth-table'}
             />
           )}
 
           {more && (
-            <Button className="nb-worth-more" loading={fetching} onClick={() => setShown(shown + ROW_STEP)}>
-              Show more
+            <Button
+              className="nb-worth-more"
+              loading={fetching && { icon: <Petals size={14} /> }}
+              disabled={fetching}
+              onClick={() => setShown(shown + ROW_STEP)}
+            >
+              {fetching ? moreText(got, of, kept) : 'Show more'}
             </Button>
+          )}
+
+          {fetching && (
+            <div className="nb-skel-rows" aria-hidden="true">
+              {SKEL_ROWS.map((widths, i) => (
+                <div key={i} className="nb-skel-row">
+                  {widths.map((w, j) => (
+                    <Skel key={j} width={`${w}%`} />
+                  ))}
+                </div>
+              ))}
+            </div>
           )}
         </>
       )}

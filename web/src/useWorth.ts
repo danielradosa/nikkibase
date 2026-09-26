@@ -2,7 +2,9 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { ideals, loadAcquire } from './boot'
 import { engine, type WorthFilter, type WorthRanking } from './engine'
 import type { IdealTable } from './stages'
-import { askRanking, rankReady, worthRunner, type AcquireTable, type WorthRequest, type WorthRun } from './worth'
+import {
+  FIRST_ROWS, askSteps, filterSuits, rankReady, rankSteps, worthRunner, type AcquireTable, type WorthRequest, type WorthRun,
+} from './worth'
 
 export const runner = worthRunner(engine.worth)
 
@@ -25,6 +27,10 @@ type Ranked = {
   filter: WorthFilter
   ranking: WorthRanking | null
   error: string | null
+  got: number
+  of: number
+  streaming: boolean
+  first: boolean
 }
 
 export function useWorthRanking(run: WorthRun, active: boolean, filter: WorthFilter, limit: number) {
@@ -35,20 +41,32 @@ export function useWorthRanking(run: WorthRun, active: boolean, filter: WorthFil
 
   useEffect(
     () =>
-      askRanking(runner, run, active, filter, limit, (ranking, error) =>
-        setResult({ key, view, run: run.run, filter, ranking, error }),
+      askSteps(runner, run, active, filter, rankSteps(filterSuits(filter), limit > FIRST_ROWS ? FIRST_ROWS : 0, limit), (step) =>
+        setResult((prev) => ({
+          key,
+          view,
+          run: run.run,
+          filter,
+          ...step,
+          first: prev === null || prev.run !== run.run || (prev.first && prev.key === key),
+        })),
       ),
     [ready, key, active],
   )
 
   const usable = ready && result !== null && result.run === run.run
+  const settled = usable && result.key === key
   return {
     ready,
     ranking: usable ? result.ranking : null,
     rankedFilter: usable ? result.filter : filter,
-    error: usable && result.key === key ? result.error : null,
-    loading: ready && result?.key !== key,
+    error: settled ? result.error : null,
+    loading: ready && (!settled || result.streaming),
     current: usable && result.view === view,
+    streaming: settled && result.streaming,
+    got: settled ? result.got : 0,
+    of: settled ? result.of : 0,
+    first: settled ? result.first : !usable,
   }
 }
 

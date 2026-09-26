@@ -5,12 +5,13 @@ import { crashError } from '../src/recycle.ts'
 import { NO_SKILLS, worthSettings, worthSkillsText, type SkillSettings } from '../src/skills.ts'
 import { variantStages, worthSkip, worthVersions, type IdealTable, type Stage } from '../src/stages.ts'
 import {
-  ALL_MODES, NO_SOURCE, OWNED_KEY, PAST_NOTE, RESTARTED, SCORE_F, UNLOCK_NOTE, askRanking, chipText, detailsLabel, hideLabel, ownsAnyPart,
+  ALL_MODES, NO_SOURCE, OWNED_KEY, PAST_NOTE, RESTARTED, SCORE_F, UNLOCK_NOTE, chipText, detailsLabel, hideLabel, ownsAnyPart,
   filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, improvesText, itemMeta,
-  neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote, rankingStatus,
+  neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote,
   recipeText, rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
   worthSuits, type AcquireTable, type WorthApi,
-  MORE_WAIT, askSteps, checkingText, rankSteps, rankingText, waitPercent, type Stepped,
+  MORE_WAIT, askSteps, checkingText, handedOver, keptRows, moreText, rankSteps, rankingText, waitPercent, worthWait,
+  type Stepped,
 } from '../src/worth.ts'
 
 const W = [1, 2, 3, 4, 5]
@@ -96,11 +97,6 @@ test('rows are labelled from the filter they were ranked for, not the one being 
   assert.equal(filterMode(worthFilter('Story', { slots: [3] }, [])), 'Story')
   assert.equal(filterSuits(worthFilter('Commission', {}, [], true)), true)
   assert.equal(filterSuits(worthFilter('Commission', {}, [])), false)
-})
-
-test('the ranking status says what is being ranked and never promises a time', () => {
-  assert.equal(rankingStatus(true), 'Ranking suits…')
-  assert.equal(rankingStatus(false), 'Ranking items…')
 })
 
 test('suits go to the engine by name, with the pieces that have stats, in name order', () => {
@@ -593,50 +589,6 @@ test('an engine crash while ranking fails the run with a Try again, which checks
   assert.equal(fake.count('start'), 2)
 })
 
-test('a hidden tab asks for no ranking, even when its filter changes, and asks once it is shown', async () => {
-  const fake = fakeEngine(10)
-  const runner = worthRunner(fake.api, 32)
-  runner.ensure(request('k1', 10))
-  await fake.drive(runner, 'done')
-  const settled: string[] = []
-  const settle = (ranking: WorthRanking | null, error: string | null) => settled.push(error ?? `${ranking?.rows.length} rows`)
-  const maiden = worthFilter(ALL_MODES, {}, worthSkip(stages, 'Maiden'))
-  const princess = worthFilter(ALL_MODES, {}, worthSkip(stages, 'Princess'))
-
-  const stop = askRanking(runner, runner.get(), true, maiden, 50, settle)
-  await flush()
-  assert.equal(fake.count('rank'), 1)
-  assert.deepEqual(settled, ['0 rows'])
-  stop?.()
-
-  assert.equal(askRanking(runner, runner.get(), false, princess, 50, settle), undefined)
-  await flush()
-  assert.equal(fake.count('rank'), 1, 'nothing is ranked while the tab is hidden')
-
-  askRanking(runner, runner.get(), true, princess, 50, settle)
-  await flush()
-  assert.equal(fake.count('rank'), 2)
-  assert.deepEqual(settled, ['0 rows', '0 rows'])
-})
-
-test('a ranking that lands after the tab was left is dropped, and one that is not ready asks nothing', async () => {
-  const fake = fakeEngine(40)
-  const runner = worthRunner(fake.api, 32)
-  const settled: unknown[] = []
-  const settle = (ranking: WorthRanking | null) => settled.push(ranking)
-  runner.ensure(request('k1', 40))
-  await fake.release()
-  await fake.release()
-  assert.equal(runner.get().phase, 'running')
-  assert.equal(askRanking(runner, runner.get(), true, {}, 50, settle), undefined)
-  await fake.drive(runner, 'done')
-  const stop = askRanking(runner, runner.get(), true, {}, 50, settle)
-  stop?.()
-  await flush()
-  assert.equal(fake.count('rank'), 1)
-  assert.deepEqual(settled, [])
-})
-
 test('a reset drops the session, and results of the old run are ignored', async () => {
   const fake = fakeEngine(64)
   const runner = worthRunner(fake.api, 32)
@@ -851,6 +803,13 @@ test('the first ranking of a run is step 2 of 2, later ones name what is being r
   assert.equal(MORE_WAIT, 'Ranking 50 more…')
 })
 
+test('Show more counts the new rows on its button once the first of them are in', () => {
+  assert.equal(moreText(0, 0, 50), MORE_WAIT)
+  assert.equal(moreText(60, 100, 50), 'Ranking 50 more · 10 of 50')
+  assert.equal(moreText(70, 100, 50), 'Ranking 50 more · 20 of 50')
+  assert.equal(moreText(90, 100, 50), 'Ranking 50 more · 40 of 50')
+})
+
 test('suits are ranked ten at a time, items first ten and then the rest', () => {
   assert.deepEqual(rankSteps(true, 0, 50), [10, 20, 30, 40, 50])
   assert.deepEqual(rankSteps(true, 50, 100), [60, 70, 80, 90, 100])
@@ -978,4 +937,56 @@ test('a step the engine answers with "no session" settles nothing, and neither d
   for (let i = 0; i < 5; i++) await flush()
   assert.equal(gone.count('rank'), 1)
   assert.deepEqual(settled, [])
+})
+
+const waiting = (s: Partial<Parameters<typeof worthWait>[0]>) =>
+  worthWait({ raise: true, loading: false, current: true, streaming: false, limit: 50, shown: 50, most: 100, listed: 50, ...s })
+
+test('every ranking wait takes the place of the ranking note: a new view, a stale view and rows still streaming', () => {
+  assert.deepEqual(waiting({ loading: true, current: false, listed: 0 }), { lead: true, fetching: false, more: false })
+  assert.deepEqual(waiting({ loading: true, current: false, listed: 50 }), { lead: true, fetching: false, more: false })
+  assert.deepEqual(waiting({ loading: true, streaming: true, listed: 10 }), { lead: true, fetching: false, more: false })
+  assert.deepEqual(waiting({ listed: 50 }), { lead: false, fetching: false, more: true })
+  assert.deepEqual(waiting({ listed: 30 }), { lead: false, fetching: false, more: false })
+})
+
+test('Show more waits in the same place and stays busy at the button, with its placeholder rows, until the last step is in', () => {
+  const suits = { limit: 100, shown: 100, most: 100 }
+  assert.deepEqual(waiting({ ...suits, loading: true, listed: 50 }), { lead: true, fetching: true, more: true })
+  assert.deepEqual(waiting({ ...suits, loading: true, streaming: true, listed: 60 }), { lead: true, fetching: true, more: true })
+  assert.deepEqual(waiting({ ...suits, listed: 100 }), { lead: false, fetching: false, more: false })
+  const items = { limit: 200, shown: 100, most: 200 }
+  assert.deepEqual(waiting({ ...items, loading: true, listed: 50 }), { lead: true, fetching: true, more: true })
+  assert.deepEqual(waiting({ ...items, listed: 200 }), { lead: false, fetching: false, more: true })
+  assert.deepEqual(waiting({ limit: 100, shown: 100, most: 100, loading: true, current: false, listed: 50 }), { lead: true, fetching: false, more: false })
+})
+
+test('while Show more ranks, the rows shown stay as they were and the new ones come in together at the end', () => {
+  assert.equal(keptRows(100, true), 50)
+  assert.equal(keptRows(100, false), 100)
+  assert.equal(keptRows(50, false), 50)
+  assert.equal(keptRows(150, false), 150)
+})
+
+test('the Unlock view waits only until its stages are in, whatever item rows are still streaming', () => {
+  assert.deepEqual(waiting({ raise: false, loading: true, current: false, listed: 0 }), { lead: true, fetching: false, more: false })
+  assert.deepEqual(waiting({ raise: false, loading: true, current: false, listed: 50 }), { lead: true, fetching: false, more: false })
+  assert.deepEqual(waiting({ raise: false, loading: true, streaming: true, listed: 10 }), { lead: false, fetching: false, more: false })
+  assert.deepEqual(waiting({ raise: false, loading: true, limit: 100, shown: 100, listed: 50 }), { lead: false, fetching: false, more: false })
+})
+
+test('the ranking wait that follows the stage check shows at once, for as long as that wait lasts', () => {
+  assert.equal(handedOver(false, true, false), true)
+  assert.equal(handedOver(true, true, false), true)
+  assert.equal(handedOver(true, false, true), true)
+  assert.equal(handedOver(true, false, false), false)
+  assert.equal(handedOver(false, false, true), false)
+  assert.equal(handedOver(false, false, false), false)
+  let now = false
+  const seen: boolean[] = []
+  for (const [checking, lead] of [[true, false], [false, true], [false, true], [false, false], [false, true]] as const) {
+    now = handedOver(now, checking, lead)
+    seen.push(now && lead)
+  }
+  assert.deepEqual(seen, [false, true, true, false, false])
 })
