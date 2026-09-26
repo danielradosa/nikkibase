@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Empty, Layout, Tabs } from 'antd'
+import { Alert, Layout, Tabs } from 'antd'
 import { useStore } from './store'
 import { useBundle } from './useBundle'
 import { useBestOutfit } from './useBestOutfit'
@@ -11,13 +11,13 @@ import Footer from './Footer'
 import BestOutfitTab from './BestOutfitTab'
 import ItemBrowser from './ItemBrowser'
 import WorthTab from './WorthTab'
-import { itemsTabLabel, type Item } from './items'
-
-const NO_ITEMS: Item[] = []
+import WaitLine from './WaitLine'
+import { itemsTabLabel } from './items'
+import { LIST_FAILED, LIST_WAIT } from './wardrobeText'
 
 export default function App() {
   const { ready, owned, source, notice, error, tab, set } = useStore()
-  const { stages, items, tagNames, places, version } = useBundle()
+  const { stages, items, itemsFailed, tagNames, places, version } = useBundle()
   useBestOutfit(stages)
   const { ingest, toggleOwned, forget } = useWardrobe(version)
   const ownedSet = useMemo(() => new Set(owned), [owned])
@@ -73,7 +73,8 @@ export default function App() {
                   children: (
                     <BestOutfitTab
                       stages={stages}
-                      items={items ?? NO_ITEMS}
+                      items={items}
+                      itemsFailed={itemsFailed}
                       tagNames={tagNames}
                       places={places}
                       onFile={ingest}
@@ -83,7 +84,16 @@ export default function App() {
                 {
                   key: 'worth',
                   label: 'Worth getting',
-                  children: <WorthTab stages={stages} items={items} places={places} owned={ownedSet} version={version} />,
+                  children: (
+                    <WorthTab
+                      stages={stages}
+                      items={items}
+                      itemsFailed={itemsFailed}
+                      places={places}
+                      owned={ownedSet}
+                      version={version}
+                    />
+                  ),
                 },
                 {
                   key: 'items',
@@ -96,8 +106,10 @@ export default function App() {
                       onToggle={toggleOwned}
                       manual={source === 'manual' || owned.length === 0}
                     />
+                  ) : itemsFailed ? (
+                    <Alert type="info" showIcon className="nb-alert" message={LIST_FAILED} description="Reload the page to try again." />
                   ) : (
-                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Loading the item list…" />
+                    <WaitLine text={LIST_WAIT} />
                   ),
                 },
               ]}

@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo } from 'react'
 import { Alert, Empty } from 'antd'
 import { useStore } from './store'
 import { ATTRS, SLOTS, type Item } from './items'
-import { FINDING, comparisonRows, outfitText, resultView, type Place } from './comparison'
+import { FINDING, NAMES_WAIT, comparisonRows, outfitText, resultView, type Place } from './comparison'
 import { skillsLine } from './skills'
 import { missingMessage, stageKey, type Stage } from './stages'
 import { manyUnscored, unscored } from './wardrobeText'
@@ -13,19 +13,22 @@ import OutfitScore from './OutfitScore'
 import ScoreWait from './ScoreWait'
 import ComparisonTable from './ComparisonTable'
 import WaitLine from './WaitLine'
+import Skel from './Skel'
 
 type Props = {
   stages: Stage[]
-  items: Item[]
+  items: Item[] | null
+  itemsFailed: boolean
   tagNames: string[]
   places: Place[]
   onFile: (text: string) => Promise<void>
 }
 
-export default function BestOutfitTab({ stages, items, tagNames, places, onFile }: Props) {
+export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, places, onFile }: Props) {
   const { owned, decoded, stage, outfit, ideal, busy, difficulty, mode, tab, jump, set } = useStore()
 
-  const names = useMemo(() => new Map(items.map((it) => [it.id, it.name])), [items])
+  const names = useMemo(() => new Map((items ?? []).map((it) => [it.id, it.name])), [items])
+  const naming = items === null && !itemsFailed
   const chosen = stages.find((s) => stageKey(s) === stage)
   const rows = useMemo(() => comparisonRows(outfit, ideal, names, places, SLOTS), [outfit, ideal, names, places])
   const copyText = useMemo(
@@ -70,7 +73,7 @@ export default function BestOutfitTab({ stages, items, tagNames, places, onFile 
         />
       )}
 
-      {chosen && <StageSummary stage={chosen} tagNames={tagNames} names={names} />}
+      {chosen && <StageSummary stage={chosen} tagNames={tagNames} names={names} naming={naming} />}
 
       {view === 'first' && <ScoreWait />}
       {view === 'first' && <WaitLine text={FINDING} className="nb-outfit-wait" />}
@@ -84,12 +87,13 @@ export default function BestOutfitTab({ stages, items, tagNames, places, onFile 
                 type="warning"
                 showIcon
                 className="nb-alert"
-                message={missingMessage(outfit.missing, names)}
+                message={naming ? <Skel width="60%" /> : missingMessage(outfit.missing, names)}
                 description="The outfit below can't pass the stage."
               />
             ) : null}
-            <OutfitScore outfit={outfit} ideal={ideal} copyText={copyText} busy={busy} />
-            <ComparisonTable rows={rows} names={names} />
+            <OutfitScore outfit={outfit} ideal={ideal} copyText={copyText} busy={busy} naming={naming} />
+            {naming && <WaitLine text={NAMES_WAIT} className="nb-names-wait" />}
+            <ComparisonTable rows={rows} names={names} naming={naming} />
           </div>
         </div>
       ) : (

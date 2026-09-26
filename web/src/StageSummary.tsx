@@ -1,12 +1,13 @@
 import { WarningOutlined } from '@ant-design/icons'
 import { Tag, Tooltip, Typography } from 'antd'
 import { ATTRS } from './items'
+import Skel from './Skel'
 import { useStore } from './store'
 import { caveatText, requirementLabel, resolveStage, rulesUnchecked, tagLabel, weightLabel, type Stage } from './stages'
 
-type Props = { stage: Stage; tagNames: string[]; names: ReadonlyMap<number, string> }
+type Props = { stage: Stage; tagNames: string[]; names: ReadonlyMap<number, string>; naming: boolean }
 
-export default function StageSummary({ stage, tagNames, names }: Props) {
+export default function StageSummary({ stage, tagNames, names, naming }: Props) {
   const difficulty = useStore((s) => s.difficulty)
   const scored = resolveStage(stage, difficulty)
   const required = scored.rules?.require ?? []
@@ -38,7 +39,7 @@ export default function StageSummary({ stage, tagNames, names }: Props) {
       )}
       {required.length > 0 && (
         <Typography.Paragraph className="nb-requires">
-          Requires: {requirementLabel(required, names)}
+          Requires: {naming ? <Skel width="50%" /> : requirementLabel(required, names)}
         </Typography.Paragraph>
       )}
     </div>

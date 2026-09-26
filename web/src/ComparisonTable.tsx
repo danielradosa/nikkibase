@@ -2,22 +2,31 @@ import { CheckOutlined } from '@ant-design/icons'
 import { Space, Table, Tag, Typography } from 'antd'
 import { alternativesLabel, bestNote, copyLines, expandLabel, rowOpens, type ComparisonRow } from './comparison'
 import type { Alternative } from './engine'
+import Skel from './Skel'
 import { usePhone } from './usePhone'
 
-type Props = { rows: ComparisonRow[]; names: ReadonlyMap<number, string> }
+type Props = { rows: ComparisonRow[]; names: ReadonlyMap<number, string>; naming: boolean }
 
-type DetailsProps = { row: ComparisonRow; phone: boolean; names: ReadonlyMap<number, string> }
+type DetailsProps = { row: ComparisonRow; phone: boolean; names: ReadonlyMap<number, string>; naming: boolean }
 
-function Details({ row, phone, names }: DetailsProps) {
+const NAME_WIDTHS = ['70%', '55%', '64%', '75%', '60%']
+
+const nameSkel = (i: number) => <Skel width={NAME_WIDTHS[i % NAME_WIDTHS.length]} />
+
+function Details({ row, phone, names, naming }: DetailsProps) {
   return (
     <Space direction="vertical" size={4} className="nb-alts">
       {phone &&
-        copyLines(row).map((line) => (
+        copyLines(row).map((line, i) => (
           <div key={line.label} className="nb-alt">
             <Typography.Text type="secondary">{line.label}:</Typography.Text>
-            <Typography.Text className="nb-alt-name" copyable={{ text: line.name }}>
-              {line.name}
-            </Typography.Text>
+            {naming ? (
+              nameSkel(i)
+            ) : (
+              <Typography.Text className="nb-alt-name" copyable={{ text: line.name }}>
+                {line.name}
+              </Typography.Text>
+            )}
           </div>
         ))}
       {row.alts.length > 0 && (
@@ -25,11 +34,15 @@ function Details({ row, phone, names }: DetailsProps) {
           Other <Typography.Text strong>{row.slot}</Typography.Text> you own, and the points you&apos;d lose:
         </Typography.Text>
       )}
-      {row.alts.map((alt: Alternative) => (
+      {row.alts.map((alt: Alternative, i) => (
         <div key={alt.id} className="nb-alt">
-          <Typography.Text className="nb-alt-name" copyable={{ text: names.get(alt.id) ?? `#${alt.id}` }}>
-            {names.get(alt.id) ?? `#${alt.id}`}
-          </Typography.Text>
+          {naming ? (
+            nameSkel(i + 2)
+          ) : (
+            <Typography.Text className="nb-alt-name" copyable={{ text: names.get(alt.id) ?? `#${alt.id}` }}>
+              {names.get(alt.id) ?? `#${alt.id}`}
+            </Typography.Text>
+          )}
           <Tag color={alt.delta === 0 ? 'default' : 'volcano'}>
             {alt.delta === 0 ? 'ties' : alt.delta.toLocaleString('en-US')}
           </Tag>
@@ -39,7 +52,7 @@ function Details({ row, phone, names }: DetailsProps) {
   )
 }
 
-export default function ComparisonTable({ rows, names }: Props) {
+export default function ComparisonTable({ rows, names, naming }: Props) {
   const phone = usePhone()
 
   return (
@@ -47,6 +60,7 @@ export default function ComparisonTable({ rows, names }: Props) {
       size="small"
       className="nb-outfit-table"
       pagination={false}
+      aria-busy={naming || undefined}
       dataSource={rows}
       rowClassName={(row: ComparisonRow) => (rowOpens(row, phone) ? 'nb-row-tap' : '')}
       columns={[
@@ -54,9 +68,11 @@ export default function ComparisonTable({ rows, names }: Props) {
         {
           title: 'Your best',
           dataIndex: 'mine',
-          render: (name: string | null, row: ComparisonRow) => (
+          render: (name: string | null, row: ComparisonRow, i: number) => (
             <>
-              {name ? (
+              {name && naming ? (
+                nameSkel(i)
+              ) : name ? (
                 <Typography.Text copyable={phone ? false : { text: name }}>{name}</Typography.Text>
               ) : (
                 <Typography.Text type="secondary">{row.unworn}</Typography.Text>
@@ -67,6 +83,8 @@ export default function ComparisonTable({ rows, names }: Props) {
                     <>
                       <CheckOutlined /> {bestNote(row)}
                     </>
+                  ) : naming && row.best ? (
+                    nameSkel(i + 1)
                   ) : (
                     bestNote(row)
                   )}
@@ -79,9 +97,11 @@ export default function ComparisonTable({ rows, names }: Props) {
           title: 'Best possible',
           dataIndex: 'best',
           responsive: ['sm' as const],
-          render: (name: string | null, row: ComparisonRow) =>
+          render: (name: string | null, row: ComparisonRow, i: number) =>
             row.same ? (
               <Typography.Text type="success">same item</Typography.Text>
+            ) : name && naming ? (
+              nameSkel(i + 1)
             ) : name ? (
               <Typography.Text type="secondary" copyable={{ text: name }}>
                 {name}
@@ -119,7 +139,7 @@ export default function ComparisonTable({ rows, names }: Props) {
             }}
           />
         ),
-        expandedRowRender: (row: ComparisonRow) => <Details row={row} phone={phone} names={names} />,
+        expandedRowRender: (row: ComparisonRow) => <Details row={row} phone={phone} names={names} naming={naming} />,
       }}
     />
   )

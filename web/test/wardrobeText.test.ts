@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   DROP_HINT,
   ENGINE_WAIT,
+  LIST_FAILED,
   LIST_WAIT,
   NO_FILE,
   SCORES_WAIT,
@@ -114,4 +115,8 @@ test('while a wardrobe is read, the drop zone says so, and says when the engine 
 test('the lists that are still loading say which one, and never promise a time', () => {
   assert.equal(LIST_WAIT, 'Loading the item list…')
   assert.equal(SCORES_WAIT, 'Loading the best possible scores…')
+})
+
+test('a failed item list says so instead of loading for ever', () => {
+  assert.equal(LIST_FAILED, "The item list couldn't be loaded.")
 })

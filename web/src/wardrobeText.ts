@@ -53,6 +53,8 @@ export const ENGINE_WAIT = 'Engine still loading · you can drop your file now'
 
 export const LIST_WAIT = 'Loading the item list…'
 
+export const LIST_FAILED = "The item list couldn't be loaded."
+
 export const SCORES_WAIT = 'Loading the best possible scores…'
 
 export function loadedLabel(count: number): string {

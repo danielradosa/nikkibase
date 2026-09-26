@@ -16,7 +16,7 @@ import { useStore } from './store'
 import { usePhone } from './usePhone'
 import { runner, useAcquire, useIdeals, useWorthRanking, useWorthRun, type Acquire } from './useWorth'
 import WaitLine from './WaitLine'
-import { LIST_WAIT, SCORES_WAIT } from './wardrobeText'
+import { LIST_FAILED, LIST_WAIT, SCORES_WAIT } from './wardrobeText'
 import {
   ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, PAST_NOTE, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
   detailsLabel, filterMode, filterSuits, gainText, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
@@ -29,6 +29,7 @@ import {
 type Props = {
   stages: Stage[]
   items: Item[] | null
+  itemsFailed: boolean
   places: Place[]
   owned: ReadonlySet<number>
   version: string
@@ -194,7 +195,7 @@ function FirstWays({ ids, acquire }: { ids: number[]; acquire: Acquire }) {
   )
 }
 
-export default function WorthTab({ stages, items, places, owned, version }: Props) {
+export default function WorthTab({ stages, items, itemsFailed, places, owned, version }: Props) {
   const ownedIds = useStore((s) => s.owned)
   const tab = useStore((s) => s.tab)
   const difficulty = useStore((s) => s.difficulty)
@@ -396,7 +397,13 @@ export default function WorthTab({ stages, items, places, owned, version }: Prop
       />
     )
   }
-  if (!items) return <WaitLine text={LIST_WAIT} />
+  if (!items) {
+    return itemsFailed ? (
+      <Alert type="info" showIcon className="nb-alert" message={LIST_FAILED} description="Reload the page to try again." />
+    ) : (
+      <WaitLine text={LIST_WAIT} />
+    )
+  }
 
   const columns = [
     {
