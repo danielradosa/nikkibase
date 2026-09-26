@@ -57,6 +57,7 @@ export function themeFor(phone: boolean): ThemeConfig {
         ...(phone ? { horizontalItemPadding: '10px 0' } : {}),
       },
       Progress: { defaultColor: rose },
+      Spin: { dotSize: 20, dotSizeSM: 14, dotSizeLG: 32 },
       Statistic: { colorTextDescription: inkSoft },
       Alert: { borderRadiusLG: 14 },
       Select: { optionSelectedBg: '#fdeef4' },

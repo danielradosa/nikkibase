@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { Segmented, Select, Typography, type RefSelectProps } from 'antd'
+import Petals from './Petals'
 import SkillControls from './SkillControls'
 import { useStore } from './store'
 import { usePhone } from './usePhone'
@@ -59,7 +60,7 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
           }}
           filterOption={matches}
           notFoundContent={`No such stage. ${coverage}`}
-          loading={busy}
+          suffixIcon={busy ? <Petals size={14} /> : undefined}
           onOpenChange={lift}
           className="nb-stage-select"
           ref={select}
