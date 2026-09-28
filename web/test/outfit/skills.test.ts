@@ -5,6 +5,7 @@ import {
   parseSkills, pickerDefault, placementPhrases, samePlacement, scoredOn, searchPlan, skillRequest, skillsLine, skillsOff,
   type SkillSettings,
 } from '../../src/outfit/skills.ts'
+import { SITE_HOST } from '../../src/site.ts'
 
 const ATTRS = ['Gorgeous', 'Simple', 'Elegant', 'Lively', 'Mature', 'Cute']
 const on = (charming: number, smile: number, manual = false): SkillSettings => ({ on: true, manual, levels: { charming, smile } })
@@ -80,18 +81,18 @@ test('the skills note names the levels in brackets', () => {
 })
 
 test('the copied line keeps its max-level wording and names other levels', () => {
-  assert.equal(skillsLine(undefined, ATTRS), 'Scores assume no skills. nikkibase.up.railway.app')
+  assert.equal(skillsLine(undefined, ATTRS, SITE_HOST), `Scores assume no skills. ${SITE_HOST}`)
   assert.equal(
-    skillsLine({ charmSmile: 3, smile: 5 }, ATTRS),
-    'Skills: Charming + Smile on Lively, Smile on Cute (max level). nikkibase.up.railway.app',
+    skillsLine({ charmSmile: 3, smile: 5 }, ATTRS, SITE_HOST),
+    `Skills: Charming + Smile on Lively, Smile on Cute (max level). ${SITE_HOST}`,
   )
   assert.equal(
-    skillsLine({ charmSmile: 3, smile: 5, levels: { charming: 0, smile: 6 } }, ATTRS),
-    'Skills: Smile on Lively, Smile on Cute (Smile level 6, no Charming). nikkibase.up.railway.app',
+    skillsLine({ charmSmile: 3, smile: 5, levels: { charming: 0, smile: 6 } }, ATTRS, SITE_HOST),
+    `Skills: Smile on Lively, Smile on Cute (Smile level 6, no Charming). ${SITE_HOST}`,
   )
   assert.equal(
-    skillsLine({ charmSmile: 3, smile: -1, levels: { charming: 7, smile: 0 } }, ATTRS),
-    'Skills: Charming on Lively (no Smile, Charming level 7). nikkibase.up.railway.app',
+    skillsLine({ charmSmile: 3, smile: -1, levels: { charming: 7, smile: 0 } }, ATTRS, SITE_HOST),
+    `Skills: Charming on Lively (no Smile, Charming level 7). ${SITE_HOST}`,
   )
 })
 

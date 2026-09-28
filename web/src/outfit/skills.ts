@@ -9,8 +9,6 @@ export const CHARMING_PERCENT = [0, 24, 26, 28, 30, 32, 34, 36, 38, 40] as const
 export const MAX_LEVELS: SkillLevels = { charming: 9, smile: 9 }
 export const NO_SKILLS: SkillSettings = { on: false, manual: false, levels: MAX_LEVELS }
 
-const SITE = 'nikkibase.up.railway.app'
-
 export const isMax = (l: SkillLevels) => l.charming === 9 && l.smile === 9
 
 export const skillsOff = (s: SkillSettings) => !s.on || (s.levels.charming === 0 && s.levels.smile === 0)
@@ -69,10 +67,10 @@ function levelsText(l: SkillLevels): string {
   return `${l.smile ? `Smile level ${l.smile}` : 'no Smile'}, ${l.charming ? `Charming level ${l.charming}` : 'no Charming'}`
 }
 
-export function skillsLine(p: SkillChoice | undefined, attrs: readonly string[]): string {
-  if (!p) return `Scores assume no skills. ${SITE}`
+export function skillsLine(p: SkillChoice | undefined, attrs: readonly string[], site: string): string {
+  if (!p) return `Scores assume no skills. ${site}`
   const l = p.levels ?? MAX_LEVELS
-  return `Skills: ${placementPhrases(p, l, attrs).join(', ')} (${levelsText(l)}). ${SITE}`
+  return `Skills: ${placementPhrases(p, l, attrs).join(', ')} (${levelsText(l)}). ${site}`
 }
 
 export function scoredOn(p: SkillChoice, l: SkillLevels): number[] {
