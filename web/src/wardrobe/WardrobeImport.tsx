@@ -12,6 +12,7 @@ export default function WardrobeImport({ onFile }: { onFile: (text: string) => P
   const decoded = useStore((s) => s.decoded)
   const importing = useStore((s) => s.importing)
   const engine = useStore((s) => s.engine)
+  const saveFailing = useStore((s) => s.saveFailing)
   const set = useStore((s) => s.set)
   const phone = usePhone()
   const loaded = owned.length > 0
@@ -85,7 +86,7 @@ export default function WardrobeImport({ onFile }: { onFile: (text: string) => P
               {NO_FILE.after}
             </>
           }
-          description={NO_FILE.saved}
+          description={saveFailing ? NO_FILE.unsaved : NO_FILE.saved}
         />
       )}
     </>

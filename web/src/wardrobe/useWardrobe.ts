@@ -3,7 +3,13 @@ import { engine } from '../engine/engine'
 import { useStore } from '../store'
 import { clearWardrobe, saveWardrobe, type WardrobeSource } from './storage'
 import { tick, tickState } from '../items/ticks'
-import { importError } from './wardrobeText'
+import { afterSave, importError } from './wardrobeText'
+
+export function noteSave(ok: boolean, fresh = false) {
+  const { saveFailing, set } = useStore.getState()
+  const next = afterSave(saveFailing && !fresh, ok)
+  set(next.notice ? { saveFailing: next.failing, notice: next.notice } : { saveFailing: next.failing })
+}
 
 export function useWardrobe(version: string) {
   const set = useStore((s) => s.set)
@@ -13,7 +19,7 @@ export function useWardrobe(version: string) {
   const adopt = useCallback(
     async (ids: number[], stats: { items: number; unresolved: number; known: number }, src: WardrobeSource) => {
       set({ owned: ids, source: src, decoded: stats, importing: false, outfit: null, ideal: null })
-      if (version) await saveWardrobe({ version, ids, source: src, savedAt: Date.now() })
+      if (version) noteSave(await saveWardrobe({ version, ids, source: src, savedAt: Date.now() }), true)
     },
     [set, version],
   )
@@ -48,7 +54,9 @@ export function useWardrobe(version: string) {
           show: (next) => set({ owned: next, source: 'manual' }),
           send: (ids) => engine.setWardrobe(ids),
           settle: (decoded) => set({ decoded }),
-          save: (ids) => (version ? saveWardrobe({ version, ids, source: 'manual', savedAt: Date.now() }) : Promise.resolve()),
+          save: async (ids) => {
+            if (version) noteSave(await saveWardrobe({ version, ids, source: 'manual', savedAt: Date.now() }))
+          },
           fail: (confirmed, e, ticked) => set({ owned: confirmed, source: ticked ? 'manual' : before.current, error: String(e) }),
         },
         ticks.current,

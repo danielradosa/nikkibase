@@ -6,7 +6,7 @@ import { useStore } from '../store'
 import { clearWardrobe, loadWardrobe } from '../wardrobe/storage'
 import type { Place } from '../outfit/comparison'
 import type { Stage } from '../outfit/stages'
-import { discardNotice, engineReason } from '../wardrobe/wardrobeText'
+import { READ_FAILED, discardNotice, engineReason } from '../wardrobe/wardrobeText'
 
 export type Bundle = {
   stages: Stage[]
@@ -60,6 +60,8 @@ export function useBundle(): Bundle {
         if (notice) {
           set({ notice })
           await clearWardrobe()
+        } else if (saved.status === 'unreadable') {
+          set({ notice: READ_FAILED })
         }
         set({ ready: true })
       } catch (e) {

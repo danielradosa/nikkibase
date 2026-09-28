@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  ANY_SLOT, ITEM_STEP, choiceLabel, gradesLine, inChoice, itemPage, itemsTabLabel, tickHint, moreItemsText, ownLabel, parseItems, placeName, slotChoice, slotOptions,
+  ANY_SLOT, ITEM_STEP, choiceLabel, gradesLine, inChoice, itemPage, itemsTabLabel, tickHint, tickLine, moreItemsText, ownLabel, parseItems, placeName, slotChoice, slotOptions,
   type Row,
 } from '../../src/items/items.ts'
 
@@ -131,4 +131,9 @@ test('a wait names the chosen slot or place with a capital, and says nothing for
   assert.equal(choiceLabel('p0', [{ name: 'leglets', slot: 5 }]), 'Leglets')
   assert.equal(choiceLabel('p40', places), null)
   assert.equal(choiceLabel(ANY_SLOT, places), null)
+})
+
+test('the tick hint claims the list is saved only while saving works', () => {
+  assert.equal(tickLine(false), "Tick what you own. It's saved in this browser.")
+  assert.equal(tickLine(true), 'Tick what you own. It will be gone when you reload.')
 })

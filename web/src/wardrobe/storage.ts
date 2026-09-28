@@ -33,25 +33,27 @@ function open(): Promise<IDBDatabase | null> {
   })
 }
 
-export async function saveWardrobe(entry: SavedWardrobe): Promise<void> {
+export async function saveWardrobe(entry: SavedWardrobe): Promise<boolean> {
   const db = await open()
-  if (!db) return
-  await new Promise<void>((resolve) => {
+  if (!db) return false
+  const saved = await new Promise<boolean>((resolve) => {
     try {
       const tx = db.transaction(STORE, 'readwrite')
       tx.objectStore(STORE).put(entry, KEY)
-      tx.oncomplete = () => resolve()
-      tx.onerror = () => resolve()
-      tx.onabort = () => resolve()
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+      tx.onabort = () => resolve(false)
     } catch {
-      resolve()
+      resolve(false)
     }
   })
   db.close()
+  return saved
 }
 
 export type LoadResult =
   | { status: 'none' }
+  | { status: 'unreadable' }
   | { status: 'ok'; entry: SavedWardrobe }
   | { status: 'stale'; entry: StoredWardrobe }
   | { status: 'unrecognised'; entry: StoredWardrobe }
@@ -70,33 +72,36 @@ export function classify(raw: unknown, version: string): LoadResult {
 
 export async function loadWardrobe(version: string): Promise<LoadResult> {
   const db = await open()
-  if (!db) return { status: 'none' }
-  const entry = await new Promise<unknown>((resolve) => {
+  if (!db) return { status: 'unreadable' }
+  const read = await new Promise<{ ok: true; entry: unknown } | { ok: false }>((resolve) => {
     try {
       const tx = db.transaction(STORE, 'readonly')
       const req = tx.objectStore(STORE).get(KEY)
-      req.onsuccess = () => resolve(req.result ?? null)
-      req.onerror = () => resolve(null)
+      req.onsuccess = () => resolve({ ok: true, entry: req.result ?? null })
+      req.onerror = () => resolve({ ok: false })
+      tx.onabort = () => resolve({ ok: false })
     } catch {
-      resolve(null)
+      resolve({ ok: false })
     }
   })
   db.close()
-  return classify(entry, version)
+  return read.ok ? classify(read.entry, version) : { status: 'unreadable' }
 }
 
-export async function clearWardrobe(): Promise<void> {
+export async function clearWardrobe(): Promise<boolean> {
   const db = await open()
-  if (!db) return
-  await new Promise<void>((resolve) => {
+  if (!db) return false
+  const cleared = await new Promise<boolean>((resolve) => {
     try {
       const tx = db.transaction(STORE, 'readwrite')
       tx.objectStore(STORE).delete(KEY)
-      tx.oncomplete = () => resolve()
-      tx.onerror = () => resolve()
+      tx.oncomplete = () => resolve(true)
+      tx.onerror = () => resolve(false)
+      tx.onabort = () => resolve(false)
     } catch {
-      resolve()
+      resolve(false)
     }
   })
   db.close()
+  return cleared
 }

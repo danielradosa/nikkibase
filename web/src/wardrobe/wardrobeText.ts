@@ -39,6 +39,16 @@ export const NO_FILE = {
   link: 'Items tab',
   after: '.',
   saved: "It's saved in this browser.",
+  unsaved: 'It will be gone when you reload.',
+}
+
+export const SAVE_FAILED = "Couldn't save your wardrobe in this browser. It will be gone when you reload."
+
+export const READ_FAILED = "Couldn't read this browser's storage, so no saved wardrobe was loaded."
+
+export function afterSave(failing: boolean, ok: boolean): { failing: boolean; notice: string | null } {
+  if (ok) return { failing: false, notice: null }
+  return { failing: true, notice: failing ? null : SAVE_FAILED }
 }
 
 export function dropText(phone: boolean): string {

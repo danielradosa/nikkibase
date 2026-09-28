@@ -8,8 +8,11 @@ import {
   LIST_FAILED,
   LIST_WAIT,
   NO_FILE,
+  READ_FAILED,
+  SAVE_FAILED,
   SCORES_WAIT,
   TAGLINE,
+  afterSave,
   discardNotice,
   dropText,
   engineReason,
@@ -137,4 +140,25 @@ test('the reason the engine gives drops the repeated Error prefixes', () => {
   assert.equal(engineReason(new Error('the engine stopped')), 'the engine stopped')
   assert.equal(engineReason('Error: '), '')
   assert.equal(engineReason(new TypeError('Failed to fetch')), 'TypeError: Failed to fetch')
+})
+
+test('a failed save says the wardrobe will be gone, once for each run of failures', () => {
+  assert.equal(SAVE_FAILED, "Couldn't save your wardrobe in this browser. It will be gone when you reload.")
+  assert.equal(NO_FILE.unsaved, 'It will be gone when you reload.')
+  assert.deepEqual(afterSave(false, true), { failing: false, notice: null })
+  assert.deepEqual(afterSave(false, false), { failing: true, notice: SAVE_FAILED })
+  assert.deepEqual(afterSave(true, false), { failing: true, notice: null })
+  assert.deepEqual(afterSave(true, true), { failing: false, notice: null })
+  let failing = false
+  const shown: (string | null)[] = []
+  for (const ok of [true, false, false, false, true, false]) {
+    const next = afterSave(failing, ok)
+    failing = next.failing
+    shown.push(next.notice)
+  }
+  assert.deepEqual(shown, [null, SAVE_FAILED, null, null, null, SAVE_FAILED])
+})
+
+test('a storage that cannot be read says so', () => {
+  assert.equal(READ_FAILED, "Couldn't read this browser's storage, so no saved wardrobe was loaded.")
 })

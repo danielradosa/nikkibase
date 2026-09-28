@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { Button, Checkbox, Empty, Grid, Input, Select, Space, Switch, Table, Tag, Tooltip, Typography } from 'antd'
 import type { Place } from '../outfit/comparison'
-import { ANY_SLOT, ATTRS, ITEM_STEP, gradesLine, inChoice, itemPage, moreItemsText, ownLabel, tickHint, placeName, slotOptions, type Item } from './items'
+import { ANY_SLOT, ATTRS, ITEM_STEP, gradesLine, inChoice, itemPage, moreItemsText, ownLabel, tickHint, tickLine, placeName, slotOptions, type Item } from './items'
 import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
 
@@ -27,6 +27,7 @@ export default function ItemBrowser({
   const screens = Grid.useBreakpoint()
   const phone = usePhone()
   const onItems = useStore((s) => s.tab) === 'items'
+  const saveFailing = useStore((s) => s.saveFailing)
   const [hint, setHint] = useState(manual)
   const showHint = tickHint(hint, manual, onItems)
   const filters = JSON.stringify([query, slot, ownedOnly, scoreableOnly, rarity])
@@ -182,7 +183,7 @@ export default function ItemBrowser({
       </Space>
 
       {showHint && (
-        <Typography.Paragraph type="secondary">Tick what you own. It&apos;s saved in this browser.</Typography.Paragraph>
+        <Typography.Paragraph type="secondary">{tickLine(saveFailing)}</Typography.Paragraph>
       )}
 
       <Typography.Paragraph type="secondary">

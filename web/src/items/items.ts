@@ -107,6 +107,10 @@ export function tickHint(shown: boolean, manual: boolean, onItems: boolean): boo
   return onItems ? shown : manual
 }
 
+export function tickLine(unsaved: boolean): string {
+  return unsaved ? 'Tick what you own. It will be gone when you reload.' : "Tick what you own. It's saved in this browser."
+}
+
 export function moreItemsText(total: number, shown: number): string | null {
   const left = total - shown
   return left > 0 ? `Show ${Math.min(ITEM_STEP, left).toLocaleString('en-US')} more` : null
