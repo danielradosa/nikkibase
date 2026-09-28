@@ -27,7 +27,7 @@ type config struct {
 	outDir, version                                       string
 	sourcesPath, exceptionsPath                           string
 	idCorrectionsPath, stageCorrectionsPath, coveragePath string
-	acquisitionMapPath                                    string
+	acquisitionMapPath, acquisitionExtraPath              string
 	allowUnlicensed, calcGrades                           bool
 	builtAt                                               time.Time
 }
@@ -55,6 +55,7 @@ func main() {
 	flag.StringVar(&c.idCorrectionsPath, "id-corrections", "data/id-corrections.json", "resolutions for item IDs that name two garments")
 	flag.StringVar(&c.stageCorrectionsPath, "stage-corrections", "data/stage-corrections.json", "stage weight vectors the source states in the wrong unit")
 	flag.StringVar(&c.coveragePath, "coverage", "data/coverage.json", "the coverage floor a bundle must clear")
+	flag.StringVar(&c.acquisitionExtraPath, "acquisition-extra", "data/acquisition-extra.json", "hand-checked ways to get items the sources give none for; empty for none")
 	flag.StringVar(&c.exceptionsPath, "exceptions", "data/production-exceptions.json", "recorded exceptions for sources without a licence; empty for none")
 	flag.BoolVar(&c.allowUnlicensed, "allow-unlicensed", false, "admit any source, marking the bundle research-only; deploy.sh refuses such a bundle")
 	check := flag.String("check", "", "verify a built bundle's provenance.json may be deployed, then exit")
@@ -706,6 +707,20 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 	acq, stats := pipeline.MergeAcquisition(cat, wiki.Items, packed, wiki.Suits)
 	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page\n",
 		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits)
+	if c.acquisitionExtraPath != "" {
+		raw, err := os.ReadFile(c.acquisitionExtraPath)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		extra, err := pipeline.ReadAcquisitionExtra(raw)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		if err := pipeline.ApplyAcquisitionExtra(acq, cat, extra); err != nil {
+			return nil, nil, nil, err
+		}
+		fmt.Printf("acquisition: %d items the sources give no line for take a hand-checked one from %s\n", len(extra), c.acquisitionExtraPath)
+	}
 	ids := make([]int, 0, len(cat.Names))
 	for id := range cat.Names {
 		ids = append(ids, id)

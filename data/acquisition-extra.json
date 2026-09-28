@@ -1,0 +1,61 @@
+{
+  "note": "Hand-checked ways to get items the sources give no line for: the wiki names them only on an event or timeline page the pipeline does not read. Each entry gives the item's name, which must still be the one the catalogue has, and the build refuses an entry once the sources give the item a line of their own, so the list stays short and current.",
+  "items": [
+    {
+      "id": 82748,
+      "name": "Hibiscus Whispers",
+      "kind": "recharge",
+      "text": "One-Dollar Sale",
+      "basis": "The wiki's page 'Events/2023' lists it as the 1 USD Sale item of Sep 28 to Oct 4."
+    },
+    {
+      "id": 88857,
+      "name": "Gifty's Wish",
+      "kind": "recharge",
+      "text": "One-Dollar Sale",
+      "basis": "The wiki's page 'Events/2023' lists it as the 1 USD Sale item of Sep 4 to Sep 17."
+    },
+    {
+      "id": 89588,
+      "name": "Nighttime Roaming",
+      "kind": "event",
+      "text": "Cosmic Murmurs event",
+      "basis": "The wiki's page 'Wonder Museum Event/Cosmic Murmurs' lists it among the prizes of the event's board, Unseen Galaxy (prize No. 6); the event's other prizes already read 'Cosmic Murmurs event'."
+    },
+    {
+      "id": 89589,
+      "name": "Neon Dance Steps",
+      "kind": "event",
+      "text": "Cosmic Murmurs event",
+      "basis": "The wiki's page 'Wonder Museum Event/Cosmic Murmurs' lists it among the prizes of the event's board, Unseen Galaxy (prize No. 6); the event's other prizes already read 'Cosmic Murmurs event'."
+    },
+    {
+      "id": 89590,
+      "name": "Simulated Walking",
+      "kind": "event",
+      "text": "Cosmic Murmurs event",
+      "basis": "The wiki's page 'Wonder Museum Event/Cosmic Murmurs' lists it among the prizes of the event's board, Unseen Galaxy (prize No. 3); the event's other prizes already read 'Cosmic Murmurs event'."
+    },
+    {
+      "id": 89597,
+      "name": "Fantasy Instructions",
+      "kind": "event",
+      "text": "Cosmic Murmurs event",
+      "basis": "The wiki's page 'Wonder Museum Event/Cosmic Murmurs' lists it among the prizes of the event's board, Unseen Galaxy (prize No. 1); the event's other prizes already read 'Cosmic Murmurs event'."
+    },
+    {
+      "id": 89598,
+      "name": "Electronic Flowers",
+      "kind": "event",
+      "text": "Cosmic Murmurs event",
+      "basis": "The wiki's page 'Wonder Museum Event/Cosmic Murmurs' lists it among the prizes of the event's board, Unseen Galaxy (prize No. 2); the event's other prizes already read 'Cosmic Murmurs event'."
+    },
+    {
+      "id": 89599,
+      "name": "Memory Cracks",
+      "kind": "event",
+      "text": "Cosmic Murmurs event",
+      "basis": "The wiki's page 'Wonder Museum Event/Cosmic Murmurs' lists it among the prizes of the event's board, Unseen Galaxy (prize No. 4); the event's other prizes already read 'Cosmic Murmurs event'."
+    }
+  ]
+}
