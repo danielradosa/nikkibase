@@ -378,6 +378,83 @@ func TestSubgradesAreRefusedOutsideTheirFloorAndCeiling(t *testing.T) {
 	}
 }
 
+func calcConfig(t *testing.T, coverage string) config {
+	t.Helper()
+	c := subgradeConfig(t, coverage)
+	c.namesPath, c.keysPath = "testdata/names.json", "testdata/names-keys.json"
+	dir := t.TempDir()
+	for name, doc := range map[string]string{
+		"item-batch-0.json":   `{"0": {"slot": 0, "attrs": [1, 3, 5, 7, 8], "niGrades": ["S-", "A+", "A", "S", "A"]}}`,
+		"item-batch-500.json": `{"1": {"slot": 1, "attrs": [0, 2, 4, 6, 8], "niGrades": ["SS+", "A-", "B", "C+", "A"]}}`,
+		"item-batch-900.json": `{"2": {"slot": 5, "attrs": [0, 3, 4, 7, 9], "niGrades": ["S+", "A", "SS-", "B", "A-"], "tags": [0]}}`,
+	} {
+		if err := os.WriteFile(filepath.Join(dir, name), []byte(doc), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	c.subgradesPath = filepath.Join(dir, "item-batch-*.json")
+	return c
+}
+
+func TestCalcGradesAddOnlyItemsNoOtherSourceGrades(t *testing.T) {
+	plain := calcConfig(t, `{"subgradedCells": 8, "maxSubgradeFallbacks": 2}`)
+	if err := run(plain); err != nil {
+		t.Fatal(err)
+	}
+	calc := calcConfig(t, `{"subgradedCells": 13, "maxSubgradeFallbacks": 2, "maxCalcGradedItems": 1}`)
+	calc.calcGrades = true
+	if err := run(calc); err != nil {
+		t.Fatal(err)
+	}
+
+	without, with := itemRows(t, plain), itemRows(t, calc)
+	if got := grades(without[30003]); got != [5]any{"", "", "", "", ""} {
+		t.Errorf("30003 without -calc-grades: grades %v, want it listed by name only", got)
+	}
+	if got, want := grades(with[30003]), [5]any{"S", "A", "SS", "B", "A"}; got != want {
+		t.Errorf("30003 with -calc-grades: grades %v, want %v", got, want)
+	}
+	for id, row := range without {
+		if id != 30003 && !reflect.DeepEqual(row, with[id]) {
+			t.Errorf("%d changed: %v -> %v", id, row, with[id])
+		}
+	}
+	cat := readCatalogue(t, calc)
+	at := slices.Index(cat.IDs, 30003)
+	if at < 0 {
+		t.Fatal("items.bin has no 30003")
+	}
+	sports, _ := pipeline.TagID("Sports")
+	if tags := cat.Tags[cat.TagOffset[at]:cat.TagOffset[at+1]]; !slices.Equal(tags, []int32{int32(sports)}) {
+		t.Errorf("30003 tags %v, want Sports", tags)
+	}
+	if n := len(readCatalogue(t, plain).IDs); n != len(cat.IDs)-1 {
+		t.Errorf("catalogue %d items without -calc-grades and %d with, want one more", n, len(cat.IDs))
+	}
+}
+
+func TestCalcGradesNeedTheirSourcesAndStayUnderTheirCeiling(t *testing.T) {
+	c := calcConfig(t, `{"subgradedCells": 13, "maxSubgradeFallbacks": 2}`)
+	c.calcGrades = true
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "committed ceiling is 0") {
+		t.Errorf("err = %v, want a refusal naming the ceiling", err)
+	}
+	if _, statErr := os.Stat(filepath.Join(c.outDir, c.version)); !os.IsNotExist(statErr) {
+		t.Error("a refused build still wrote a bundle directory")
+	}
+	for name, set := range map[string]func(*config){
+		"no -names":     func(c *config) { c.namesPath = "" },
+		"no -subgrades": func(c *config) { c.subgradesPath = "" },
+	} {
+		c := calcConfig(t, `{}`)
+		c.calcGrades = true
+		set(&c)
+		if err := run(c); err == nil || !strings.Contains(err.Error(), "-calc-grades") {
+			t.Errorf("%s: err = %v, want a refusal naming -calc-grades", name, err)
+		}
+	}
+}
+
 func itemRows(t *testing.T, c config) map[int][]any {
 	t.Helper()
 	raw, err := os.ReadFile(filepath.Join(c.outDir, c.version, "items.json"))

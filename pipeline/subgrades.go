@@ -43,11 +43,25 @@ func SubgradeLetter(grade string) string {
 }
 
 type subgradeRecord struct {
+	Slot     int      `json:"slot"`
 	Attrs    []int    `json:"attrs"`
 	NiGrades []string `json:"niGrades"`
+	Tags     []int    `json:"tags"`
 }
 
 func ParseSubgrades(batches [][]byte, keys []byte) (map[int][5]Subgrade, SubgradeStats, error) {
+	items, stats, err := ParseCalcItems(batches, keys)
+	if err != nil {
+		return nil, stats, err
+	}
+	out := make(map[int][5]Subgrade, len(items))
+	for id, it := range items {
+		out[id] = it.Row
+	}
+	return out, stats, nil
+}
+
+func ParseCalcItems(batches [][]byte, keys []byte) (map[int]CalcItem, SubgradeStats, error) {
 	var stats SubgradeStats
 	var byKey map[string]int
 	if err := json.Unmarshal(keys, &byKey); err != nil {
@@ -66,7 +80,7 @@ func ParseSubgrades(batches [][]byte, keys []byte) (map[int][5]Subgrade, Subgrad
 		keyOf[index] = key
 	}
 
-	out := map[int][5]Subgrade{}
+	out := map[int]CalcItem{}
 	seen := map[int]bool{}
 	for f, raw := range batches {
 		var records map[string]subgradeRecord
@@ -103,7 +117,7 @@ func ParseSubgrades(batches [][]byte, keys []byte) (map[int][5]Subgrade, Subgrad
 			if _, dup := out[id]; dup {
 				return nil, stats, fmt.Errorf("pipeline: two item keys give ID %d", id)
 			}
-			out[id] = row
+			out[id] = CalcItem{Place: r.Slot, Row: row, Tags: r.Tags}
 		}
 	}
 	return out, stats, nil

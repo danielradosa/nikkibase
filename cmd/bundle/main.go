@@ -27,7 +27,7 @@ type config struct {
 	sourcesPath, exceptionsPath                           string
 	idCorrectionsPath, stageCorrectionsPath, coveragePath string
 	acquisitionMapPath                                    string
-	allowUnlicensed                                       bool
+	allowUnlicensed, calcGrades                           bool
 	builtAt                                               time.Time
 }
 
@@ -46,6 +46,7 @@ func main() {
 	flag.StringVar(&c.namesPath, "names", "", "path to Nikki Calc's items JSON, for names the dump lacks and rarity no other source gives")
 	flag.StringVar(&c.keysPath, "keys", "", "path to Nikki Calc's item-key JSON, required with -names and -subgrades")
 	flag.StringVar(&c.subgradesPath, "subgrades", "", "glob of Nikki Calc's item-batch files, whose sub-grades set each stat within its letter grade, e.g. .../item-batch-v0.14-*.json")
+	flag.BoolVar(&c.calcGrades, "calc-grades", false, "grade the items no other source grades from the -subgrades item batches: letters, sides, places and style tags; needs -names")
 	flag.StringVar(&c.outDir, "out", "web/public/data", "directory to write the bundle into")
 	flag.StringVar(&c.version, "version", "", "version directory name, e.g. 2026.09")
 	flag.StringVar(&c.sourcesPath, "sources", "data/sources.json", "the source registry")
@@ -93,6 +94,9 @@ func run(c config) error {
 	}
 	if c.subgradesPath != "" && c.keysPath == "" {
 		return fmt.Errorf("-subgrades needs -keys, which maps each item-batch record to its item")
+	}
+	if c.calcGrades && (c.subgradesPath == "" || c.namesPath == "") {
+		return fmt.Errorf("-calc-grades reads the -subgrades item batches for the items -names lists, so it needs both")
 	}
 	reg, ex, err := readTerms(c.sourcesPath, c.exceptionsPath)
 	if err != nil {
@@ -206,10 +210,16 @@ func run(c config) error {
 		}
 	}
 	var sub *pipeline.SubgradeStats
+	var calc *pipeline.CalcStats
 	if c.subgradesPath != "" {
-		if sub, err = applySubgrades(c.subgradesPath, keysPath, entries); err != nil {
+		items, stats, err := readCalcItems(c.subgradesPath, keysPath)
+		if err != nil {
 			return err
 		}
+		if c.calcGrades {
+			entries, calc = calcGrades(entries, items, names, corrections)
+		}
+		sub = applySubgrades(items, stats, entries)
 	}
 	if namesPath != "" {
 		filled := pipeline.FillRarity(entries, names, rarity)
@@ -225,35 +235,59 @@ func run(c config) error {
 		}
 		fmt.Printf("names: %d items shown under a corrected name\n", len(itemNames.Shown))
 	}
-	return finish(c, entries, skipped, itemNames, rarity, prov, sub, known, corrections)
+	return finish(c, entries, skipped, itemNames, rarity, prov, sub, calc, known, corrections)
 }
 
-func applySubgrades(glob, keysPath string, entries []pipeline.Entry) (*pipeline.SubgradeStats, error) {
+func readCalcItems(glob, keysPath string) (map[int]pipeline.CalcItem, pipeline.SubgradeStats, error) {
 	paths, err := subgradeFiles(glob)
 	if err != nil {
-		return nil, err
+		return nil, pipeline.SubgradeStats{}, err
 	}
 	batches := make([][]byte, 0, len(paths))
 	for _, path := range paths {
 		raw, err := os.ReadFile(path)
 		if err != nil {
-			return nil, err
+			return nil, pipeline.SubgradeStats{}, err
 		}
 		batches = append(batches, raw)
 	}
 	keys, err := os.ReadFile(keysPath)
 	if err != nil {
-		return nil, err
+		return nil, pipeline.SubgradeStats{}, err
 	}
-	subs, stats, err := pipeline.ParseSubgrades(batches, keys)
-	if err != nil {
-		return nil, err
+	return pipeline.ParseCalcItems(batches, keys)
+}
+
+func calcGrades(entries []pipeline.Entry, items map[int]pipeline.CalcItem, names map[int]string,
+	corrections *pipeline.IDCorrections) ([]pipeline.Entry, *pipeline.CalcStats) {
+	have := make(map[int]bool, len(entries))
+	for _, e := range entries {
+		have[e.Item.ID] = true
+	}
+	if corrections != nil {
+		for id := range corrections.Excluded {
+			have[id] = true
+		}
+	}
+	graded, stats := pipeline.CalcEntries(items, names, have)
+	before := len(entries)
+	entries = pipeline.MergeEntries(entries, graded)
+	fmt.Printf("calc grades: %d items no other source grades, %d graded from Nikki Calc (%d with style tags, %d unknown tags dropped); left by name only: %d with no record, %d missing a sub-grade, %d whose place contradicts their ID %v -> catalogue %d to %d\n",
+		stats.Candidates, stats.Graded, stats.Tagged, stats.UnknownTags, stats.NoRecord, stats.Incomplete,
+		len(stats.Unplaced), stats.Unplaced, before, len(entries))
+	return entries, &stats
+}
+
+func applySubgrades(items map[int]pipeline.CalcItem, stats pipeline.SubgradeStats, entries []pipeline.Entry) *pipeline.SubgradeStats {
+	subs := make(map[int][5]pipeline.Subgrade, len(items))
+	for id, it := range items {
+		subs[id] = it.Row
 	}
 	pipeline.ApplySubgrades(entries, subs, &stats)
 	fmt.Printf("subgrades: %d files, %d records, %d without a key, %d not in the catalogue -> %d stats set by sub-grade; %d keep their letter's stat: %d on the other side, %d under another letter, %d with no sub-grade\n",
 		stats.Files, stats.Records, stats.Unkeyed, stats.NotInCatalogue, stats.Applied,
 		stats.OtherSide+stats.OtherLetter+stats.Missing, stats.OtherSide, stats.OtherLetter, stats.Missing)
-	return &stats, nil
+	return &stats
 }
 
 func readTerms(sourcesPath, exceptionsPath string) (*pipeline.Registry, *pipeline.Exceptions, error) {
@@ -391,7 +425,8 @@ func checkSpiritBonuses(dumpPath string, known map[int]bool, packed []pipeline.E
 }
 
 func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.ItemNames, rarity map[int]int,
-	prov pipeline.Provenance, sub *pipeline.SubgradeStats, known map[int]bool, corrections *pipeline.IDCorrections) error {
+	prov pipeline.Provenance, sub *pipeline.SubgradeStats, calc *pipeline.CalcStats, known map[int]bool,
+	corrections *pipeline.IDCorrections) error {
 	stagesPath, outDir, version := c.stagesPath, c.outDir, c.version
 	var stages []pipeline.Stage
 	var stageStats pipeline.StageStats
@@ -417,7 +452,7 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 		return err
 	}
 	pipeline.ApplySuits(entries, suits)
-	if err := checkBundle(c, entries, stages, stageStats, sub, acq, cat, wikiStats, suits); err != nil {
+	if err := checkBundle(c, entries, stages, stageStats, sub, calc, acq, cat, wikiStats, suits); err != nil {
 		return err
 	}
 
@@ -663,7 +698,7 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 }
 
 func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
-	stats pipeline.StageStats, sub *pipeline.SubgradeStats,
+	stats pipeline.StageStats, sub *pipeline.SubgradeStats, calc *pipeline.CalcStats,
 	acq map[int][]pipeline.Acquisition, cat pipeline.AcquisitionCatalogue,
 	wikiStats *pipeline.WikiAcquisitionStats, suits map[int]string) error {
 	var cov pipeline.Coverage
@@ -688,6 +723,9 @@ func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 	}
 	v := pipeline.CheckAcquisition(acq, cat, cov)
 	v = append(v, pipeline.CheckSuits(suits, cov)...)
+	if calc != nil {
+		v = append(v, pipeline.CheckCalcGrades(*calc, cov)...)
+	}
 	if wikiStats != nil {
 		v = append(v, pipeline.CheckAcquisitionNames(*wikiStats, cov)...)
 	}

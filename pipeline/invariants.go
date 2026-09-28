@@ -24,6 +24,7 @@ type Coverage struct {
 	ValuedStages         int            `json:"valuedStages"`
 	SubgradedCells       int            `json:"subgradedCells"`
 	MaxSubgradeFallbacks int            `json:"maxSubgradeFallbacks"`
+	MaxCalcGradedItems   int            `json:"maxCalcGradedItems"`
 	AcquisitionItems     int            `json:"acquisitionItems"`
 	MaxUnmatchedNames    int            `json:"maxUnmatchedNames"`
 	SuitItems            int            `json:"suitItems"`
