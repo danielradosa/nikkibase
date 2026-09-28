@@ -25,13 +25,13 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `2026-09-29` rebuilds byte-for-byte from the files below
+The bundle `2026-09-30` rebuilds byte-for-byte from the files below
 (verified 2026-09-28, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/` and the
 wiki dump extracted to `/tmp/fandom`:
 
 ```sh
-SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
+SOURCE_DATE_EPOCH=1790726400 go run ./cmd/bundle \
   -fandom  /tmp/fandom/lovenikki673_pages_current.xml \
   -stages       .ai/research/sources/community/seal100x/levels.js \
   -stage-values .ai/research/sources/community/aojiao/levels.js \
@@ -41,11 +41,19 @@ SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
   -keys    .ai/research/sources/ids/ni-ids-v0.14.json \
   -subgrades '.ai/research/sources/nikkicalc/item-batches/item-batch-v0.14-*.json' \
   -out     web/public/data \
-  -version 2026-09-29
+  -version 2026-09-30
 ```
 
-A version directory is served as immutable once deployed. `2026-09-29`
-changes only `items.json`, `items.bin` and `acquire.json` from `2026-09-28`.
+A version directory is served as immutable once deployed. `2026-09-30`
+changes only names from `2026-09-29`, in `items.json` and `acquire.json`: a
+name keeps its source's own spelling instead of being respaced, as the game
+spells it. 1,978 names the wiki writes with a tight hyphen ("Red
+Satin-Epic") lose the spaces added around it, 843 Nikki Calc names take a
+tight "-" for its "·", and 2 keep a tight "&"; the 1,958 the wiki writes with
+a spaced " - " keep it. Gift box lines name a suit without the wiki's
+"(Hidden Suit)"-style qualifier.
+
+`2026-09-29` changes only `items.json`, `items.bin` and `acquire.json` from `2026-09-28`.
 The wiki's item pages are read whole: 182 pages whose Attributes template
 starts on a new line, or whose empty infobox field hid the wardrobe number,
 were skipped before, so the wiki grades 18,405 items instead of 18,223, six

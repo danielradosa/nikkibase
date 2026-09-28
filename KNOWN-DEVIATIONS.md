@@ -120,8 +120,10 @@ Love Nikki Wiki's suit and item pages place them, and 121 the wiki places in
 none that nikkiup2u3 files under a suit the wiki names in Chinese. The other
 4,568 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base, 740
 whose Chinese suit name no single wiki suit page gives, and 2,473 no source places.
-A suit is named as its wiki page is titled, so a few carry the wiki's
-qualifier, such as "Star Shadow (Hidden Suit)". The wiki's pack pages (event
+A suit is named as its wiki page is titled, and the site shows it without the
+qualifier the wiki adds to tell suits apart ("Star Shadow", not "Star Shadow
+(Hidden Suit)"); two suits with one name, such as the two Night Rose suits,
+stay apart. The wiki's pack pages (event
 items, chests and sales) are not suits: 579 items only a pack page lists, and
 576 of them are in no suit (nikkiup2u3 files the other 3 under Green Wind).
 29 items are listed on more than one suit page; each takes the suit its own
