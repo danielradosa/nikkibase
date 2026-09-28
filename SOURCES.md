@@ -12,7 +12,7 @@ what each status allows is in [DATA-LICENSE.md](DATA-LICENSE.md).
 
 | Source | Flag | What NikkiBase uses | Licence | Status |
 |---|---|---|---|---|
-| Love Nikki Wiki, by its editors | `-fandom` | Item names, slots and places, letter grades and style tags (~18,200 items); the style codes of Template:S; Maiden's tags on Story 5-12, 6-7 and 6-9; the items 57 story stages require; how to get 19,373 items, from item and suit pages; the suit of 29,323 items, and the Chinese name of each suit | CC BY-SA 3.0 | redistributable |
+| Love Nikki Wiki, by its editors | `-fandom` | Item names, slots and places, letter grades and style tags (~18,400 items); the style codes of Template:S; Maiden's tags on Story 5-12, 6-7 and 6-9; the items 57 story stages require; how to get 19,373 items, from item and suit pages; the suit of 29,323 items, and the Chinese name of each suit | CC BY-SA 3.0 | redistributable |
 | nikkiup2u3 by 傲娇攻略组 | `-packed`, `-stage-values` | Every spirit's flat bonus; grades, tags and places for ~14,800 items no other source has; exact weights and tag awards for every stage except co-op; how to get ~14,600 items the wiki has no page for; the suit of 121 items the wiki places in none | None located | permission-required |
 | nikkiup2u by lovenikkiusa | `-stage-names`, `-items` | English names of arena and co-op stages; Maiden's tag sizes on Story 5-12 | None located | permission-required |
 | nikkiup2u3_data by seal100x | `-stages` | The stage list, modes and rules; co-op weights and tag awards; the Maiden notes; the items 25 stages require where the wiki names none | None located | permission-required |
@@ -25,13 +25,13 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `2026-09-28` rebuilds byte-for-byte from the files below
-(verified 2026-09-26, provenance included, with the build time fixed by
+The bundle `2026-09-29` rebuilds byte-for-byte from the files below
+(verified 2026-09-28, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/` and the
 wiki dump extracted to `/tmp/fandom`:
 
 ```sh
-SOURCE_DATE_EPOCH=1790553600 go run ./cmd/bundle \
+SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
   -fandom  /tmp/fandom/lovenikki673_pages_current.xml \
   -stages       .ai/research/sources/community/seal100x/levels.js \
   -stage-values .ai/research/sources/community/aojiao/levels.js \
@@ -41,11 +41,23 @@ SOURCE_DATE_EPOCH=1790553600 go run ./cmd/bundle \
   -keys    .ai/research/sources/ids/ni-ids-v0.14.json \
   -subgrades '.ai/research/sources/nikkicalc/item-batches/item-batch-v0.14-*.json' \
   -out     web/public/data \
-  -version 2026-09-28
+  -version 2026-09-29
 ```
 
-A version directory is served as immutable once deployed. `2026-09-27`, the
-bundle before this one, holds the same `stages.json`, `tags.json` and
+A version directory is served as immutable once deployed. `2026-09-29`
+changes only `items.json`, `items.bin` and `acquire.json` from `2026-09-28`.
+The wiki's item pages are read whole: 182 pages whose Attributes template
+starts on a new line, or whose empty infobox field hid the wardrobe number,
+were skipped before, so the wiki grades 18,405 items instead of 18,223, six
+items listed by name only gain grades and the catalogue holds 33,023 items.
+Where the wiki's letter differs from both nikkiup2u3's and Nikki Calc's
+sub-grade (three stats), theirs is kept (`gradeOverrides` in
+`data/id-corrections.json`). Names are shown as the game shows them: the
+bracket the wiki adds to tell items apart ("Musical Sound (Coat)") is dropped
+from 1,543 names, night forms show their plain name, and six names take the
+wiki's " - " for Nikki Calc's " · ".
+
+`2026-09-27`, the bundle before `2026-09-28`, holds the same `stages.json`, `tags.json` and
 `positions.json` byte for byte. Its catalogue graded 978 items that no source
 of this build grades (498 accessories, 106 dresses, 90 hairs, 77 shoes, 53
 coats, 51 hosiery, 44 tops, 38 bottoms and 21 makeup); `2026-09-28` lists them
@@ -119,6 +131,6 @@ research-only, and `deploy.sh` will not ship it.
 - **SHA-256:** items `4b991ac68bf43b70c0068ff18a1b726e940f5b0c60bc467d6c6cb83ef9f1c5aa` (1,418,602 bytes); ids `7916e730db0a37bbbc486026175acc135a8c8e2f14b38b6973f01242a517f7f0` (462,771 bytes)
 - **Files (`-subgrades`):** `nikkicalc/item-batches/item-batch-v0.14-<n>.json`, 69 files of 500 items each (n = 0, 500, … 34000; data version v0.14, built 2026-09-08), fetched 2026-09-21 and 2026-09-24, 15,012,873 bytes in all. Each file's SHA-256 is recorded in the bundle's `provenance.json`.
 - **Licence:** none. **Permission:** in writing, from the maintainer, on 2026-09-26, on the conditions in [DATA-LICENSE.md](DATA-LICENSE.md).
-- **Used for:** English item names where no other source has one (~15,800 items: those nikkiup2u3 names in Chinese only, and the 995 that reach `items.json` by Nikki Calc's name alone), and the name of 181600, Cookie Sweet Dream, which `data/id-corrections.json` shows in place of the wiki's Biscuits & Sweet Dream; every item's rarity (34,012 items), from the rarity code each record holds after its index, where 1 to 6 and 7 to 12 both mean 1 to 6 hearts; the set of valid Global item IDs, which keeps unreleased items out; and each item's sub-grades (+ and −), which set its stats within its letter grade. A sub-grade is used only where its letter and side agree with the item's own grade (164,644 of 165,085 graded stats); the rest keep their letter's value. Letters and sides are never taken from it, and tag awards stay priced on the letter grades.
+- **Used for:** English item names where no other source has one (~15,800 items: those nikkiup2u3 names in Chinese only, and the 989 that reach `items.json` by Nikki Calc's name alone), and the name of 181600, Cookie Sweet Dream, which `data/id-corrections.json` shows in place of the wiki's Biscuits & Sweet Dream; every item's rarity (34,012 items), from the rarity code each record holds after its index, where 1 to 6 and 7 to 12 both mean 1 to 6 hearts; the set of valid Global item IDs, which keeps unreleased items out; and each item's sub-grades (+ and −), which set its stats within its letter grade. A sub-grade is used only where its letter and side agree with the item's own grade (164,644 of 165,085 graded stats); the rest keep their letter's value. Letters and sides are never taken from it, and tag awards stay priced on the letter grades.
 - **Spelling:** its spelling of item names decides which hyphenated words in item names stay joined and which hyphens are spaced as separators. A hyphen written with a space on one side only is spaced on both (Moonlight - White). A hyphenated word in an item's name stays joined where Nikki Calc spells it joined for the same item. Otherwise a hyphen is spaced as a separator where Nikki Calc writes a separator there instead (a middot, or a hyphen with a space beside it) for the same item, whatever the length of the words or the number of hyphens (Fox Talk - Me, Passers-By - Red). Otherwise it stays joined where a lowercase letter follows it, and a word made of two or more letters, one hyphen and three or more letters is spaced as a separator (Doll Dress - Blue), unless it starts with a common prefix such as anti- or re-; every other hyphen is kept as written.
 - **Not read:** item descriptions and every other field of the item batches except each item's attribute sides and sub-grades.

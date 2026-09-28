@@ -1,4 +1,4 @@
-# Whole-catalogue best score and outfit size for every stage in bundle 2026-09-28.
+# Whole-catalogue best score and outfit size for every stage in bundle 2026-09-29.
 # Regenerate after a deliberate change: go test -tags dataset ./golden/ -run Pinned -update
 Arena	Beach Party	67357	32
 Arena	Where Is Spring	74075	32

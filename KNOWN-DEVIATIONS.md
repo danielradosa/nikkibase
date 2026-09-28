@@ -102,11 +102,11 @@ in either direction).
 
 ## Items listed by name only
 
-995 items released on Global have no grades in any source the build reads:
-510 accessories, 107 dresses, 92 hairs, 78 shoes, 53 coats, 51 hosiery, 45
-tops, 38 bottoms and 21 makeup. 978 of them were graded in the bundles before
+989 items released on Global have no grades in any source the build reads:
+507 accessories, 107 dresses, 91 hairs, 78 shoes, 52 coats, 51 hosiery, 44
+tops, 38 bottoms and 21 makeup. 975 of them were graded in the bundles before
 `2026-09-28`. `items.json` lists each under Nikki Calc's name with its rarity
-and no stats, and `acquire.json` says how to get 973 of them. 973 are in a
+and no stats, and `acquire.json` says how to get 967 of them. 953 are in a
 suit.
 
 **Cost:** these items are never recommended and score nothing. A best
