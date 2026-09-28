@@ -5,10 +5,12 @@
 [![code licence: MIT](https://img.shields.io/badge/code_licence-MIT-blue)](LICENSE)
 [![data: see DATA-LICENSE.md](https://img.shields.io/badge/data-see_DATA--LICENSE.md-lightgrey)](DATA-LICENSE.md)
 
-> **Awaiting approvals.** Permission to use the game's content and the
-> community data NikkiBase is built on is being requested from the Love Nikki
-> team and each data maintainer. Until they reply, NikkiBase stays as it is. See
-> [DATA-LICENSE.md](DATA-LICENSE.md) for what is and isn't licensed today.
+> **Permissions.** Nikki Calc has given permission to use its data, with
+> credit. One community source was removed at its maintainer's request, and
+> nothing from it is used anywhere in NikkiBase. Permission for the game's
+> content and the rest of the community data is still being requested from the
+> Love Nikki team and those maintainers.
+> [DATA-LICENSE.md](DATA-LICENSE.md) says what is licensed or permitted today.
 
 NikkiBase suggests a stage outfit from the items you own, runs entirely in
 your browser, and tells you what it doesn't know.
