@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"maps"
+	"slices"
 	"strings"
 	"testing"
 
@@ -64,13 +65,89 @@ func TestSuitsLayerTheWikiOverThePackedTable(t *testing.T) {
 		99999: {Name: "甲套"},
 	}
 	english := map[string]string{"甲套": "Alpha Suit", "乙套": " Beta  Suit"}
-	got, stats := LayerSuits(ids, WikiAcquisition{SuitOf: wiki, ChineseSuits: english}, packed)
+	got, stats := LayerSuits(ids, WikiAcquisition{SuitOf: wiki, ChineseSuits: english}, packed, nil)
 	want := map[int]string{10001: "Alpha Suit", 10002: "Alpha Suit", 10003: "Beta Suit", 10006: "Alpha Suit", 30003: "Beta Suit"}
 	if !maps.Equal(got, want) {
 		t.Errorf("suits %v, want %v", got, want)
 	}
 	if want := (SuitStats{Wiki: 3, Packed: 2, Bases: 1, Unnamed: 1, None: 1, Suits: 2}); stats != want {
 		t.Errorf("stats %+v, want %+v", stats, want)
+	}
+}
+
+func TestSuitsTakeTheSuitTheirOtherPiecesHold(t *testing.T) {
+	ids := []int{10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10009}
+	wiki := map[int]string{10001: "Sexy Bad Girl", 10002: "Sexy Bad Girl", 10004: "Solo Suit", 10007: "Left Suit", 10008: "Right Suit"}
+	packed := map[int]PackedSuit{
+		10001: {Name: "甲"}, 10002: {Name: "甲"}, 10003: {Name: "甲"}, 10006: {Name: "甲", Base: true},
+		10004: {Name: "乙"}, 10005: {Name: "乙"},
+		10007: {Name: "丙"}, 10008: {Name: "丙"}, 10009: {Name: "丙"},
+	}
+	got, stats := LayerSuits(ids, WikiAcquisition{SuitOf: wiki}, packed, nil)
+	if got[10003] != "Sexy Bad Girl" || stats.Members != 1 {
+		t.Errorf("10003 in %q with %d placed by their other pieces, want Sexy Bad Girl and 1", got[10003], stats.Members)
+	}
+	for _, id := range []int{10005, 10006, 10009} {
+		if got[id] != "" {
+			t.Errorf("%d placed in %q, want no suit", id, got[id])
+		}
+	}
+}
+
+func TestSuitsTakeNikkiCalcNamesWhereTheWikiHasNone(t *testing.T) {
+	ids := []int{10001, 20001, 20002, 20003, 20004, 20005, 20006, 20007, 20008, 20009, 20010, 20011, 20012, 20013, 20014}
+	wiki := WikiAcquisition{
+		SuitOf: map[int]string{10001: "Old Suit (Hidden Suit)", 20010: "Star Shadow (Hidden Suit)"},
+		Packs:  map[string]bool{"Lucky Pack": true},
+	}
+	packed := map[int]PackedSuit{
+		20001: {Name: "丁"}, 20002: {Name: "丁"}, 20003: {Name: "丁"},
+		20004: {Name: "戊"}, 20005: {Name: "戊"},
+		20006: {Name: "己"},
+		20007: {Name: "庚"},
+		20008: {Name: "辛"}, 20009: {Name: "壬"},
+		20010: {Name: "癸"}, 20011: {Name: "癸"},
+	}
+	calc := map[int][]string{
+		20001: {"New Suit"}, 20002: {"New Suit"},
+		20004: {"Alpha"}, 20005: {"Beta"},
+		20006: {"Old Suit"},
+		20007: {"Lucky Pack"},
+		20008: {"Twin"}, 20009: {"Twin"},
+		20011: {"Star Shadow"},
+		20012: {"New Suit"}, 20013: {"old  suit"}, 20014: {"Alpha", "Beta"},
+	}
+	got, stats := LayerSuits(ids, wiki, packed, calc)
+	want := map[int]string{
+		10001: "Old Suit (Hidden Suit)", 20010: "Star Shadow (Hidden Suit)",
+		20001: "New Suit", 20002: "New Suit", 20003: "New Suit",
+		20011: "Star Shadow (Hidden Suit)",
+		20012: "New Suit", 20013: "Old Suit (Hidden Suit)",
+	}
+	if !maps.Equal(got, want) {
+		t.Errorf("suits %v, want %v", got, want)
+	}
+	if want := (SuitStats{Wiki: 2, Calc: 6, Unnamed: 6, None: 1, Suits: 3}); stats != want {
+		t.Errorf("stats %+v, want %+v", stats, want)
+	}
+}
+
+func TestCalcSuitsMapMembersToGameIDsAndDropSharedNames(t *testing.T) {
+	table := []byte(`{"names": ["New Suit", "Twin", " Twin ", "Solo"], "offsets": [0, 2, 3, 4], "counts": [2, 1, 1, 2],
+		"clothes": [0, 1, 1, 2, 0, 9], "icons": [0, 0, 0, 0]}`)
+	got, stats, err := ParseCalcSuits(table, []byte(`{"H1": 0, "D2": 1, "C3": 2}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[int][]string{10001: {"New Suit", "Solo"}, 20002: {"New Suit"}}
+	if !maps.EqualFunc(got, want, slices.Equal) {
+		t.Errorf("suits %v, want %v", got, want)
+	}
+	if stats != (CalcSuitStats{Suits: 2, Ambiguous: 2, Items: 2, Unkeyed: 1}) {
+		t.Errorf("stats %+v", stats)
+	}
+	if _, _, err := ParseCalcSuits([]byte(`{"names": ["A"], "offsets": [0], "counts": [3], "clothes": [0]}`), []byte(`{}`)); err == nil {
+		t.Error("a suit running past the clothes list was accepted")
 	}
 }
 

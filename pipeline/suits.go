@@ -56,6 +56,8 @@ func ParsePackedSuits(src []byte, known map[int]bool) (map[int]PackedSuit, error
 type SuitStats struct {
 	Wiki    int
 	Late    int
+	Members int
+	Calc    int
 	Packs   int
 	Packed  int
 	Bases   int
@@ -68,7 +70,7 @@ func suitName(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
 
-func LayerSuits(ids []int, wiki WikiAcquisition, packed map[int]PackedSuit) (map[int]string, SuitStats) {
+func LayerSuits(ids []int, wiki WikiAcquisition, packed map[int]PackedSuit, calc map[int][]string) (map[int]string, SuitStats) {
 	var stats SuitStats
 	out := make(map[int]string, len(wiki.SuitOf))
 	for _, id := range ids {
@@ -99,6 +101,8 @@ func LayerSuits(ids []int, wiki WikiAcquisition, packed map[int]PackedSuit) (map
 			stats.Late++
 		}
 	}
+	stats.Members = placeByMembers(out, ids, packed)
+	stats.Calc = placeByCalc(out, ids, wiki.Packs, packed, calc)
 	for _, id := range ids {
 		if out[id] != "" {
 			continue
@@ -119,6 +123,115 @@ func LayerSuits(ids []int, wiki WikiAcquisition, packed map[int]PackedSuit) (map
 	}
 	stats.Suits = len(names)
 	return out, stats
+}
+
+func placeByMembers(out map[int]string, ids []int, packed map[int]PackedSuit) int {
+	held := map[string]map[string]int{}
+	for _, id := range ids {
+		p, ok := packed[id]
+		if !ok || p.Base || out[id] == "" {
+			continue
+		}
+		if held[p.Name] == nil {
+			held[p.Name] = map[string]int{}
+		}
+		held[p.Name][out[id]]++
+	}
+	placed := 0
+	for _, id := range ids {
+		p, ok := packed[id]
+		if !ok || p.Base || out[id] != "" || len(held[p.Name]) != 1 {
+			continue
+		}
+		for suit, n := range held[p.Name] {
+			if n >= 2 {
+				out[id] = suit
+				placed++
+			}
+		}
+	}
+	return placed
+}
+
+func placeByCalc(out map[int]string, ids []int, packs map[string]bool, packed map[int]PackedSuit, calc map[int][]string) int {
+	if len(calc) == 0 {
+		return 0
+	}
+	keys := map[string]string{}
+	for _, s := range out {
+		keys[foldSuit(s)] = s
+	}
+	pack := map[string]bool{}
+	for s := range packs {
+		pack[foldSuit(s)] = true
+	}
+	given := map[string]map[string]bool{}
+	holds := map[string]map[string]bool{}
+	for _, id := range ids {
+		p, ok := packed[id]
+		if !ok || p.Base {
+			continue
+		}
+		if out[id] != "" {
+			if holds[p.Name] == nil {
+				holds[p.Name] = map[string]bool{}
+			}
+			holds[p.Name][out[id]] = true
+		}
+		if names := calc[id]; len(names) == 1 {
+			if given[p.Name] == nil {
+				given[p.Name] = map[string]bool{}
+			}
+			given[p.Name][names[0]] = true
+		}
+	}
+	named := map[string]string{}
+	claims := map[string]int{}
+	for chinese, names := range given {
+		if len(names) != 1 {
+			continue
+		}
+		for name := range names {
+			key, clash := keys[foldSuit(name)]
+			held := holds[chinese]
+			switch {
+			case pack[foldSuit(name)] || len(held) > 1:
+			case len(held) == 1 && held[key]:
+				named[chinese] = key
+			case len(held) == 0 && !clash:
+				named[chinese] = name
+				claims[foldSuit(name)]++
+			}
+		}
+	}
+	placed := 0
+	for _, id := range ids {
+		p, ok := packed[id]
+		if !ok || p.Base || out[id] != "" {
+			continue
+		}
+		if name := named[p.Name]; name != "" && claims[foldSuit(name)] <= 1 {
+			out[id] = name
+			keys[foldSuit(name)] = name
+			placed++
+		}
+	}
+	for _, id := range ids {
+		if _, inTable := packed[id]; inTable || out[id] != "" || len(calc[id]) != 1 {
+			continue
+		}
+		name := calc[id][0]
+		if pack[foldSuit(name)] {
+			continue
+		}
+		if key, ok := keys[foldSuit(name)]; ok {
+			name = key
+		}
+		out[id] = name
+		keys[foldSuit(name)] = name
+		placed++
+	}
+	return placed
 }
 
 func placeLate(out map[int]string, part SuitPart, inCatalogue map[int]bool) int {

@@ -455,6 +455,41 @@ func TestCalcGradesNeedTheirSourcesAndStayUnderTheirCeiling(t *testing.T) {
 	}
 }
 
+func TestCalcSuitsPlaceItemsTheOtherSourcesLeaveOut(t *testing.T) {
+	c := testConfig(t)
+	c.dumpPath = "testdata/wiki.xml"
+	c.namesPath, c.keysPath = "testdata/names.json", "testdata/names-keys.json"
+	c.calcSuitsPath = filepath.Join(t.TempDir(), "suits.json")
+	doc := `{"names": ["Test Global Suit", "Shared", "Shared"], "offsets": [0, 2, 3], "counts": [2, 1, 1], "clothes": [1, 2, 0, 3]}`
+	if err := os.WriteFile(c.calcSuitsPath, []byte(doc), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(c); err != nil {
+		t.Fatal(err)
+	}
+	rows := itemRows(t, c)
+	for id, want := range map[int]string{20002: "Test Global Suit", 30003: "Test Global Suit", 10001: "", 10002: ""} {
+		if got := rows[id][14]; got != want {
+			t.Errorf("%d: suit %q, want %q", id, got, want)
+		}
+	}
+	var inputs []string
+	for _, src := range provenance(t, c).Sources {
+		if src.ID == "nikki-calc" {
+			for _, in := range src.Inputs {
+				inputs = append(inputs, in.File)
+			}
+		}
+	}
+	if !slices.Contains(inputs, "suits.json") {
+		t.Errorf("nikki-calc inputs %v, want suits.json among them", inputs)
+	}
+	c.keysPath = ""
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "-calc-suits needs -keys") {
+		t.Errorf("err = %v, want a refusal naming -keys", err)
+	}
+}
+
 func itemRows(t *testing.T, c config) map[int][]any {
 	t.Helper()
 	raw, err := os.ReadFile(filepath.Join(c.outDir, c.version, "items.json"))

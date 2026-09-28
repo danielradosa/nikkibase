@@ -23,6 +23,7 @@ type config struct {
 	stageValuesPath, stageNamesPath                       string
 	stageScopePath, stageDifficultyPath, stageRulesPath   string
 	packedPath, namesPath, keysPath, subgradesPath        string
+	calcSuitsPath                                         string
 	outDir, version                                       string
 	sourcesPath, exceptionsPath                           string
 	idCorrectionsPath, stageCorrectionsPath, coveragePath string
@@ -46,6 +47,7 @@ func main() {
 	flag.StringVar(&c.namesPath, "names", "", "path to Nikki Calc's items JSON, for names the dump lacks and rarity no other source gives")
 	flag.StringVar(&c.keysPath, "keys", "", "path to Nikki Calc's item-key JSON, required with -names and -subgrades")
 	flag.StringVar(&c.subgradesPath, "subgrades", "", "glob of Nikki Calc's item-batch files, whose sub-grades set each stat within its letter grade, e.g. .../item-batch-v0.14-*.json")
+	flag.StringVar(&c.calcSuitsPath, "calc-suits", "", "path to Nikki Calc's suits JSON, naming the suits the wiki has no page for; needs -keys")
 	flag.BoolVar(&c.calcGrades, "calc-grades", false, "grade the items no other source grades from the -subgrades item batches: letters, sides, places and style tags; needs -names")
 	flag.StringVar(&c.outDir, "out", "web/public/data", "directory to write the bundle into")
 	flag.StringVar(&c.version, "version", "", "version directory name, e.g. 2026.09")
@@ -94,6 +96,9 @@ func run(c config) error {
 	}
 	if c.subgradesPath != "" && c.keysPath == "" {
 		return fmt.Errorf("-subgrades needs -keys, which maps each item-batch record to its item")
+	}
+	if c.calcSuitsPath != "" && c.keysPath == "" {
+		return fmt.Errorf("-calc-suits needs -keys, which maps each suit's clothes to their items")
 	}
 	if c.calcGrades && (c.subgradesPath == "" || c.namesPath == "") {
 		return fmt.Errorf("-calc-grades reads the -subgrades item batches for the items -names lists, so it needs both")
@@ -339,7 +344,7 @@ func sourcesInUse(c config, reg *pipeline.Registry) ([]pipeline.Source, map[stri
 		{"fandom", c.dumpPath}, {"items", c.itemsPath}, {"known", c.knownPath},
 		{"stages", c.stagesPath}, {"stage-values", c.stageValuesPath}, {"stage-names", c.stageNamesPath},
 		{"packed", c.packedPath},
-		{"names", c.namesPath}, {"keys", c.keysPath}, {"subgrades", c.subgradesPath},
+		{"names", c.namesPath}, {"keys", c.keysPath}, {"subgrades", c.subgradesPath}, {"calc-suits", c.calcSuitsPath},
 	}
 	var used []pipeline.Source
 	inputs := map[string][]pipeline.Input{}
@@ -706,15 +711,40 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 		ids = append(ids, id)
 	}
 	slices.Sort(ids)
-	suits, suitStats := pipeline.LayerSuits(ids, wiki, packedSuits)
+	calcSuits, err := readCalcSuits(c)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	suits, suitStats := pipeline.LayerSuits(ids, wiki, packedSuits, calcSuits)
 	shared := 0
 	if wikiStats != nil {
 		shared = wikiStats.SharedParts
 	}
-	fmt.Printf("suits: %d of %d items in %d suits: %d from the wiki's suit and item pages (%d on more than one suit page), %d from the packed table under the wiki's English name, %d from a suit page whose part name fits several items once the others are placed; %d the wiki lists only on a pack page, which is no suit, left to the packed table; not in a suit: %d the packed table files as a suit's base, %d whose packed suit the wiki gives no English name, %d with no suit anywhere\n",
+	fmt.Printf("suits: %d of %d items in %d suits: %d from the wiki's suit and item pages (%d on more than one suit page), %d from the packed table under the wiki's English name, %d from a suit page whose part name fits several items once the others are placed, %d from the suit their other pieces are in, %d under Nikki Calc's name for a suit the wiki has no page for; %d the wiki lists only on a pack page, which is no suit, left to the packed table; not in a suit: %d the packed table files as a suit's base, %d whose packed suit has no English name, %d with no suit anywhere\n",
 		len(suits), len(ids), suitStats.Suits, suitStats.Wiki, shared, suitStats.Packed, suitStats.Late,
-		suitStats.Packs, suitStats.Bases, suitStats.Unnamed, suitStats.None)
+		suitStats.Members, suitStats.Calc, suitStats.Packs, suitStats.Bases, suitStats.Unnamed, suitStats.None)
 	return acq, wikiStats, suits, nil
+}
+
+func readCalcSuits(c config) (map[int][]string, error) {
+	if c.calcSuitsPath == "" {
+		return nil, nil
+	}
+	table, err := os.ReadFile(c.calcSuitsPath)
+	if err != nil {
+		return nil, err
+	}
+	keys, err := os.ReadFile(c.keysPath)
+	if err != nil {
+		return nil, err
+	}
+	suits, stats, err := pipeline.ParseCalcSuits(table, keys)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("calc suits: %d suits, %d whose name Nikki Calc gives twice left out, %d items in one, %d clothes without a key\n",
+		stats.Suits, stats.Ambiguous, stats.Items, stats.Unkeyed)
+	return suits, nil
 }
 
 func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,

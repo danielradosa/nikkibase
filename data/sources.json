@@ -59,7 +59,7 @@
       "id": "nikki-calc",
       "name": "Nikki Calc",
       "url": "https://nikkicalc.com",
-      "flags": ["names", "keys", "subgrades"],
+      "flags": ["names", "keys", "subgrades", "calc-suits"],
       "licence": "none",
       "permission": "given 2026-09-26, for a site that is free for the community (ads and Patreon are fine; the data is not sold), with credit, and without putting load on nikkicalc.com or its hosting",
       "permissionUrl": "https://github.com/nikki-calc/nikki-calc-project/issues/33#issuecomment-5843594161",

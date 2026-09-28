@@ -711,7 +711,7 @@ func TestPacksAreNoSuits(t *testing.T) {
 		t.Fatal(err)
 	}
 	packed := map[int]PackedSuit{80003: {Name: "冬礼包"}}
-	got, stats := LayerSuits([]int{10001, 80002, 80003}, wiki, packed)
+	got, stats := LayerSuits([]int{10001, 80002, 80003}, wiki, packed, nil)
 	if want := map[int]string{10001: "Winter Wish"}; !maps.Equal(got, want) {
 		t.Errorf("suits %v, want %v", got, want)
 	}
@@ -733,14 +733,14 @@ func TestAnAmbiguousPartTakesTheItemThePackedTableLeavesFree(t *testing.T) {
 	if len(wiki.SuitOf) != 0 || len(wiki.Unplaced) != 2 {
 		t.Fatalf("suits %v and unplaced parts %v, want none placed and both parts waiting", wiki.SuitOf, wiki.Unplaced)
 	}
-	got, stats := LayerSuits([]int{10001, 10002}, wiki, map[int]PackedSuit{10001: {Name: "孤月"}})
+	got, stats := LayerSuits([]int{10001, 10002}, wiki, map[int]PackedSuit{10001: {Name: "孤月"}}, nil)
 	if want := map[int]string{10001: "Lone Suit", 10002: "Star Suit"}; !maps.Equal(got, want) {
 		t.Errorf("suits %v, want %v", got, want)
 	}
 	if stats.Packed != 1 || stats.Late != 1 {
 		t.Errorf("stats %+v, want one from the packed table and one placed after it", stats)
 	}
-	if got, _ := LayerSuits([]int{10001, 10002}, wiki, nil); len(got) != 0 {
+	if got, _ := LayerSuits([]int{10001, 10002}, wiki, nil, nil); len(got) != 0 {
 		t.Errorf("suits %v, want none while both items are free", got)
 	}
 }
