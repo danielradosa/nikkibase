@@ -22,7 +22,7 @@ every place it knowingly differs from the game.
 
 ## What NikkiBase knows
 
-- Letter grades and sub-grades (S−, S, S+ and so on) for about 33,000 Global
+- Letter grades and sub-grades (S−, S, S+ and so on) for about 34,000 Global
   items, gathered from community sources (see [SOURCES.md](SOURCES.md)).
 - Stage weights and style-tag bonuses for every stage released on the Global
   server: Story Volumes I–II and Volume III to chapter 3, Commission Acts 1–20,

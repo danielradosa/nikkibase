@@ -22,20 +22,20 @@ which NikkiBase matches to within 1% on Story 1-1.
 
 | Stage | NikkiBase best possible | #1 ranked | Gap |
 |---|---|---|---|
-| Story 1-1 | 119,052 | 183,260 | -35% |
+| Story 1-1 | 119,118 | 183,260 | -35% |
 | Story 1-2 | 139,269 | 194,384 | -28% |
-| Story 4-1 | 125,005 | 239,979 | -48% |
-| Story 7-7 | 163,662 | 212,890 | -23% |
+| Story 4-1 | 125,052 | 239,979 | -48% |
+| Story 7-7 | 163,665 | 212,890 | -23% |
 
 Best possible is at Princess difficulty, which on these stages other than 4-1
 scores the same as Maiden.
 
 - **Story 1-1 and 1-2**: mostly skills. With Skills switched on at max level, the
-  best possible is 163,292 (-11%) and 184,612 (-5%).
+  best possible is 163,333 (-11%) and 184,694 (-5%).
 - **Story 7-7**: most of its score is tag points, which skills don't raise:
-  166,613 (-22%) with them. The rest is unexplained.
+  166,617 (-22%) with them. The rest is unexplained.
 - **Story 4-1**: at Princess its Rain tag pays C x0.5; at Maiden it pays SS x1,
-  and the best possible is 186,632 (-22%), or 216,912 (-10%) with skills. The
+  and the best possible is 186,680 (-22%), or 216,903 (-10%) with skills. The
   Princess gap is larger than skills can explain, so the ranked score was
   probably set at Maiden.
 
@@ -102,24 +102,53 @@ in either direction).
 
 ## Items listed by name only
 
-989 items released on Global have no grades in any source the build reads:
-507 accessories, 107 dresses, 91 hairs, 78 shoes, 52 coats, 51 hosiery, 44
-tops, 38 bottoms and 21 makeup. 975 of them were graded in the bundles before
-`2026-09-28`. `items.json` lists each under Nikki Calc's name with its rarity
-and no stats, and `acquire.json` says how to get 967 of them. 953 are in a
-suit.
+7 items the game lists are listed by name only. 5 carry an ID of one slot
+while Nikki Calc and the wiki's suit pages file them under another: 30961
+Vanity Fair, a coat filed as a top, and the accessories 81327 Moonlight
+Serenade, 82599 Bamboo Leaf Bracelet, 83221 Maple Viewing and 85735 Glistening
+Aqua, filed as a coat, leglets, shoes and leglets. How the game sizes such an
+item's stats is unknown. 2 were never released: 85647 Magic Bubble and 181794
+Hymn of Dawn, both called unused by the wiki (`data/id-corrections.json`).
+`items.json` lists each under Nikki Calc's name with its rarity and no stats.
 
-**Cost:** these items are never recommended and score nothing. A best
-possible outfit that would wear one is missed, and a player who owns one gets
-no credit for it. Worth getting's suits leave them out of their pieces.
+**Cost:** these items are never recommended and score nothing. A player who
+owns one of the five gets no credit for it.
+
+## Items graded by Nikki Calc alone
+
+982 items released on Global, most of them Global-only, have no grades in the
+Love Nikki Wiki or nikkiup2u3. Their letters, sides, wearable places and style
+tags come from Nikki Calc's item data: each sub-grade rounded to its letter
+(S- is S), its slot code for the place, and its style list for the tags.
+Where Nikki Calc and the other sources both grade an item, they agree on 99.7%
+of grades and 99.98% of sides, and its place matches ours on 99.95% of items.
+Nikki Calc marks 38 items in Korean-themed suits with a style its own list does
+not name; that mark is left out, and no Global stage awards such a style.
+
+**Cost:** one of these items can be a letter off on a stat, or miss a style
+tag, somewhat more often than an item two sources grade.
+
+## Item-page grades two sources contradict
+
+On 406 grades of 285 items, the wiki's item page gives one grade while
+nikkiup2u3 and Nikki Calc agree on another; the build takes theirs, 21 times on
+the other side of the pair. On the 35 pages with three or more such grades,
+most rows are another item's copied onto the page: a sibling in the same suit,
+a recolour, or the spirit it evolves into.
+
+**Cost:** none known. If both sources were wrong where the wiki is right, the
+item would be a letter off on that stat.
 
 ## Items in no suit
 
-`items.json` places 29,444 of 34,012 items in 2,245 suits: 29,323 as the
-Love Nikki Wiki's suit and item pages place them, and 121 the wiki places in
-none that nikkiup2u3 files under a suit the wiki names in Chinese. The other
-4,568 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base, 740
-whose Chinese suit name no single wiki suit page gives, and 2,473 no source places.
+`items.json` places 30,193 of 34,012 items in 2,293 suits: 29,323 as the
+Love Nikki Wiki's suit and item pages place them, 121 the wiki places in none
+that nikkiup2u3 files under a suit the wiki names in Chinese, 16 that nikkiup2u3
+files with pieces the wiki already places, and 733 under Nikki Calc's name for
+48 suits the wiki has no page for yet (the wiki dump is from 2026-07-29). The
+other 3,819 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base,
+1 whose Chinese suit no source names in English (To Eternity), and 2,463 no
+source places.
 A suit is named as its wiki page is titled, and the site shows it without the
 qualifier the wiki adds to tell suits apart ("Star Shadow", not "Star Shadow
 (Hidden Suit)"); two suits with one name, such as the two Night Rose suits,
@@ -140,7 +169,7 @@ item from its sub-grade (S-, S, S+ and so on): a + or - moves a stat 43% of the
 way to the next letter's value, and each letter keeps its average. On the few
 single stats that have been measured exactly this is within about 1.5%, and
 the best possible outfit on Story 1-1 is within 1% of Nikki Calc's. Two items
-sharing a sub-grade cannot be told apart, and the 441 stats whose sub-grade
+sharing a sub-grade cannot be told apart, and the 35 stats whose sub-grade
 names another letter or side than our grade keep the letter's value. See the
 footer note in the product.
 
