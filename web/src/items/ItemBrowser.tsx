@@ -29,13 +29,18 @@ export default function ItemBrowser({
   const onItems = useStore((s) => s.tab) === 'items'
   const [hint, setHint] = useState(manual)
   const showHint = tickHint(hint, manual, onItems)
-  if (showHint !== hint) setHint(showHint)
   const filters = JSON.stringify([query, slot, ownedOnly, scoreableOnly, rarity])
   const [paging, setPaging] = useState({ filters, shown: ITEM_STEP })
-  const page = itemPage(paging, filters)
-  if (page !== paging) setPaging(page)
-  const shown = page.shown
+  const shown = itemPage(paging, filters).shown
   const focusRow = useRef<number | null>(null)
+
+  useLayoutEffect(() => {
+    if (!onItems) setHint(manual)
+  }, [onItems, manual])
+
+  useLayoutEffect(() => {
+    setPaging((page) => itemPage(page, filters))
+  }, [filters])
 
   useLayoutEffect(() => {
     const index = focusRow.current
