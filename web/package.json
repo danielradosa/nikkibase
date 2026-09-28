@@ -8,7 +8,7 @@
     "preview": "vite preview",
     "build:wasm": "cd .. && GOOS=js GOARCH=wasm go build -ldflags=\"-s -w\" -o web/src/generated/nikkibase.wasm ./wasm",
     "build:ideal": "cd .. && go run ./cmd/ideal -data web/public/data -out web/src/generated/ideal.json",
-    "test": "node --test test/*.test.ts"
+    "test": "node --test 'test/**/*.test.ts'"
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",

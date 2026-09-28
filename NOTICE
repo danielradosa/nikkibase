@@ -3,7 +3,7 @@ Copyright (c) 2026 Daniel Radosa — MIT, see LICENSE.
 
 This product includes third-party software.
 
-The WebAssembly engine includes the Go runtime, and web/src/wasm_exec.js is
+The WebAssembly engine includes the Go runtime, and web/src/engine/wasm_exec.js is
 Go's loader for it. Both are from the Go project, distributed under the
 following licence:
 

@@ -2,7 +2,7 @@
 
 NikkiBase's [MIT licence](LICENSE) covers its **source code** only: `core/`,
 `pipeline/`, `cmd/`, `wasm/`, `main.go` and `web/`, with two exceptions:
-`web/src/wasm_exec.js` is the Go authors' (BSD-3-Clause, see [NOTICE](NOTICE)),
+`web/src/engine/wasm_exec.js` is the Go authors' (BSD-3-Clause, see [NOTICE](NOTICE)),
 and the style-code table `styleName` in `pipeline/tagtable.go` follows the
 wiki's Template:S (CC BY-SA 3.0, below). The MIT licence does not cover data,
 and it grants no rights in it.

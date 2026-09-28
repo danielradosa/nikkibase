@@ -1,10 +1,10 @@
 import { create } from 'zustand'
-import type { Outfit } from './engine'
-import type { SkillChoice } from './engine'
-import { parseSkills, type SkillSettings } from './skills'
-import type { WardrobeSource } from './storage'
-import type { OpenTarget } from './worth'
-import type { Difficulty, Ideal } from './stages'
+import type { Outfit } from './engine/engine'
+import type { SkillChoice } from './engine/engine'
+import { parseSkills, type SkillSettings } from './outfit/skills'
+import type { WardrobeSource } from './wardrobe/storage'
+import type { OpenTarget } from './worth/worth'
+import type { Difficulty, Ideal } from './outfit/stages'
 
 type State = {
   ready: boolean

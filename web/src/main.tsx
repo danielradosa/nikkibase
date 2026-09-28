@@ -10,9 +10,9 @@ import '@fontsource/cormorant-garamond/700.css'
 import '@fontsource/cormorant-garamond/600-italic.css'
 import './styles.css'
 import { themeFor } from './theme'
-import { usePhone } from './usePhone'
+import { usePhone } from './hooks/usePhone'
 import App from './App'
-import Petals from './Petals'
+import Petals from './components/Petals'
 
 const SPIN = { indicator: <Petals /> }
 

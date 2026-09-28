@@ -1,10 +1,10 @@
-import { engine } from './engine'
+import { engine } from './engine/engine'
 import idealUrl from './generated/ideal.json?url'
-import { loadIdeals } from './idealLoad'
-import { parseItems, type ItemPlaces, type Row } from './items'
-import type { Place } from './comparison'
-import type { IdealTable, Stage } from './stages'
-import type { AcquireFile, AcquireTable } from './worth'
+import { loadIdeals } from './engine/idealLoad'
+import { parseItems, type ItemPlaces, type Row } from './items/items'
+import type { Place } from './outfit/comparison'
+import type { IdealTable, Stage } from './outfit/stages'
+import type { AcquireFile, AcquireTable } from './worth/worth'
 
 export const version = __DATA_VERSION__
 
