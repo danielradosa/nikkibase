@@ -13,10 +13,10 @@ import ItemBrowser from './items/ItemBrowser'
 import WorthTab from './worth/WorthTab'
 import WaitLine from './components/WaitLine'
 import { itemsTabLabel } from './items/items'
-import { LIST_FAILED, LIST_WAIT } from './wardrobe/wardrobeText'
+import { ENGINE_FAILED, LIST_FAILED, LIST_WAIT } from './wardrobe/wardrobeText'
 
 export default function App() {
-  const { ready, owned, source, notice, error, tab, set } = useStore()
+  const { ready, owned, source, notice, error, engine, engineError, tab, set } = useStore()
   const { stages, items, itemsFailed, tagNames, places, version } = useBundle()
   useBestOutfit(stages)
   const { ingest, toggleOwned, forget } = useWardrobe(version)
@@ -37,7 +37,7 @@ export default function App() {
 
   return (
     <>
-      <Blossom done={ready} failed={!!error && !ready} onUncover={uncover} />
+      <Blossom done={ready} failed={(!!error || engine === 'failed') && !ready} onUncover={uncover} />
       <p className="nb-visually-hidden" role="status" aria-live="polite">
         {announcement}
       </p>
@@ -45,6 +45,9 @@ export default function App() {
         <Header onForget={forget} />
 
         <Layout.Content className="nb-content">
+          {engine === 'failed' && (
+            <Alert type="error" message={ENGINE_FAILED} description={engineError || undefined} className="nb-alert" showIcon />
+          )}
           {error && (
             <Alert type="error" message={error} className="nb-alert" showIcon closable onClose={() => set({ error: null })} />
           )}

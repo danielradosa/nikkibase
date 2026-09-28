@@ -51,6 +51,18 @@ export function importingText(engineReady: boolean): string {
 
 export const ENGINE_WAIT = 'Engine still loading · you can drop your file now'
 
+export const ENGINE_FAILED = "The scoring engine couldn't start. Reload the page to try again."
+
+export const ENGINE_DOWN = {
+  import: "Engine couldn't start · files can't be read",
+  outfit: "The engine couldn't start, so no outfit can be found.",
+  worth: "The engine couldn't start, so nothing can be ranked.",
+}
+
+export function engineReason(e: unknown): string {
+  return String(e).replace(/^(?:\s*Error:\s*)+/, '').trim()
+}
+
 export const LIST_WAIT = 'Loading the item list…'
 
 export const LIST_FAILED = "The item list couldn't be loaded."

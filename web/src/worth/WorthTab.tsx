@@ -16,7 +16,7 @@ import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
 import { runner, useAcquire, useIdeals, useWorthRanking, useWorthRun, type Acquire } from './useWorth'
 import WaitLine from '../components/WaitLine'
-import { LIST_FAILED, LIST_WAIT, SCORES_WAIT } from '../wardrobe/wardrobeText'
+import { ENGINE_DOWN, LIST_FAILED, LIST_WAIT, SCORES_WAIT } from '../wardrobe/wardrobeText'
 import {
   ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, PAST_NOTE, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
   detailsLabel, filterMode, filterSuits, gainText, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
@@ -198,6 +198,7 @@ function FirstWays({ ids, acquire }: { ids: number[]; acquire: Acquire }) {
 export default function WorthTab({ stages, items, itemsFailed, places, owned, version }: Props) {
   const ownedIds = useStore((s) => s.owned)
   const tab = useStore((s) => s.tab)
+  const engineState = useStore((s) => s.engine)
   const difficulty = useStore((s) => s.difficulty)
   const setDifficulty = useStore((s) => s.setDifficulty)
   const skills = useStore((s) => s.skills)
@@ -376,6 +377,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
       return it ? placeName(it, places) : ''
     })
 
+  if (engineState === 'failed') return <Alert type="info" showIcon className="nb-alert" message={ENGINE_DOWN.worth} />
   if (!ownedIds.length) {
     return (
       <Empty className="nb-worth-empty" description="Import your wardrobe first. This tab then ranks what you don't own by how much it would raise your best scores.">

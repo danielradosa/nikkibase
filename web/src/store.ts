@@ -17,6 +17,7 @@ type State = {
   busy: boolean
   importing: boolean
   engine: 'loading' | 'ready' | 'failed'
+  engineError: string | null
   notice: string | null
   error: string | null
   difficulty: Difficulty
@@ -72,6 +73,7 @@ export const useStore = create<State>((set) => ({
   busy: false,
   importing: false,
   engine: 'loading',
+  engineError: null,
   notice: null,
   error: null,
   difficulty: savedDifficulty(),

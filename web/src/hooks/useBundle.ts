@@ -6,7 +6,7 @@ import { useStore } from '../store'
 import { clearWardrobe, loadWardrobe } from '../wardrobe/storage'
 import type { Place } from '../outfit/comparison'
 import type { Stage } from '../outfit/stages'
-import { discardNotice } from '../wardrobe/wardrobeText'
+import { discardNotice, engineReason } from '../wardrobe/wardrobeText'
 
 export type Bundle = {
   stages: Stage[]
@@ -24,16 +24,21 @@ export function useBundle(): Bundle {
   const [bundle, setBundle] = useState<Bundle>(EMPTY)
 
   useEffect(() => {
+    const report = (e: unknown) =>
+      engineReady.then(
+        () => set({ error: String(e) }),
+        () => {},
+      )
     items.then(
       (itemList) => setBundle((b) => ({ ...b, items: itemList })),
       (e) => {
         setBundle((b) => ({ ...b, itemsFailed: true }))
-        set({ error: String(e) })
+        report(e)
       },
     )
     engineReady.then(
       () => set({ engine: 'ready' }),
-      (e) => set({ engine: 'failed', error: String(e) }),
+      (e) => set({ engine: 'failed', engineError: engineReason(e) }),
     )
     ;(async () => {
       try {
@@ -45,7 +50,7 @@ export function useBundle(): Bundle {
           const { ids, source } = saved.entry
           engine.setWardrobe(ids).then(
             (stats) => useStore.getState().owned === ids && set({ decoded: { ...stats, unresolved: 0 } }),
-            (e) => set({ error: String(e) }),
+            report,
           )
           set({ owned: ids, source, decoded: null })
         } else {

@@ -6,7 +6,7 @@ import { FINDING, NAMES_WAIT, comparisonRows, outfitText, resultView, type Place
 import { skillsLine } from './skills'
 import { SITE_HOST } from '../site'
 import { missingMessage, stageKey, type Stage } from './stages'
-import { manyUnscored, unscored } from '../wardrobe/wardrobeText'
+import { ENGINE_DOWN, manyUnscored, unscored } from '../wardrobe/wardrobeText'
 import WardrobeImport from '../wardrobe/WardrobeImport'
 import StagePicker from './StagePicker'
 import StageSummary from './StageSummary'
@@ -26,7 +26,7 @@ type Props = {
 }
 
 export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, places, onFile }: Props) {
-  const { owned, decoded, stage, outfit, ideal, busy, difficulty, mode, tab, jump, set } = useStore()
+  const { owned, decoded, stage, outfit, ideal, busy, engine, difficulty, mode, tab, jump, set } = useStore()
 
   const names = useMemo(() => new Map((items ?? []).map((it) => [it.id, it.name])), [items])
   const naming = items === null && !itemsFailed
@@ -100,7 +100,13 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
       ) : (
         owned.length > 0 &&
         !busy && (
-          <Empty description="Pick a stage to see your best outfit and the best possible one (using every item in the game)." />
+          <Empty
+            description={
+              engine === 'failed'
+                ? ENGINE_DOWN.outfit
+                : 'Pick a stage to see your best outfit and the best possible one (using every item in the game).'
+            }
+          />
         )
       )}
     </>

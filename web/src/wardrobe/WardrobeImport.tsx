@@ -5,7 +5,7 @@ import { useStore } from '../store'
 import { useLate } from '../hooks/useLate'
 import { usePhone } from '../hooks/usePhone'
 import WaitLine from '../components/WaitLine'
-import { DROP_HINT, ENGINE_WAIT, NO_FILE, TAGLINE, dropText, importingText, loadedLabel, stripNotes } from './wardrobeText'
+import { DROP_HINT, ENGINE_DOWN, ENGINE_WAIT, NO_FILE, TAGLINE, dropText, importingText, loadedLabel, stripNotes } from './wardrobeText'
 
 export default function WardrobeImport({ onFile }: { onFile: (text: string) => Promise<void> }) {
   const owned = useStore((s) => s.owned)
@@ -63,6 +63,11 @@ export default function WardrobeImport({ onFile }: { onFile: (text: string) => P
       </Upload.Dragger>
 
       {engine === 'loading' && !loaded && !importing && <WaitLine text={ENGINE_WAIT} className="nb-engine-wait" />}
+      {engine === 'failed' && !loaded && (
+        <Typography.Paragraph type="secondary" className="nb-engine-down">
+          {ENGINE_DOWN.import}
+        </Typography.Paragraph>
+      )}
 
       {!loaded && phone && <Typography.Paragraph className="nb-tagline nb-tagline-under">{TAGLINE}</Typography.Paragraph>}
 

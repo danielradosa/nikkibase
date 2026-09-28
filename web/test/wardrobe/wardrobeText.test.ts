@@ -2,6 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   DROP_HINT,
+  ENGINE_DOWN,
+  ENGINE_FAILED,
   ENGINE_WAIT,
   LIST_FAILED,
   LIST_WAIT,
@@ -10,6 +12,7 @@ import {
   TAGLINE,
   discardNotice,
   dropText,
+  engineReason,
   importError,
   importingText,
   loadedLabel,
@@ -119,4 +122,19 @@ test('the lists that are still loading say which one, and never promise a time',
 
 test('a failed item list says so instead of loading for ever', () => {
   assert.equal(LIST_FAILED, "The item list couldn't be loaded.")
+})
+
+test('when the engine cannot start, the page says so plainly and says what to do', () => {
+  assert.equal(ENGINE_FAILED, "The scoring engine couldn't start. Reload the page to try again.")
+  assert.equal(ENGINE_DOWN.import, "Engine couldn't start · files can't be read")
+  assert.equal(ENGINE_DOWN.outfit, "The engine couldn't start, so no outfit can be found.")
+  assert.equal(ENGINE_DOWN.worth, "The engine couldn't start, so nothing can be ranked.")
+})
+
+test('the reason the engine gives drops the repeated Error prefixes', () => {
+  assert.equal(engineReason(new Error('Error: items.bin: 404 Not Found')), 'items.bin: 404 Not Found')
+  assert.equal(engineReason('Error: Error: WebAssembly.instantiate(): out of memory'), 'WebAssembly.instantiate(): out of memory')
+  assert.equal(engineReason(new Error('the engine stopped')), 'the engine stopped')
+  assert.equal(engineReason('Error: '), '')
+  assert.equal(engineReason(new TypeError('Failed to fetch')), 'TypeError: Failed to fetch')
 })

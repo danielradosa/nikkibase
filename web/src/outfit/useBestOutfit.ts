@@ -9,7 +9,7 @@ import { bestOutfitRun, type Shown } from './bestOutfitRun'
 const search = bestOutfitRun({ ideals, get: () => useStore.getState(), set: (patch) => useStore.getState().set(patch) })
 
 export function useBestOutfit(stages: readonly Stage[]) {
-  const { owned, stage, difficulty, skills, placements, tab } = useStore()
+  const { owned, stage, difficulty, skills, placements, tab, engine: engineState } = useStore()
   const found = stages.find((s) => stageKey(s) === stage)
   const key = found ? placementKey(found, difficulty) : null
   const placement = key && skills.manual ? placements[key] ?? null : null
@@ -20,7 +20,7 @@ export function useBestOutfit(stages: readonly Stage[]) {
   const shown = useRef<Shown | null>(null)
 
   useEffect(() => {
-    if (!onTab || !owned.length || !found || !key) return
+    if (!onTab || engineState === 'failed' || !owned.length || !found || !key) return
     const chosen = resolveStage(found, difficulty)
     const require = chosen.rules?.require
     return search(
@@ -34,5 +34,5 @@ export function useBestOutfit(stages: readonly Stage[]) {
       },
       shown,
     )
-  }, [onTab, owned, found, key, difficulty, mineKey, ceilingKey, fromTable])
+  }, [onTab, engineState, owned, found, key, difficulty, mineKey, ceilingKey, fromTable])
 }
