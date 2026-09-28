@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -50,12 +51,13 @@ type acqRawPage struct {
 }
 
 type acqPage struct {
-	title    string
-	id       int
-	obtain   string
-	suit     string
-	intro    string
-	sections map[string]string
+	title      string
+	id         int
+	obtain     string
+	suit       string
+	intro      string
+	sections   map[string]string
+	categories []string
 }
 
 type acqSuit struct {
@@ -105,7 +107,16 @@ var (
 	wikiPartType     = regexp.MustCompile(`\|\s*type\s*=\s*([^|}]*)`)
 	wikiEventWord    = regexp.MustCompile(`(?i)\bevents?\b`)
 	wikiCustomTarget = regexp.MustCompile(`(?m)^\*\s*\{\{IconItem\|([^}|]+)[^}]*\}\}\s*:?(.*)$`)
+	wikiCategory     = regexp.MustCompile(`\[\[Category:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]`)
 )
+
+var rechargeCategories = []struct{ category, text string }{
+	{"Abyssal Island", "Abyssal Island"},
+	{"Lucky Bags", "Lucky Bags"},
+	{"Zodiac Lucky Pack", "Zodiac Lucky Pack"},
+	{"Time-limited Pack", "Time-limited Pack"},
+	{"First Recharge Giftpack", "First Recharge Giftpack"},
+}
 
 type fixedSource struct {
 	kind, text string
@@ -162,6 +173,9 @@ var fixedSources = map[string]fixedSource{
 	"monthly card":                  {"recharge", "Monthly Card"},
 	"one-dollar sale":               {"recharge", "One-Dollar Sale"},
 	"one dollar sale":               {"recharge", "One-Dollar Sale"},
+	"time-limited pack":             {"recharge", "Time-limited Pack"},
+	"zodiac lucky pack":             {"recharge", "Zodiac Lucky Pack"},
+	"zodiac lucky packs":            {"recharge", "Zodiac Lucky Pack"},
 	"monthly sign-in":               {"signin", "Monthly Sign-In"},
 	"monthly sign-in reward":        {"signin", "Monthly Sign-In"},
 	"monthly sign in":               {"signin", "Monthly Sign-In"},
@@ -276,7 +290,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 		ChineseSuits: chineseSuits(suits), Packs: packTitles(suits), Unplaced: ctx.unplaced(suits)}
 	stats.Pages = len(pages)
 	for _, p := range pages {
-		if list := ctx.pageAcquisition(p); len(list) > 0 {
+		if list := categoryRecharge(ctx.pageAcquisition(p), p.categories); len(list) > 0 {
 			out.Items[p.id] = list
 			stats.WithEntries++
 		}
@@ -329,14 +343,40 @@ func acqItemPage(page acqRawPage, known map[int]bool, corrections *IDCorrections
 	if i := wikiSection.FindStringIndex(body); i != nil {
 		intro = body[:i[0]]
 	}
+	var categories []string
+	for _, m := range wikiCategory.FindAllStringSubmatch(text, -1) {
+		categories = append(categories, m[1])
+	}
 	return acqPage{
-		title:    title,
-		id:       id,
-		obtain:   fields["how to obtain"],
-		suit:     fields["part of suit"],
-		intro:    intro,
-		sections: wikiSections(body),
+		title:      title,
+		id:         id,
+		obtain:     fields["how to obtain"],
+		suit:       fields["part of suit"],
+		intro:      intro,
+		sections:   wikiSections(body),
+		categories: categories,
 	}, true
+}
+
+func categoryRecharge(list []Acquisition, categories []string) []Acquisition {
+	plain := func(a Acquisition) bool { return a.Kind == "recharge" && a.Text == "Recharge" }
+	if !allVague(list) || !slices.ContainsFunc(list, plain) {
+		return list
+	}
+	var named []Acquisition
+	for _, c := range rechargeCategories {
+		if slices.ContainsFunc(categories, func(got string) bool { return strings.EqualFold(got, c.category) }) {
+			named = append(named, Acquisition{Kind: "recharge", Text: c.text, Past: pastSource("recharge", c.text)})
+		}
+	}
+	if len(named) == 0 {
+		return list
+	}
+	out := slices.DeleteFunc(slices.Clone(list), plain)
+	for _, a := range named {
+		out = appendAcquisition(out, a)
+	}
+	return out
 }
 
 func acqSuitPage(page acqRawPage) acqSuit {

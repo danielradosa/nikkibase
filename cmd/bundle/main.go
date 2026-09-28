@@ -704,8 +704,8 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 		}
 	}
 	acq, stats := pipeline.MergeAcquisition(cat, wiki.Items, packed, wiki.Suits)
-	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page, %d from the packed table, %d from their suit's wiki page\n",
-		stats.Covered, stats.Catalogue, stats.FromWiki, stats.FromPacked, stats.FromSuits)
+	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page\n",
+		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits)
 	ids := make([]int, 0, len(cat.Names))
 	for id := range cat.Names {
 		ids = append(ids, id)

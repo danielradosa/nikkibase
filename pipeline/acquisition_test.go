@@ -1,11 +1,12 @@
 package pipeline
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
 
-func TestMergeAcquisitionNeverMixesSources(t *testing.T) {
+func TestMergeAcquisitionTakesTheWikiThenThePackedTableThenTheSuitPage(t *testing.T) {
 	cat := AcquisitionCatalogue{Names: map[int]string{1: "A", 2: "B", 3: "C", 4: "D"}}
 	wiki := map[int][]Acquisition{1: {{Kind: "store", Text: "Clothes Store"}}, 9: {{Kind: "store", Text: "Clothes Store"}}}
 	packed := map[int][]Acquisition{
@@ -20,6 +21,54 @@ func TestMergeAcquisitionNeverMixesSources(t *testing.T) {
 	}
 	if stats != (AcquisitionStats{Catalogue: 4, Covered: 3, FromWiki: 1, FromPacked: 1, FromSuits: 1}) {
 		t.Errorf("stats = %+v", stats)
+	}
+}
+
+func TestMergeAcquisitionSharpensVagueLinesFromTheOtherSources(t *testing.T) {
+	cat := AcquisitionCatalogue{Names: map[int]string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}}
+	wiki := map[int][]Acquisition{4: {{Kind: "evolve", Text: "Evolution"}, {Kind: "store", Text: "Clothes Store"}}}
+	packed := map[int][]Acquisition{
+		1: {{Kind: "event", Text: "Limited event", CN: true}, {Kind: "recharge", Text: "Recharge", CN: true}},
+		2: {{Kind: "event", Text: "Limited event", CN: true}, {Kind: "craft", Text: "Crafting", CN: true}},
+		3: {{Kind: "event", Text: "Limited event", CN: true}},
+		4: {{Kind: "evolve", Text: "Evolve: E", From: []Ingredient{{ID: 5, Qty: 2}}, CN: true}},
+	}
+	suits := map[int][]Acquisition{
+		1: {{Kind: "event", Text: "Starry Night event", Past: true}, {Kind: "store", Text: "Clothes Store"}, {Kind: "pavilion", Text: "Wish Gate"}},
+		2: {{Kind: "event", Text: "Starry Night event", Past: true}},
+		3: {{Kind: "recharge", Text: "Recharge"}},
+	}
+	got, stats := MergeAcquisition(cat, wiki, packed, suits)
+	want := `{"version":"v","items":{` +
+		`"1":[{"k":"event","t":"Starry Night event","past":1},{"k":"store","t":"Clothes Store"}],` +
+		`"2":[{"k":"event","t":"Limited event","cn":1},{"k":"craft","t":"Crafting","cn":1}],` +
+		`"3":[{"k":"event","t":"Limited event","cn":1}],` +
+		`"4":[{"k":"evolve","t":"Evolve: E","from":[[5,2]],"cn":1},{"k":"store","t":"Clothes Store"}]}}`
+	if out := string(WriteAcquisition("v", got)); out != want {
+		t.Errorf("\n got %s\nwant %s", out, want)
+	}
+	if stats.Named != 1 || stats.Based != 1 || stats.FromWiki != 1 || stats.FromPacked != 3 {
+		t.Errorf("stats = %+v", stats)
+	}
+}
+
+func TestCategoriesNameAPlainRechargeLine(t *testing.T) {
+	plain := []Acquisition{{Kind: "recharge", Text: "Recharge"}}
+	for name, c := range map[string]struct {
+		list       []Acquisition
+		categories []string
+		want       []Acquisition
+	}{
+		"abyssal":  {plain, []string{"Clothing", "abyssal island"}, []Acquisition{{Kind: "recharge", Text: "Abyssal Island", Past: true}}},
+		"lasting":  {plain, []string{"First Recharge Giftpack"}, []Acquisition{{Kind: "recharge", Text: "First Recharge Giftpack"}}},
+		"no match": {plain, []string{"Clothing"}, plain},
+		"specific": {[]Acquisition{plain[0], {Kind: "store", Text: "Clothes Store"}}, []string{"Abyssal Island"}, []Acquisition{plain[0], {Kind: "store", Text: "Clothes Store"}}},
+		"no plain": {[]Acquisition{{Kind: "event", Text: "Limited event"}}, []string{"Abyssal Island"}, []Acquisition{{Kind: "event", Text: "Limited event"}}},
+	} {
+		same := func(a, b Acquisition) bool { return sameAcquisition(a, b) && a.Past == b.Past }
+		if got := categoryRecharge(c.list, c.categories); !slices.EqualFunc(got, c.want, same) {
+			t.Errorf("%s: %+v, want %+v", name, got, c.want)
+		}
 	}
 }
 

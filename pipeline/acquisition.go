@@ -184,6 +184,84 @@ type AcquisitionStats struct {
 	FromWiki   int
 	FromPacked int
 	FromSuits  int
+	Named      int
+	Based      int
+}
+
+func vagueKinds(a Acquisition) ([]string, bool) {
+	switch {
+	case a.Kind == "event" && a.Text == "Limited event":
+		return []string{"event"}, true
+	case a.Kind == "recharge" && (a.Text == "Recharge" || a.Text == "Event recharge"):
+		return []string{"recharge", "store"}, true
+	case (a.Kind == "customize" || a.Kind == "evolve") && len(a.From) == 0:
+		return []string{a.Kind}, true
+	case a.Kind == "suit" && a.Text == "Styling Gift Box":
+		return []string{"suit"}, true
+	case a.Kind == "dream" && a.Text == "Dream Weaver":
+		return []string{"dream"}, true
+	case a.Kind == "gift" && a.Text == "Gift":
+		return nil, true
+	}
+	return nil, false
+}
+
+func vague(a Acquisition) bool {
+	_, ok := vagueKinds(a)
+	return ok
+}
+
+func allVague(list []Acquisition) bool {
+	return len(list) > 0 && !slices.ContainsFunc(list, func(a Acquisition) bool { return !vague(a) })
+}
+
+func namedBySuit(packed, suit []Acquisition) ([]Acquisition, bool) {
+	if !allVague(packed) {
+		return packed, false
+	}
+	var out []Acquisition
+	for _, a := range packed {
+		kinds, _ := vagueKinds(a)
+		var named []Acquisition
+		for _, b := range suit {
+			if !vague(b) && slices.Contains(kinds, b.Kind) {
+				named = append(named, b)
+			}
+		}
+		if len(named) == 0 {
+			named = []Acquisition{a}
+		}
+		for _, b := range named {
+			out = appendAcquisition(out, b)
+		}
+	}
+	return out, !slices.EqualFunc(out, packed, sameAcquisition)
+}
+
+func basedByTable(wiki, packed []Acquisition) ([]Acquisition, bool) {
+	out := make([]Acquisition, 0, len(wiki))
+	changed := false
+	for _, a := range wiki {
+		if (a.Kind != "customize" && a.Kind != "evolve") || len(a.From) > 0 {
+			out = appendAcquisition(out, a)
+			continue
+		}
+		var based []Acquisition
+		for _, b := range packed {
+			if b.Kind == a.Kind && len(b.From) > 0 {
+				based = append(based, b)
+			}
+		}
+		if len(based) == 0 {
+			out = appendAcquisition(out, a)
+			continue
+		}
+		changed = true
+		for _, b := range based {
+			out = appendAcquisition(out, b)
+		}
+	}
+	return out, changed
 }
 
 func MergeAcquisition(cat AcquisitionCatalogue, wiki, packed, suits map[int][]Acquisition) (map[int][]Acquisition, AcquisitionStats) {
@@ -192,11 +270,19 @@ func MergeAcquisition(cat AcquisitionCatalogue, wiki, packed, suits map[int][]Ac
 	for id := range cat.Names {
 		switch {
 		case len(wiki[id]) > 0:
-			out[id] = wiki[id]
+			list, based := basedByTable(wiki[id], packed[id])
+			out[id] = list
 			stats.FromWiki++
+			if based {
+				stats.Based++
+			}
 		case len(packed[id]) > 0:
-			out[id] = packed[id]
+			list, named := namedBySuit(packed[id], suits[id])
+			out[id] = list
 			stats.FromPacked++
+			if named {
+				stats.Named++
+			}
 		case len(suits[id]) > 0:
 			out[id] = suits[id]
 			stats.FromSuits++
