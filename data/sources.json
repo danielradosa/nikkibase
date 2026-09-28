@@ -67,7 +67,7 @@
       "status": "permitted",
       "attributionRequired": true,
       "attribution": "Nikki Calc (nikkicalc.com)",
-      "fields": ["English item names where no other source has one, and one that data/id-corrections.json shows in place of the wiki's (181600)", "every item's rarity", "the Global item-ID list", "sub-grades (+ and −) that set each item's stats within its letter grade", "letter grades, sides, wearable places and style tags for the items no other source grades", "with nikkiup2u3, the grade on the item-page grades both give otherwise", "the English names of the suits the wiki has no page for, from its suit table", "its spelling of item names, which decides which hyphenated words in item names stay joined and which hyphens are spaced as separators"]
+      "fields": ["English item names where no other source has one, and one that data/id-corrections.json shows in place of the wiki's (181600)", "every item's rarity", "the Global item-ID list", "sub-grades (+ and −) that set each item's stats within its letter grade", "letter grades, sides, wearable places and style tags for the items no other source grades", "the ingredients of recipes the other sources name without them", "with nikkiup2u3, the grade on the item-page grades both give otherwise", "the English names of the suits the wiki has no page for, from its suit table", "its spelling of item names, which decides which hyphenated words in item names stay joined and which hyphens are spaced as separators"]
     },
     {
       "id": "known-id-list",
