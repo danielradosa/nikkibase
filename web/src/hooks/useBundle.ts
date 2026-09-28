@@ -3,10 +3,11 @@ import { engine } from '../engine/engine'
 import { engineReady, items, startup, version } from '../boot'
 import type { Item } from '../items/items'
 import { useStore } from '../store'
-import { clearWardrobe, loadWardrobe } from '../wardrobe/storage'
+import { clearWardrobe, loadWardrobe, saveWardrobe, type WardrobeSource } from '../wardrobe/storage'
 import type { Place } from '../outfit/comparison'
 import type { Stage } from '../outfit/stages'
-import { READ_FAILED, discardNotice, engineReason } from '../wardrobe/wardrobeText'
+import { noteSave } from '../wardrobe/useWardrobe'
+import { engineReason, restorePlan, updatedWardrobe } from '../wardrobe/wardrobeText'
 
 export type Bundle = {
   stages: Stage[]
@@ -29,6 +30,24 @@ export function useBundle(): Bundle {
         () => set({ error: String(e) }),
         () => {},
       )
+    const send = (ids: number[]) =>
+      engine.setWardrobe(ids).then(
+        (stats) => useStore.getState().owned === ids && set({ decoded: { ...stats, unresolved: 0 } }),
+        report,
+      )
+    const resave = (ids: number[], source: WardrobeSource) =>
+      items.then(
+        async (list) => {
+          if (useStore.getState().owned !== ids) return
+          const kept = updatedWardrobe(ids, new Set(list.map((it) => it.id)))
+          if (kept.notice) {
+            set({ owned: kept.ids, source: kept.ids.length ? source : null, decoded: null, notice: kept.notice })
+            send(kept.ids)
+          }
+          noteSave(await saveWardrobe({ version, ids: kept.ids, source, savedAt: Date.now() }))
+        },
+        () => {},
+      )
     items.then(
       (itemList) => setBundle((b) => ({ ...b, items: itemList })),
       (e) => {
@@ -45,23 +64,19 @@ export function useBundle(): Bundle {
         const { stages, tagNames, places } = await startup
         setBundle((b) => ({ ...b, stages, tagNames, places }))
 
-        const saved = await loadWardrobe(version)
-        if (saved.status === 'ok') {
-          const { ids, source } = saved.entry
-          engine.setWardrobe(ids).then(
-            (stats) => useStore.getState().owned === ids && set({ decoded: { ...stats, unresolved: 0 } }),
-            report,
-          )
-          set({ owned: ids, source, decoded: null })
+        const plan = restorePlan(await loadWardrobe(version))
+        if (plan.action === 'load') {
+          send(plan.ids)
+          set({ owned: plan.ids, source: plan.source, decoded: null })
+          if (plan.resave) resave(plan.ids, plan.source)
         } else {
           engine.loadKeystream().catch(() => {})
         }
-        const notice = discardNotice(saved)
-        if (notice) {
-          set({ notice })
+        if (plan.action === 'clear') {
+          set({ notice: plan.notice })
           await clearWardrobe()
-        } else if (saved.status === 'unreadable') {
-          set({ notice: READ_FAILED })
+        } else if (plan.action === 'warn') {
+          set({ notice: plan.notice })
         }
         set({ ready: true })
       } catch (e) {

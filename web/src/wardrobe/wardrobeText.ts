@@ -1,4 +1,4 @@
-import type { LoadResult } from './storage'
+import type { LoadResult, WardrobeSource } from './storage'
 
 const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, or a selections file saved from Nikki Calc."
 const EMPTY = 'That selections file has no items in it. Save it again from Nikki Calc.'
@@ -12,14 +12,36 @@ export function importError(e: unknown): string {
   return text
 }
 
-export function discardNotice(result: LoadResult): string | null {
-  if (result.status === 'stale') {
-    return result.entry.source === 'manual'
-      ? "NikkiBase's item data was updated, so your ticked items were cleared. Sorry! Tick them again in the Items tab."
-      : "NikkiBase's item data was updated, so your saved wardrobe was cleared. Import your file again."
+const CLEARED = "Your saved wardrobe couldn't be read, so it was cleared. Import it again."
+
+const knownSource = (source: string): source is WardrobeSource =>
+  source === 'sel' || source === 'manual' || source === 'clothes_date'
+
+export type Restore =
+  | { action: 'none' }
+  | { action: 'load'; ids: number[]; source: WardrobeSource; resave: boolean }
+  | { action: 'clear'; notice: string }
+  | { action: 'warn'; notice: string }
+
+export function restorePlan(result: LoadResult): Restore {
+  if (result.status === 'ok') return { action: 'load', ids: result.entry.ids, source: result.entry.source, resave: false }
+  if (result.status === 'stale' && knownSource(result.entry.source)) {
+    return { action: 'load', ids: result.entry.ids, source: result.entry.source, resave: true }
   }
-  if (result.status === 'unrecognised') return "Your saved wardrobe couldn't be read, so it was cleared. Import it again."
-  return null
+  if (result.status === 'stale' || result.status === 'unrecognised') return { action: 'clear', notice: CLEARED }
+  if (result.status === 'unreadable') return { action: 'warn', notice: READ_FAILED }
+  return { action: 'none' }
+}
+
+export function droppedNotice(dropped: number): string | null {
+  if (dropped <= 0) return null
+  const count = dropped.toLocaleString('en-US')
+  return `NikkiBase's item data was updated. ${count} of your items ${dropped === 1 ? "isn't" : "aren't"} in it any more.`
+}
+
+export function updatedWardrobe(ids: readonly number[], known: ReadonlySet<number>): { ids: number[]; notice: string | null } {
+  const kept = ids.filter((id) => known.has(id))
+  return { ids: kept, notice: droppedNotice(ids.length - kept.length) }
 }
 
 export type Decoded = { items: number; known: number; unresolved: number }

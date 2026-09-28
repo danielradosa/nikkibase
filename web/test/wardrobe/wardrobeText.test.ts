@@ -13,15 +13,17 @@ import {
   SCORES_WAIT,
   TAGLINE,
   afterSave,
-  discardNotice,
+  droppedNotice,
   dropText,
   engineReason,
   importError,
   importingText,
   loadedLabel,
+  restorePlan,
   manyUnscored,
   stripNotes,
   unscored,
+  updatedWardrobe,
 } from '../../src/wardrobe/wardrobeText.ts'
 
 const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, or a selections file saved from Nikki Calc."
@@ -55,21 +57,46 @@ test('an error the list does not know is shown as it is', () => {
   assert.equal(importError('plain text'), 'plain text')
 })
 
-test('a discarded saved wardrobe is explained by how it was made', () => {
-  const entry = (source: string) => ({ version: '2026-09-26', ids: [1], source, savedAt: 0 })
-  assert.equal(
-    discardNotice({ status: 'stale', entry: entry('manual') }),
-    "NikkiBase's item data was updated, so your ticked items were cleared. Sorry! Tick them again in the Items tab.",
-  )
-  for (const source of ['sel', 'clothes_date']) {
-    assert.equal(
-      discardNotice({ status: 'stale', entry: entry(source) }),
-      "NikkiBase's item data was updated, so your saved wardrobe was cleared. Import your file again.",
-    )
+test('a wardrobe saved under older item data is kept and saved again, whatever its source', () => {
+  const entry = (source: string, version = '2026-09-26') => ({ version, ids: [10001, 20001], source, savedAt: 0 })
+  for (const source of ['sel', 'manual', 'clothes_date'] as const) {
+    assert.deepEqual(restorePlan({ status: 'stale', entry: entry(source) }), {
+      action: 'load',
+      ids: [10001, 20001],
+      source,
+      resave: true,
+    })
+    assert.deepEqual(restorePlan({ status: 'ok', entry: { ...entry(source, '2026-09-29'), source } }), {
+      action: 'load',
+      ids: [10001, 20001],
+      source,
+      resave: false,
+    })
   }
-  assert.equal(discardNotice({ status: 'unrecognised', entry: entry('csv') }), "Your saved wardrobe couldn't be read, so it was cleared. Import it again.")
-  assert.equal(discardNotice({ status: 'none' }), null)
-  assert.equal(discardNotice({ status: 'ok', entry: { version: 'v', ids: [1], source: 'sel', savedAt: 0 } }), null)
+})
+
+test('a saved wardrobe that cannot be understood is still cleared with its notice', () => {
+  const entry = (source: string) => ({ version: '2026-09-26', ids: [1], source, savedAt: 0 })
+  const cleared = { action: 'clear', notice: "Your saved wardrobe couldn't be read, so it was cleared. Import it again." }
+  assert.deepEqual(restorePlan({ status: 'unrecognised', entry: entry('csv') }), cleared)
+  assert.deepEqual(restorePlan({ status: 'stale', entry: entry('csv') }), cleared)
+  assert.deepEqual(restorePlan({ status: 'unreadable' }), { action: 'warn', notice: READ_FAILED })
+  assert.deepEqual(restorePlan({ status: 'none' }), { action: 'none' })
+})
+
+test('after a data update only the items still in the data are kept, and a notice counts the rest', () => {
+  const known = new Set([10001, 20001, 30001])
+  assert.deepEqual(updatedWardrobe([10001, 20001, 30001], known), { ids: [10001, 20001, 30001], notice: null })
+  assert.deepEqual(updatedWardrobe([10001, 99999, 20001], known), {
+    ids: [10001, 20001],
+    notice: "NikkiBase's item data was updated. 1 of your items isn't in it any more.",
+  })
+  assert.deepEqual(updatedWardrobe([10001, 99997, 99998, 99999], known), {
+    ids: [10001],
+    notice: "NikkiBase's item data was updated. 3 of your items aren't in it any more.",
+  })
+  assert.equal(droppedNotice(0), null)
+  assert.equal(droppedNotice(1234), "NikkiBase's item data was updated. 1,234 of your items aren't in it any more.")
 })
 
 test('a full warning is kept only when more than 2% of the wardrobe has no stats', () => {
