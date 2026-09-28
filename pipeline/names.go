@@ -20,12 +20,24 @@ var compoundPrefix = map[string]bool{
 }
 
 var (
-	runsOfSpace    = regexp.MustCompile(`\s{2,}`)
-	middot         = regexp.MustCompile(`\s*·\s*`)
-	tightAmpersand = regexp.MustCompile(`([A-Za-z]{2,})&([A-Za-z]{2,})`)
-	tightHyphen    = regexp.MustCompile(`^([A-Za-z]{2,})-([A-Za-z]{3,})$`)
-	separator      = regexp.MustCompile(`\s*·\s*|\s+-\s*|\s*-\s+`)
+	runsOfSpace     = regexp.MustCompile(`\s{2,}`)
+	middot          = regexp.MustCompile(`\s*·\s*`)
+	tightAmpersand  = regexp.MustCompile(`([A-Za-z]{2,})&([A-Za-z]{2,})`)
+	tightHyphen     = regexp.MustCompile(`^([A-Za-z]{2,})-([A-Za-z]{3,})$`)
+	separator       = regexp.MustCompile(`\s*·\s*|\s+-\s*|\s*-\s+`)
+	trailingBracket = regexp.MustCompile(`^(.*\S)\s+(\([^()]+\))$`)
 )
+
+func gameName(name, global string) string {
+	global = calcName(global)
+	for {
+		m := trailingBracket.FindStringSubmatch(name)
+		if m == nil || strings.HasSuffix(global, m[2]) {
+			return name
+		}
+		name = m[1]
+	}
+}
 
 func NormalizeName(name string, spellings ...string) string {
 	s := strings.TrimSpace(runsOfSpace.ReplaceAllString(name, " "))

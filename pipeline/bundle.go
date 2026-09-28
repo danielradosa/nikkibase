@@ -231,7 +231,7 @@ func displayName(e Entry, names ItemNames) string {
 	if name, ok := names.Shown[e.Item.ID]; ok {
 		return name
 	}
-	return sourceName(e, names)
+	return gameName(sourceName(e, names), names.Calc[e.Item.ID])
 }
 
 func sourceName(e Entry, names ItemNames) string {

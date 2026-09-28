@@ -39,6 +39,7 @@ type Cost struct {
 type AcquisitionCatalogue struct {
 	Names  map[int]string
 	Shown  map[int]string
+	Global map[int]string
 	Suits  map[int]string
 	Stages map[string]bool
 }
@@ -47,7 +48,7 @@ func (c AcquisitionCatalogue) shown(id int) string {
 	if name, ok := c.Shown[id]; ok {
 		return name
 	}
-	return c.Names[id]
+	return gameName(c.Names[id], c.Global[id])
 }
 
 func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) AcquisitionCatalogue {
@@ -55,6 +56,7 @@ func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) A
 	cat := AcquisitionCatalogue{
 		Names:  make(map[int]string, len(entries)+len(extra)),
 		Shown:  names.Shown,
+		Global: names.Calc,
 		Suits:  make(map[int]string, len(entries)),
 		Stages: make(map[string]bool, len(stages)),
 	}

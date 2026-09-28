@@ -50,7 +50,7 @@ func TestCommittedCorrectionsSettleTheMisnumberedPages(t *testing.T) {
 	}
 }
 
-func TestCommittedNightFormsAddOnlyTheirQualifier(t *testing.T) {
+func TestCommittedNightFormsShowThePlainName(t *testing.T) {
 	raw, err := os.ReadFile("../data/id-corrections.json")
 	if err != nil {
 		t.Fatal(err)
@@ -61,17 +61,20 @@ func TestCommittedNightFormsAddOnlyTheirQualifier(t *testing.T) {
 	}
 	nights := 0
 	for id, n := range c.Shown {
-		plain, ok := strings.CutSuffix(n.Name, " (Night)")
+		if strings.HasSuffix(n.Name, ")") {
+			t.Errorf("%d shows %q; a shown name keeps no bracket", id, n.Name)
+		}
+		address, ok := strings.CutSuffix(n.Was, "/Night")
 		if !ok {
 			continue
 		}
 		nights++
-		if n.Was != plain && n.Was != plain+"/Night" {
-			t.Errorf("%d: %q becomes %q, which changes more than the night qualifier", id, n.Was, n.Name)
+		if want := gameName(address, ""); n.Name != want {
+			t.Errorf("%d: %q becomes %q, want the plain %q", id, n.Was, n.Name, want)
 		}
 	}
-	if nights != 27 {
-		t.Errorf("%d night forms, want 27", nights)
+	if nights != 18 {
+		t.Errorf("%d night forms, want 18", nights)
 	}
 }
 

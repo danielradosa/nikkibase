@@ -267,168 +267,114 @@
     },
     {
       "id": 11316,
-      "name": "Quiet Night Poem (Night)",
+      "name": "Quiet Night Poem",
       "was": "Quiet Night Poem/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key H1316 -> items-v0.14.json name) gives 11316 and its day form 11315 the same name, 'Quiet Night Poem'; the packed table names 11316 幽夜诗[夜] and 11315 幽夜诗[昼], marking night (夜) and day (昼). Fandom page 'Quiet Night Poem/Night' carries '|wardrobe nr = 1316', and the wiki's list reads '{{WIL|1316|Quiet Night Poem/Night|Quiet Night Poem}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 11316 from 11315, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key H1316 -> items-v0.14.json name) gives 11316 and its day form 11315 the same name, 'Quiet Night Poem'; the packed table names 11316 幽夜诗[夜] and 11315 幽夜诗[昼], marking night (夜) and day (昼). Fandom page 'Quiet Night Poem/Night' carries '|wardrobe nr = 1316', and the wiki's list reads '{{WIL|1316|Quiet Night Poem/Night|Quiet Night Poem}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 11319,
-      "name": "Beauty (Night)",
+      "name": "Beauty",
       "was": "Beauty/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key H1319 -> items-v0.14.json name) gives 11319 and its day form 11317 the same name, 'Beauty'; the packed table names 11319 红颜[夜] and 11317 红颜[昼], marking night (夜) and day (昼). Fandom page 'Beauty/Night' carries '|wardrobe nr = 1319', and the wiki's list reads '{{WIL|1319|Beauty/Night|Beauty}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 11319 from 11317, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key H1319 -> items-v0.14.json name) gives 11319 and its day form 11317 the same name, 'Beauty'; the packed table names 11319 红颜[夜] and 11317 红颜[昼], marking night (夜) and day (昼). Fandom page 'Beauty/Night' carries '|wardrobe nr = 1319', and the wiki's list reads '{{WIL|1319|Beauty/Night|Beauty}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 21112,
-      "name": "Lord of Underworld (Night)",
+      "name": "Lord of Underworld",
       "was": "Lord of Underworld/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1112 -> items-v0.14.json name) gives 21112 and its day form 21110 the same name, 'Lord of Underworld'; the packed table names 21112 鬼域之主[夜] and 21110 鬼域之主[昼], marking night (夜) and day (昼). Fandom page 'Lord of Underworld/Night' carries '|wardrobe nr = 1112', and the wiki's list reads '{{WIL|1112|Lord of Underworld/Night|Lord of Underworld}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 21112 from 21110, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1112 -> items-v0.14.json name) gives 21112 and its day form 21110 the same name, 'Lord of Underworld'; the packed table names 21112 鬼域之主[夜] and 21110 鬼域之主[昼], marking night (夜) and day (昼). Fandom page 'Lord of Underworld/Night' carries '|wardrobe nr = 1112', and the wiki's list reads '{{WIL|1112|Lord of Underworld/Night|Lord of Underworld}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 21116,
-      "name": "Bone Allure (Night)",
+      "name": "Bone Allure",
       "was": "Bone Allure/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1116 -> items-v0.14.json name) gives 21116 and its day form 21114 the same name, 'Bone Allure'; the packed table names 21116 白骨倾城[夜] and 21114 白骨倾城[昼], marking night (夜) and day (昼). Fandom page 'Bone Allure/Night' carries '|wardrobe nr = 1116', and the wiki's list reads '{{WIL|1116|Bone Allure/Night|Bone Allure}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 21116 from 21114, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1116 -> items-v0.14.json name) gives 21116 and its day form 21114 the same name, 'Bone Allure'; the packed table names 21116 白骨倾城[夜] and 21114 白骨倾城[昼], marking night (夜) and day (昼). Fandom page 'Bone Allure/Night' carries '|wardrobe nr = 1116', and the wiki's list reads '{{WIL|1116|Bone Allure/Night|Bone Allure}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 60526,
-      "name": "Bone (Night)",
+      "name": "Bone",
       "was": "Bone/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key P526 -> items-v0.14.json name) gives 60526 and its day form 60525 the same name, 'Bone'; the packed table names 60526 枯骨[夜] and 60525 枯骨[昼], marking night (夜) and day (昼). Fandom page 'Bone/Night' carries '|wardrobe nr = 526', and the wiki's list reads '{{WIL|526|Bone/Night|Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 60526 from 60525, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key P526 -> items-v0.14.json name) gives 60526 and its day form 60525 the same name, 'Bone'; the packed table names 60526 枯骨[夜] and 60525 枯骨[昼], marking night (夜) and day (昼). Fandom page 'Bone/Night' carries '|wardrobe nr = 526', and the wiki's list reads '{{WIL|526|Bone/Night|Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 71177,
-      "name": "Rebirth Song (Night)",
+      "name": "Rebirth Song",
       "was": "Rebirth Song/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key S1177 -> items-v0.14.json name) gives 71177 and its day form 71176 the same name, 'Rebirth Song'; the packed table names 71177 往生歌[夜] and 71176 往生歌[昼], marking night (夜) and day (昼). Fandom page 'Rebirth Song/Night' carries '|wardrobe nr = 1177', and the wiki's list reads '{{WIL|1177|Rebirth Song/Night|Rebirth Song}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 71177 from 71176, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key S1177 -> items-v0.14.json name) gives 71177 and its day form 71176 the same name, 'Rebirth Song'; the packed table names 71177 往生歌[夜] and 71176 往生歌[昼], marking night (夜) and day (昼). Fandom page 'Rebirth Song/Night' carries '|wardrobe nr = 1177', and the wiki's list reads '{{WIL|1177|Rebirth Song/Night|Rebirth Song}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 71179,
-      "name": "Soul (Night)",
+      "name": "Soul",
       "was": "Soul/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key S1179 -> items-v0.14.json name) gives 71179 and its day form 71178 the same name, 'Soul'; the packed table names 71179 魂兮[夜] and 71178 魂兮[昼], marking night (夜) and day (昼). Fandom page 'Soul/Night' carries '|wardrobe nr = 1179', and the wiki's list reads '{{WIL|1179|Soul/Night|Soul}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 71179 from 71178, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key S1179 -> items-v0.14.json name) gives 71179 and its day form 71178 the same name, 'Soul'; the packed table names 71179 魂兮[夜] and 71178 魂兮[昼], marking night (夜) and day (昼). Fandom page 'Soul/Night' carries '|wardrobe nr = 1179', and the wiki's list reads '{{WIL|1179|Soul/Night|Soul}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 90154,
-      "name": "Quiet Night Dream (Night)",
+      "name": "Quiet Night Dream",
       "was": "Quiet Night Dream/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key M154 -> items-v0.14.json name) gives 90154 and its day form 90153 the same name, 'Quiet Night Dream'; the packed table names 90154 幽夜之梦[夜] and 90153 幽夜之梦[昼], marking night (夜) and day (昼). Fandom page 'Quiet Night Dream/Night' carries '|wardrobe nr = 154', and the wiki's list reads '{{WIL|154|Quiet Night Dream}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 90154 from 90153, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key M154 -> items-v0.14.json name) gives 90154 and its day form 90153 the same name, 'Quiet Night Dream'; the packed table names 90154 幽夜之梦[夜] and 90153 幽夜之梦[昼], marking night (夜) and day (昼). Fandom page 'Quiet Night Dream/Night' carries '|wardrobe nr = 154', and the wiki's list reads '{{WIL|154|Quiet Night Dream}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 90156,
-      "name": "Bone Painting (Night)",
+      "name": "Bone Painting",
       "was": "Bone Painting/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key M156 -> items-v0.14.json name) gives 90156 and its day form 90155 the same name, 'Bone Painting'; the packed table names 90156 白骨画颜[夜] and 90155 白骨画颜[昼], marking night (夜) and day (昼). Fandom page 'Bone Painting/Night' carries '|wardrobe nr = 156', and the wiki's list reads '{{WIL|156|Bone Painting}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 90156 from 90155, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key M156 -> items-v0.14.json name) gives 90156 and its day form 90155 the same name, 'Bone Painting'; the packed table names 90156 白骨画颜[夜] and 90155 白骨画颜[昼], marking night (夜) and day (昼). Fandom page 'Bone Painting/Night' carries '|wardrobe nr = 156', and the wiki's list reads '{{WIL|156|Bone Painting}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82828,
-      "name": "Dark Crown (Night)",
+      "name": "Dark Crown",
       "was": "Dark Crown/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2828 -> items-v0.14.json name) gives 82828 and its day form 82820 the same name, 'Dark Crown'; the packed table names 82828 逢魔之冠[夜] and 82820 逢魔之冠[昼], marking night (夜) and day (昼). Fandom page 'Dark Crown/Night' carries '|wardrobe nr = 2828', and the wiki's list reads '{{WIL|2828|Dark Crown/Night|Dark Crown}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82828 from 82820, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2828 -> items-v0.14.json name) gives 82828 and its day form 82820 the same name, 'Dark Crown'; the packed table names 82828 逢魔之冠[夜] and 82820 逢魔之冠[昼], marking night (夜) and day (昼). Fandom page 'Dark Crown/Night' carries '|wardrobe nr = 2828', and the wiki's list reads '{{WIL|2828|Dark Crown/Night|Dark Crown}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82829,
-      "name": "Bone Pendant (Night)",
+      "name": "Bone Pendant",
       "was": "Bone Pendant/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2829 -> items-v0.14.json name) gives 82829 and its day form 82821 the same name, 'Bone Pendant'; the packed table names 82829 白骨坠[夜] and 82821 白骨坠[昼], marking night (夜) and day (昼). Fandom page 'Bone Pendant/Night' carries '|wardrobe nr = 2829', and the wiki's list reads '{{WIL|2829|Bone Pendant/Night|Bone Pendant}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82829 from 82821, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2829 -> items-v0.14.json name) gives 82829 and its day form 82821 the same name, 'Bone Pendant'; the packed table names 82829 白骨坠[夜] and 82821 白骨坠[昼], marking night (夜) and day (昼). Fandom page 'Bone Pendant/Night' carries '|wardrobe nr = 2829', and the wiki's list reads '{{WIL|2829|Bone Pendant/Night|Bone Pendant}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82830,
-      "name": "Soul Bone Dream (Night)",
+      "name": "Soul Bone Dream",
       "was": "Soul Bone Dream/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2830 -> items-v0.14.json name) gives 82830 and its day form 82822 the same name, 'Soul Bone Dream'; the packed table names 82830 魂骨梦[夜] and 82822 魂骨梦[昼], marking night (夜) and day (昼). Fandom page 'Soul Bone Dream/Night' carries '|wardrobe nr = 2830', and the wiki's list reads '{{WIL|2830|Soul Bone Dream/Night|Soul Bone Dream}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82830 from 82822, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2830 -> items-v0.14.json name) gives 82830 and its day form 82822 the same name, 'Soul Bone Dream'; the packed table names 82830 魂骨梦[夜] and 82822 魂骨梦[昼], marking night (夜) and day (昼). Fandom page 'Soul Bone Dream/Night' carries '|wardrobe nr = 2830', and the wiki's list reads '{{WIL|2830|Soul Bone Dream/Night|Soul Bone Dream}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82831,
-      "name": "Bone Within (Night)",
+      "name": "Bone Within",
       "was": "Bone Within/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2831 -> items-v0.14.json name) gives 82831 and its day form 82823 the same name, 'Bone Within'; the packed table names 82831 白骨珞[夜] and 82823 白骨珞[昼], marking night (夜) and day (昼). Fandom page 'Bone Within/Night' carries '|wardrobe nr = 2831', and the wiki's list reads '{{WIL|2831|Bone Within/Night|Bone Within}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82831 from 82823, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2831 -> items-v0.14.json name) gives 82831 and its day form 82823 the same name, 'Bone Within'; the packed table names 82831 白骨珞[夜] and 82823 白骨珞[昼], marking night (夜) and day (昼). Fandom page 'Bone Within/Night' carries '|wardrobe nr = 2831', and the wiki's list reads '{{WIL|2831|Bone Within/Night|Bone Within}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82832,
-      "name": "Flurried Soul (Night)",
+      "name": "Flurried Soul",
       "was": "Flurried Soul/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2832 -> items-v0.14.json name) gives 82832 and its day form 82824 the same name, 'Flurried Soul'; the packed table names 82832 落荒魂[夜] and 82824 落荒魂[昼], marking night (夜) and day (昼). Fandom page 'Flurried Soul/Night' carries '|wardrobe nr = 2832', and the wiki's list reads '{{WIL|2832|Flurried Soul/Night|Flurried Soul}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82832 from 82824, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2832 -> items-v0.14.json name) gives 82832 and its day form 82824 the same name, 'Flurried Soul'; the packed table names 82832 落荒魂[夜] and 82824 落荒魂[昼], marking night (夜) and day (昼). Fandom page 'Flurried Soul/Night' carries '|wardrobe nr = 2832', and the wiki's list reads '{{WIL|2832|Flurried Soul/Night|Flurried Soul}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82833,
-      "name": "Beauty Village (Night)",
+      "name": "Beauty Village",
       "was": "Beauty Village/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2833 -> items-v0.14.json name) gives 82833 and its day form 82826 the same name, 'Beauty Village'; the packed table names 82833 美人乡[夜] and 82826 美人乡[昼], marking night (夜) and day (昼). Fandom page 'Beauty Village/Night' carries '|wardrobe nr = 2833', and the wiki's list reads '{{WIL|2833|Beauty Village/Night|Beauty Village}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82833 from 82826, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2833 -> items-v0.14.json name) gives 82833 and its day form 82826 the same name, 'Beauty Village'; the packed table names 82833 美人乡[夜] and 82826 美人乡[昼], marking night (夜) and day (昼). Fandom page 'Beauty Village/Night' carries '|wardrobe nr = 2833', and the wiki's list reads '{{WIL|2833|Beauty Village/Night|Beauty Village}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82834,
-      "name": "Bone Grave (Night)",
+      "name": "Bone Grave",
       "was": "Bone Grave/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2834 -> items-v0.14.json name) gives 82834 and its day form 82836 the same name, 'Bone Grave'; the packed table names 82834 枯骨冢[夜] and 82836 枯骨冢[昼], marking night (夜) and day (昼). Fandom page 'Bone Grave/Night' carries '|wardrobe nr = 2834', and the wiki's list reads '{{WIL|2834|Bone Grave/Night|Bone Grave}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82834 from 82836, which keeps the plain name."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2834 -> items-v0.14.json name) gives 82834 and its day form 82836 the same name, 'Bone Grave'; the packed table names 82834 枯骨冢[夜] and 82836 枯骨冢[昼], marking night (夜) and day (昼). Fandom page 'Bone Grave/Night' carries '|wardrobe nr = 2834', and the wiki's list reads '{{WIL|2834|Bone Grave/Night|Bone Grave}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 82835,
-      "name": "Prison of Life and death (Night)",
+      "name": "Prison of Life and death",
       "was": "Prison of Life and death/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2835 -> items-v0.14.json name) gives 82835 and its day form 82825 the same name, 'Prison of Life and death'; the packed table names 82835 死生牢[夜] and 82825 死生牢[昼], marking night (夜) and day (昼). Fandom page 'Prison of Life and death/Night' carries '|wardrobe nr = 2835', and the wiki's list reads '{{WIL|2835|Prison of Life and death/Night|Prison of Life and death}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 82835 from 82825, which keeps the plain name. The lower-case 'death' is the spelling of Nikki Calc and the wiki's list."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2835 -> items-v0.14.json name) gives 82835 and its day form 82825 the same name, 'Prison of Life and death'; the packed table names 82835 死生牢[夜] and 82825 死生牢[昼], marking night (夜) and day (昼). Fandom page 'Prison of Life and death/Night' carries '|wardrobe nr = 2835', and the wiki's list reads '{{WIL|2835|Prison of Life and death/Night|Prison of Life and death}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     },
     {
       "id": 21117,
-      "name": "Miss Bone (Dress) (Night)",
+      "name": "Miss Bone",
       "was": "Miss Bone (Dress)/Night",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1117 -> items-v0.14.json name) gives 21117 and its day form 21115 the same name, 'Miss Bone'; the packed table names 21117 白骨夫人[夜] and 21115 白骨夫人[昼], marking night (夜) and day (昼). Fandom page 'Miss Bone (Dress)/Night' carries '|wardrobe nr = 1117', and the wiki's list reads '{{WIL|1117|Miss Bone (Dress)/Night|Miss Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. '(Night)' tells 21117 from 21115, which keeps the wiki's '(Dress)' (page 'Miss Bone' is the suit)."
-    },
-    {
-      "id": 21113,
-      "name": "Nether Fairy (Night)",
-      "was": "Nether Fairy",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1113 -> items-v0.14.json name) gives 21113 the plain name 'Nether Fairy', which is also the name of its day form 21111; the packed table names 21113 幽冥仙主[夜], marking it night (夜) against 21111's day (昼). The wiki has no item page for it; its list reads '{{WIL|1113|Nether Fairy/Night|Nether Fairy}}'. '(Night)' tells 21113 from 21111, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82812,
-      "name": "Underworld Fire (Night)",
-      "was": "Underworld Fire",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2812 -> items-v0.14.json name) gives 82812 the plain name 'Underworld Fire', which is also the name of its day form 82804; the packed table names 82812 鬼域冥火[夜], marking it night (夜) against 82804's day (昼). The wiki has no item page for it; its list reads '{{WIL|2812|Underworld Fire/Night|Underworld Fire}}'. '(Night)' tells 82812 from 82804, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82813,
-      "name": "Regret Pendant (Night)",
-      "was": "Regret Pendant",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2813 -> items-v0.14.json name) gives 82813 the plain name 'Regret Pendant', which is also the name of its day form 82810; the packed table names 82813 长恨坠[夜], marking it night (夜) against 82810's day (昼). The wiki has no item page for it; its list reads '{{WIL|2813|Regret Pendant/Night|Regret Pendant}}'. '(Night)' tells 82813 from 82810, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82814,
-      "name": "Pearl of Exorcism (Night)",
-      "was": "Pearl of Exorcism",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2814 -> items-v0.14.json name) gives 82814 the plain name 'Pearl of Exorcism', which is also the name of its day form 82811; the packed table names 82814 镇魔珠[夜], marking it night (夜) against 82811's day (昼). The wiki has no item page for it; its list reads '{{WIL|2814|Pearl of Exorcism/Night|Pearl of Exorcism}}'. '(Night)' tells 82814 from 82811, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82815,
-      "name": "Grudge Doll (Night)",
-      "was": "Grudge Doll",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2815 -> items-v0.14.json name) gives 82815 the plain name 'Grudge Doll', which is also the name of its day form 82808; the packed table names 82815 咒怨人偶[夜], marking it night (夜) against 82808's day (昼). The wiki has no item page for it; its list reads '{{WIL|2815|Grudge Doll/Night|Grudge Doll}}'. '(Night)' tells 82815 from 82808, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82816,
-      "name": "Exorcism Bracelet (Night)",
-      "was": "Exorcism Bracelet",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2816 -> items-v0.14.json name) gives 82816 the plain name 'Exorcism Bracelet', which is also the name of its day form 82809; the packed table names 82816 镇妖镯[夜], marking it night (夜) against 82809's day (昼). The wiki has no item page for it; its list reads '{{WIL|2816|Exorcism Bracelet/Night|Exorcism Bracelet}}'. '(Night)' tells 82816 from 82809, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82817,
-      "name": "Immortal Poem (Night)",
-      "was": "Immortal Poem",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2817 -> items-v0.14.json name) gives 82817 the plain name 'Immortal Poem', which is also the name of its day form 82807; the packed table names 82817 无灭诗[夜], marking it night (夜) against 82807's day (昼). The wiki has no item page for it; its list and disambiguation page give 2817 as 'Immortal Poem (Hair Ornament)/Night'. '(Night)' tells 82817 from 82807, which keeps the plain name, as for the night forms of the same suits that have a wiki page. The name 'Immortal Poem' is also the plain name of 61297 (hosiery)."
-    },
-    {
-      "id": 82818,
-      "name": "Exorcism Coffin (Night)",
-      "was": "Exorcism Coffin",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2818 -> items-v0.14.json name) gives 82818 the plain name 'Exorcism Coffin', which is also the name of its day form 82806; the packed table names 82818 镇魂棺[夜], marking it night (夜) against 82806's day (昼). The wiki has no item page for it; its list reads '{{WIL|2818|Exorcism Coffin/Night|Exorcism Coffin}}'. '(Night)' tells 82818 from 82806, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
-    },
-    {
-      "id": 82819,
-      "name": "Blood Silk Temple (Night)",
-      "was": "Blood Silk Temple",
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2819 -> items-v0.14.json name) gives 82819 the plain name 'Blood Silk Temple', which is also the name of its day form 82805; the packed table names 82819 血绫殿[夜], marking it night (夜) against 82805's day (昼). The wiki has no item page for it; its list reads '{{WIL|2819|Blood Silk Temple/Night|Blood Silk Temple}}'. '(Night)' tells 82819 from 82805, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1117 -> items-v0.14.json name) gives 21117 and its day form 21115 the same name, 'Miss Bone'; the packed table names 21117 白骨夫人[夜] and 21115 白骨夫人[昼], marking night (夜) and day (昼). Fandom page 'Miss Bone (Dress)/Night' carries '|wardrobe nr = 1117', and the wiki's list reads '{{WIL|1117|Miss Bone (Dress)/Night|Miss Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
     }
   ],
-  "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where two items share a name and the wiki tells them apart with a qualifier its item page carries, where one source swaps the names of two items, and where the night form of a day and night pair would read like its day form or like the wiki's page address ('/Night'). 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling.",
+  "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where one source swaps the names of two items, and where a night form's name would be the wiki's page address ('/Night'): it shows the plain name, as the game does. 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling. A trailing bracket the wiki adds to tell items apart ('(Coat)', '(Hair)', '(Night)') is dropped from every shown name unless Nikki Calc's name carries the same bracket, since the game shows the plain name.",
   "gradeOverrides": [
     {
       "id": 40721,

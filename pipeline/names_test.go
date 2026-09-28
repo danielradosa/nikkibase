@@ -163,3 +163,21 @@ func TestNormalizeNameSpacesWhereTheOtherSourcesSeparate(t *testing.T) {
 		}
 	}
 }
+
+func TestGameNameDropsTheWikisQualifier(t *testing.T) {
+	for _, c := range []struct{ in, global, want string }{
+		{"Musical Sound (Coat)", "Musical Sound", "Musical Sound"},
+		{"Lunar (Hair)", "Lunar", "Lunar"},
+		{"Dynamic Maiden (Hair Ornament)", "", "Dynamic Maiden"},
+		{"Miss Bone (Dress) (Night)", "Miss Bone", "Miss Bone"},
+		{"Kitten's Book (Chill)", "Kitten's Book (Chill)", "Kitten's Book (Chill)"},
+		{"Kitten's Book (Warm)", "Kitten's Book(Warm)", "Kitten's Book (Warm)"},
+		{"Quiet Night Poem/Night", "Quiet Night Poem", "Quiet Night Poem/Night"},
+		{"Nikki's Pinky", "Nikki's Pinky", "Nikki's Pinky"},
+		{"(Hair)", "", "(Hair)"},
+	} {
+		if got := gameName(c.in, c.global); got != c.want {
+			t.Errorf("gameName(%q, %q) = %q, want %q", c.in, c.global, got, c.want)
+		}
+	}
+}

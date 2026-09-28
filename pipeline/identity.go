@@ -201,7 +201,7 @@ func (c *IDCorrections) DisplayNames(entries []Entry, names ItemNames) (map[int]
 		given[id] = calcName(name)
 	}
 	for _, e := range entries {
-		given[e.Item.ID] = sourceName(e, names)
+		given[e.Item.ID] = gameName(sourceName(e, names), names.Calc[e.Item.ID])
 	}
 	out := make(map[int]string, len(c.Shown))
 	var wrong []string
