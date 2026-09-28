@@ -22,7 +22,7 @@ func writtenItems(t *testing.T, raw []byte) map[int][]any {
 	return out
 }
 
-func TestItemNamesFollowTheOtherSourcesHyphens(t *testing.T) {
+func TestItemNamesShowTheSourcesSpellingAndMatchByTidiedSpacing(t *testing.T) {
 	entries := []Entry{
 		{Item: scoring.Item{ID: 13298, Slot: scoring.Hair}, Name: "Honey-Soaked Song"},
 		{Item: scoring.Item{ID: 12457, Slot: scoring.Hair}, Name: "Fair Lady-Gorgeous"},
@@ -34,7 +34,12 @@ func TestItemNamesFollowTheOtherSourcesHyphens(t *testing.T) {
 	}
 	calc := map[int]string{13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress·Blue",
 		20003: "Day-Night Concerto", 20004: "Fox Talk·Me", 30006: "Test Dance·Purple", 30007: "Salt&Pepper-Joy"}
-	want := map[int]string{
+	shown := map[int]string{
+		13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress-Blue",
+		20002: "Day-Night Concerto", 20003: "Day-Night Concerto", 20004: "Fox Talk-Me", 20005: "Moonlight-White",
+		30006: "Test Dance-Purple", 30007: "Salt&Pepper-Joy",
+	}
+	matched := map[int]string{
 		13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress - Blue",
 		20002: "Day - Night Concerto", 20003: "Day-Night Concerto", 20004: "Fox Talk - Me", 20005: "Moonlight - White",
 		30006: "Test Dance · Purple", 30007: "Salt & Pepper-Joy",
@@ -43,12 +48,15 @@ func TestItemNamesFollowTheOtherSourcesHyphens(t *testing.T) {
 	names := ItemNames{Calc: calc}
 	rows := writtenItems(t, WriteItems(entries, names, nil, nil))
 	cat := NewAcquisitionCatalogue(entries, names, nil)
-	for id, name := range want {
+	for id, name := range shown {
 		if got := rows[id][1]; got != name {
 			t.Errorf("items.json names %d %q, want %q", id, got, name)
 		}
-		if got := cat.Names[id]; got != name {
-			t.Errorf("acquire.json names %d %q, want %q", id, got, name)
+		if got := cat.shown(id); got != name {
+			t.Errorf("acquire.json prints %d as %q, want %q", id, got, name)
+		}
+		if got := cat.Names[id]; got != matched[id] {
+			t.Errorf("acquire.json matches %d by %q, want %q", id, got, matched[id])
 		}
 	}
 }
@@ -77,7 +85,7 @@ func TestShownNamesReachItemsJSONAndTheLinesThatPrintThem(t *testing.T) {
 	cat := NewAcquisitionCatalogue(entries, names, nil)
 	for id, want := range map[int][3]string{
 		20001: {"Test Gown", "Tset Gown", "Test Gown"},
-		20002: {"Plain - Gesture", "Plain - Gesture", "Plain - Gesture"},
+		20002: {"Plain-Gesture", "Plain - Gesture", "Plain-Gesture"},
 		30003: {"Named Only (Coat)", "Named Only", "Named Only (Coat)"},
 	} {
 		if got := rows[id][1]; got != want[0] {

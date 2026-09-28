@@ -26,7 +26,19 @@ var (
 	tightHyphen     = regexp.MustCompile(`^([A-Za-z]{2,})-([A-Za-z]{3,})$`)
 	separator       = regexp.MustCompile(`\s*·\s*|\s+-\s*|\s*-\s+`)
 	trailingBracket = regexp.MustCompile(`^(.*\S)\s+(\([^()]+\))$`)
+	oneSidedHyphen  = regexp.MustCompile(`(\S) -(\S)|(\S)- (\S)`)
+	suitQualifier   = regexp.MustCompile(`\s*\([^()]*\bSuit\)$`)
 )
+
+func gameSpelling(name string) string {
+	s := strings.TrimSpace(runsOfSpace.ReplaceAllString(name, " "))
+	s = middot.ReplaceAllString(s, "-")
+	return oneSidedHyphen.ReplaceAllString(s, "$1$3-$2$4")
+}
+
+func shownSuit(suit string) string {
+	return suitQualifier.ReplaceAllString(suit, "")
+}
 
 func gameName(name, global string) string {
 	global = calcName(global)

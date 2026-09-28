@@ -1142,7 +1142,7 @@ func classifySource(tok string) acqToken {
 		if strings.EqualFold(suit, "suit") || !nameLike(suit) {
 			return acqToken{kind: "suit", text: "Styling Gift Box"}
 		}
-		return acqToken{kind: "suit", text: "Styling Gift Box for completing " + suit}
+		return acqToken{kind: "suit", text: "Styling Gift Box for completing " + shownSuit(suit)}
 	case strings.HasPrefix(lower, "evolve"):
 		return acqToken{kind: "evolve", text: "Evolution"}
 	case strings.HasPrefix(lower, "customiz"):
@@ -1641,7 +1641,7 @@ func (c *acqContext) suitAcquisition(s acqSuit, out map[int][]Acquisition) {
 		out[id] = appendAcquisition(out[id], a)
 	}
 	for id := range reward {
-		add(id, Acquisition{Kind: "suit", Text: "Styling Gift Box for completing " + s.title})
+		add(id, Acquisition{Kind: "suit", Text: "Styling Gift Box for completing " + shownSuit(s.title)})
 	}
 	for _, part := range s.parts {
 		id := c.resolvePart(part.name, s.title)
@@ -1655,7 +1655,7 @@ func (c *acqContext) suitAcquisition(s acqSuit, out map[int][]Acquisition) {
 		for _, t := range tokens {
 			a := Acquisition{Kind: t.kind, Text: t.text, Past: pastSource(t.kind, t.text)}
 			if t.kind == "suit" {
-				a.Text = "Styling Gift Box for completing " + s.title
+				a.Text = "Styling Gift Box for completing " + shownSuit(s.title)
 			}
 			add(id, a)
 		}

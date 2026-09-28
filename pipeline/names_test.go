@@ -181,3 +181,35 @@ func TestGameNameDropsTheWikisQualifier(t *testing.T) {
 		}
 	}
 }
+
+func TestGameSpellingKeepsTheWikisSeparators(t *testing.T) {
+	for _, c := range []struct{ in, want string }{
+		{"Red Satin-Epic", "Red Satin-Epic"},
+		{"Candy Girl - Pink", "Candy Girl - Pink"},
+		{"Moonlight -White", "Moonlight-White"},
+		{"Snow Scarf- Epic", "Snow Scarf-Epic"},
+		{"Red Satin·Epic", "Red Satin-Epic"},
+		{"Song of Clouds · Mist", "Song of Clouds-Mist"},
+		{"Soundless  Yearning ", "Soundless Yearning"},
+		{"High-top Sneakers", "High-top Sneakers"},
+		{"Sweet&Smooth-Joy", "Sweet&Smooth-Joy"},
+	} {
+		if got := gameSpelling(c.in); got != c.want {
+			t.Errorf("gameSpelling(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
+func TestShownSuitDropsTheWikisSuitQualifier(t *testing.T) {
+	for _, c := range []struct{ in, want string }{
+		{"Star Shadow (Hidden Suit)", "Star Shadow"},
+		{"Wish of Snow (Pigeon Suit)", "Wish of Snow"},
+		{"Night Rose (Gallery Suit)", "Night Rose"},
+		{"Kitten's Book (Chill)", "Kitten's Book (Chill)"},
+		{"Golden Dancer", "Golden Dancer"},
+	} {
+		if got := shownSuit(c.in); got != c.want {
+			t.Errorf("shownSuit(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}

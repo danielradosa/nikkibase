@@ -87,9 +87,9 @@ func WriteItems(entries []Entry, names ItemNames, rarity map[int]int, suits map[
 		b.WriteByte('[')
 		b.WriteString(strconv.Itoa(id))
 		b.WriteByte(',')
-		name := calcName(extra[id])
+		name := gameSpelling(extra[id])
 		if shown, ok := names.Shown[id]; ok {
-			name = shown
+			name = gameSpelling(shown)
 		}
 		b.WriteString(quote(name))
 		b.WriteByte(',')
@@ -229,9 +229,19 @@ func WriteTags() []byte {
 
 func displayName(e Entry, names ItemNames) string {
 	if name, ok := names.Shown[e.Item.ID]; ok {
-		return name
+		return gameSpelling(name)
 	}
-	return gameName(sourceName(e, names), names.Calc[e.Item.ID])
+	return plainName(e, names)
+}
+
+func plainName(e Entry, names ItemNames) string {
+	name := e.Name
+	if hasHan(name) {
+		if english, ok := names.Calc[e.Item.ID]; ok && english != "" && !hasHan(english) {
+			name = english
+		}
+	}
+	return gameName(gameSpelling(name), names.Calc[e.Item.ID])
 }
 
 func sourceName(e Entry, names ItemNames) string {

@@ -37,31 +37,35 @@ type Cost struct {
 }
 
 type AcquisitionCatalogue struct {
-	Names  map[int]string
-	Shown  map[int]string
-	Global map[int]string
-	Suits  map[int]string
-	Stages map[string]bool
+	Names   map[int]string
+	Shown   map[int]string
+	Display map[int]string
+	Suits   map[int]string
+	Stages  map[string]bool
 }
 
 func (c AcquisitionCatalogue) shown(id int) string {
 	if name, ok := c.Shown[id]; ok {
+		return gameSpelling(name)
+	}
+	if name, ok := c.Display[id]; ok {
 		return name
 	}
-	return gameName(c.Names[id], c.Global[id])
+	return c.Names[id]
 }
 
 func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) AcquisitionCatalogue {
 	extra := names.Calc
 	cat := AcquisitionCatalogue{
-		Names:  make(map[int]string, len(entries)+len(extra)),
-		Shown:  names.Shown,
-		Global: names.Calc,
-		Suits:  make(map[int]string, len(entries)),
-		Stages: make(map[string]bool, len(stages)),
+		Names:   make(map[int]string, len(entries)+len(extra)),
+		Shown:   names.Shown,
+		Display: make(map[int]string, len(entries)+len(extra)),
+		Suits:   make(map[int]string, len(entries)),
+		Stages:  make(map[string]bool, len(stages)),
 	}
 	for _, e := range entries {
 		cat.Names[e.Item.ID] = sourceName(e, names)
+		cat.Display[e.Item.ID] = plainName(e, names)
 		if e.Suit != "" {
 			cat.Suits[e.Item.ID] = e.Suit
 		}
@@ -69,6 +73,7 @@ func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) A
 	for id, name := range extra {
 		if _, ok := cat.Names[id]; !ok {
 			cat.Names[id] = calcName(name)
+			cat.Display[id] = gameSpelling(name)
 		}
 	}
 	for _, s := range stages {

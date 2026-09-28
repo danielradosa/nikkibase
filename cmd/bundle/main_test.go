@@ -437,14 +437,14 @@ func TestNikkiCalcSpellingKeepsHyphensJoined(t *testing.T) {
 	}
 }
 
-func TestWikiSpellingIsSpacedWithoutNikkiCalc(t *testing.T) {
+func TestWikiSpellingIsKeptWithoutNikkiCalc(t *testing.T) {
 	c := evolvedConfig(t)
 	c.namesPath, c.keysPath = "", ""
 	if err := run(c); err != nil {
 		t.Fatal(err)
 	}
-	if got := itemRows(t, c)[10002][1]; got != "Honey - Soaked Song" {
-		t.Errorf("items.json names 10002 %q, want Honey - Soaked Song with no source spelling it joined", got)
+	if got := itemRows(t, c)[10002][1]; got != "Honey-Soaked Song" {
+		t.Errorf("items.json names 10002 %q, want the wiki's own Honey-Soaked Song", got)
 	}
 }
 

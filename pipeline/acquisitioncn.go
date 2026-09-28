@@ -223,5 +223,5 @@ func giftBoxLine(suit string) string {
 	if suit == "" || hasHan(suit) {
 		return "Styling Gift Box"
 	}
-	return "Styling Gift Box for completing " + suit
+	return "Styling Gift Box for completing " + shownSuit(suit)
 }
