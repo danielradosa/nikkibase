@@ -44,14 +44,38 @@ type NameOverride struct {
 	Basis string `json:"basis"`
 }
 
+type GradeOverride struct {
+	ID        int    `json:"id"`
+	Attribute string `json:"attribute"`
+	Grade     string `json:"grade"`
+	Was       string `json:"was"`
+	Basis     string `json:"basis"`
+}
+
+var attributeNames = [...]string{
+	scoring.Gorgeous: "Gorgeous", scoring.Simple: "Simple", scoring.Elegant: "Elegant", scoring.Lively: "Lively",
+	scoring.Mature: "Mature", scoring.Cute: "Cute", scoring.Sexy: "Sexy", scoring.Pure: "Pure",
+	scoring.Warm: "Warm", scoring.Cool: "Cool",
+}
+
+func attributeOf(name string) (int8, bool) {
+	for a, n := range attributeNames {
+		if n == name {
+			return int8(a), true
+		}
+	}
+	return 0, false
+}
+
 type Corrections struct {
-	Note       string         `json:"note"`
-	DerivedOn  string         `json:"derivedOn"`
-	Duplicates []Duplicate    `json:"duplicates"`
-	Overrides  []SlotOverride `json:"slotOverrides"`
-	Excluded   []Excluded     `json:"excluded"`
-	Names      []NameOverride `json:"nameOverrides"`
-	Shown      []NameOverride `json:"displayNames"`
+	Note       string          `json:"note"`
+	DerivedOn  string          `json:"derivedOn"`
+	Duplicates []Duplicate     `json:"duplicates"`
+	Overrides  []SlotOverride  `json:"slotOverrides"`
+	Excluded   []Excluded      `json:"excluded"`
+	Names      []NameOverride  `json:"nameOverrides"`
+	Shown      []NameOverride  `json:"displayNames"`
+	Grades     []GradeOverride `json:"gradeOverrides"`
 }
 
 type IDCorrections struct {
@@ -63,6 +87,7 @@ type IDCorrections struct {
 	Excluded map[int]string
 	Name     map[int]NameOverride
 	Shown    map[int]NameOverride
+	Grade    map[int][]GradeOverride
 }
 
 func ReadIDCorrections(b []byte) (*IDCorrections, error) {
@@ -73,7 +98,7 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 	out := &IDCorrections{
 		Owner: map[int]string{}, Drop: map[int]string{}, RealID: map[int]int{}, Slot: map[int]scoring.Slot{},
 		Position: map[int]string{}, Excluded: map[int]string{}, Name: map[int]NameOverride{},
-		Shown: map[int]NameOverride{},
+		Shown: map[int]NameOverride{}, Grade: map[int][]GradeOverride{},
 	}
 	for _, n := range c.Shown {
 		switch {
@@ -88,6 +113,25 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 			return nil, fmt.Errorf("id corrections: %d is given two names to show", n.ID)
 		}
 		out.Shown[n.ID] = n
+	}
+	for _, g := range c.Grades {
+		a, known := attributeOf(g.Attribute)
+		switch {
+		case g.ID <= 0 || !known:
+			return nil, fmt.Errorf("id corrections: %d must give an item ID and one of its attributes", g.ID)
+		case gradeBase[g.Grade] == 0 || gradeBase[g.Was] == 0:
+			return nil, fmt.Errorf("id corrections: %d must give the grade to keep and the one its sources give", g.ID)
+		case g.Grade == g.Was:
+			return nil, fmt.Errorf("id corrections: %d keeps the grade its sources already give", g.ID)
+		case g.Basis == "":
+			return nil, fmt.Errorf("id corrections: %d gives no basis for its grade", g.ID)
+		}
+		for _, o := range out.Grade[g.ID] {
+			if b, _ := attributeOf(o.Attribute); b/2 == a/2 {
+				return nil, fmt.Errorf("id corrections: %d is given two grades for %s", g.ID, g.Attribute)
+			}
+		}
+		out.Grade[g.ID] = append(out.Grade[g.ID], g)
 	}
 	for _, n := range c.Names {
 		switch {
@@ -198,7 +242,41 @@ func (c *IDCorrections) Apply(entries []Entry) ([]Entry, error) {
 			}
 		}
 	}
-	return c.dropDuplicates(entries, true)
+	out, err := c.dropDuplicates(entries, true)
+	if err != nil {
+		return nil, err
+	}
+	return out, c.keepGrades(out)
+}
+
+func (c *IDCorrections) keepGrades(entries []Entry) error {
+	found := make(map[int]bool, len(c.Grade))
+	var wrong []string
+	for i := range entries {
+		e := &entries[i]
+		for _, g := range c.Grade[e.Item.ID] {
+			found[e.Item.ID] = true
+			a, _ := attributeOf(g.Attribute)
+			p := a / 2
+			if e.Item.Attrs[p] != a || strings.ToUpper(e.Grades[p]) != g.Was {
+				wrong = append(wrong, fmt.Sprintf("%d is %s %s, not %s %s",
+					e.Item.ID, attributeNames[e.Item.Attrs[p]], e.Grades[p], g.Attribute, g.Was))
+				continue
+			}
+			e.Grades[p] = g.Grade
+			e.Item.Stats[p] = Stat(g.Grade, e.Item.Slot)
+		}
+	}
+	for _, id := range sortedIDs(c.Grade) {
+		if !found[id] {
+			wrong = append(wrong, fmt.Sprintf("%d is not in the catalogue", id))
+		}
+	}
+	if len(wrong) > 0 {
+		return fmt.Errorf("id corrections: %d grades no longer fit what the sources give: %s",
+			len(wrong), strings.Join(wrong, "; "))
+	}
+	return nil
 }
 
 func (c *IDCorrections) DropDuplicates(entries []Entry) []Entry {

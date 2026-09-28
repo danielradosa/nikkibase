@@ -91,6 +91,13 @@ func TestReadIDCorrectionsRefusesBadEntries(t *testing.T) {
 		"shown name without the new name": `{"displayNames": [{"id": 20001, "was": "B", "basis": "b"}]}`,
 		"shown name unchanged":            `{"displayNames": [{"id": 20001, "name": "A", "was": "A", "basis": "b"}]}`,
 		"shown name given twice":          `{"displayNames": [{"id": 20001, "name": "A", "was": "B", "basis": "b"}, {"id": 20001, "name": "C", "was": "B", "basis": "b"}]}`,
+		"grade without basis":             `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A"}]}`,
+		"grade without an ID":             `{"gradeOverrides": [{"attribute": "Gorgeous", "grade": "S", "was": "A", "basis": "b"}]}`,
+		"grade on no attribute":           `{"gradeOverrides": [{"id": 40721, "attribute": "Shiny", "grade": "S", "was": "A", "basis": "b"}]}`,
+		"grade that is no letter":         `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "s", "was": "A", "basis": "b"}]}`,
+		"grade without the old letter":    `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "basis": "b"}]}`,
+		"grade unchanged":                 `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "A", "was": "A", "basis": "b"}]}`,
+		"two grades on one pair":          `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A", "basis": "b"}, {"id": 40721, "attribute": "Simple", "grade": "S", "was": "A", "basis": "b"}]}`,
 	} {
 		if _, err := ReadIDCorrections([]byte(doc)); err == nil {
 			t.Errorf("%s: accepted", name)
@@ -435,5 +442,39 @@ func TestPlacesOfDropsASourceThatContradictsItself(t *testing.T) {
 	}
 	if p := got[80002]; p.Slot != scoring.Accessory || p.Position != "accessory_scarf" || p.Name != "y" {
 		t.Errorf("80002 = %+v", p)
+	}
+}
+
+func dress(id int, gorgeous int8, letter string) Entry {
+	e := graded(id, scoring.Dress, "Test Dress", "dress", [5]string{letter, "B", "C", "B", "C"})
+	e.Item.Attrs = [5]int8{gorgeous, scoring.Lively, scoring.Cute, scoring.Pure, scoring.Cool}
+	return e
+}
+
+func TestGradeOverrideKeepsTheLetterTheOtherSourcesGive(t *testing.T) {
+	c := corrections(t, `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A", "basis": "two sources agree"}]}`)
+	got, err := c.Apply([]Entry{dress(40721, scoring.Gorgeous, "A")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := got[0]
+	if e.Grades[0] != "S" || e.Item.Stats[0] != Stat("S", scoring.Dress) {
+		t.Errorf("Gorgeous is %s %d, want S %d", e.Grades[0], e.Item.Stats[0], Stat("S", scoring.Dress))
+	}
+	if e.Grades[1] != "B" || e.Item.Stats[1] != Stat("B", scoring.Dress) {
+		t.Errorf("Lively changed to %s %d", e.Grades[1], e.Item.Stats[1])
+	}
+}
+
+func TestGradeOverrideStopsWhenTheSourcesNoLongerGiveIt(t *testing.T) {
+	c := corrections(t, `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A", "basis": "b"}]}`)
+	for name, e := range map[string]Entry{
+		"another letter": dress(40721, scoring.Gorgeous, "B"),
+		"another side":   dress(40721, scoring.Simple, "A"),
+		"another item":   dress(40722, scoring.Gorgeous, "A"),
+	} {
+		if _, err := c.Apply([]Entry{e}); err == nil || !strings.Contains(err.Error(), "grades no longer fit") {
+			t.Errorf("%s: %v", name, err)
+		}
 	}
 }
