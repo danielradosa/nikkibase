@@ -165,7 +165,12 @@ func run(c config) error {
 	if corrections != nil {
 		entries = corrections.DropDuplicates(entries)
 	}
+	given := make(map[int][5]string, len(entries))
+	for _, e := range entries {
+		given[e.Item.ID] = e.Grades
+	}
 	var packedPlaces map[int]pipeline.Placed
+	var packedRows map[int]pipeline.Entry
 	if packedPath != "" {
 		raw, err := os.ReadFile(packedPath)
 		if err != nil {
@@ -178,7 +183,7 @@ func run(c config) error {
 		if err := pipeline.Canonicalise(packed); err != nil {
 			return fmt.Errorf("packed: %w", err)
 		}
-		packedPlaces = pipeline.PlacesOf(packed)
+		packedPlaces, packedRows = pipeline.PlacesOf(packed), pipeline.TableRows(packed)
 		before := len(entries)
 		entries = pipeline.MergeEntries(entries, packed)
 		fmt.Printf("packed: %d rows, %d parsed, %d rejected, %d not in the global game, %d spirit bonuses, %d unknown tags -> catalogue %d to %d\n",
@@ -209,17 +214,19 @@ func run(c config) error {
 				len(wrong), c.idCorrectionsPath, strings.Join(wrong, "; "))}
 		}
 	}
-	var sub *pipeline.SubgradeStats
-	var calc *pipeline.CalcStats
+	var layers layerStats
 	if c.subgradesPath != "" {
 		items, stats, err := readCalcItems(c.subgradesPath, keysPath)
 		if err != nil {
 			return err
 		}
-		if c.calcGrades {
-			entries, calc = calcGrades(entries, items, names, corrections)
+		if packedRows != nil {
+			layers.agreed = agree(entries, given, packedRows, items)
 		}
-		sub = applySubgrades(items, stats, entries)
+		if c.calcGrades {
+			entries, layers.calc = calcGrades(entries, items, names, corrections)
+		}
+		layers.sub = applySubgrades(items, stats, entries)
 	}
 	if namesPath != "" {
 		filled := pipeline.FillRarity(entries, names, rarity)
@@ -235,7 +242,21 @@ func run(c config) error {
 		}
 		fmt.Printf("names: %d items shown under a corrected name\n", len(itemNames.Shown))
 	}
-	return finish(c, entries, skipped, itemNames, rarity, prov, sub, calc, known, corrections)
+	return finish(c, entries, skipped, itemNames, rarity, prov, layers, known, corrections)
+}
+
+type layerStats struct {
+	sub    *pipeline.SubgradeStats
+	calc   *pipeline.CalcStats
+	agreed *pipeline.AgreementStats
+}
+
+func agree(entries []pipeline.Entry, given map[int][5]string, packed map[int]pipeline.Entry,
+	items map[int]pipeline.CalcItem) *pipeline.AgreementStats {
+	stats := pipeline.CorrectByAgreement(entries, given, packed, items)
+	fmt.Printf("agreement: %d grades the item pages give, on %d items, take the one the packed table and Nikki Calc agree on (%d of them on the other side of their pair); 3 or more on %v\n",
+		stats.Pairs, len(stats.Items), stats.Sides, stats.Heavy)
+	return &stats
 }
 
 func readCalcItems(glob, keysPath string) (map[int]pipeline.CalcItem, pipeline.SubgradeStats, error) {
@@ -425,8 +446,7 @@ func checkSpiritBonuses(dumpPath string, known map[int]bool, packed []pipeline.E
 }
 
 func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.ItemNames, rarity map[int]int,
-	prov pipeline.Provenance, sub *pipeline.SubgradeStats, calc *pipeline.CalcStats, known map[int]bool,
-	corrections *pipeline.IDCorrections) error {
+	prov pipeline.Provenance, layers layerStats, known map[int]bool, corrections *pipeline.IDCorrections) error {
 	stagesPath, outDir, version := c.stagesPath, c.outDir, c.version
 	var stages []pipeline.Stage
 	var stageStats pipeline.StageStats
@@ -452,7 +472,7 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 		return err
 	}
 	pipeline.ApplySuits(entries, suits)
-	if err := checkBundle(c, entries, stages, stageStats, sub, calc, acq, cat, wikiStats, suits); err != nil {
+	if err := checkBundle(c, entries, stages, stageStats, layers, acq, cat, wikiStats, suits); err != nil {
 		return err
 	}
 
@@ -698,7 +718,7 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 }
 
 func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
-	stats pipeline.StageStats, sub *pipeline.SubgradeStats, calc *pipeline.CalcStats,
+	stats pipeline.StageStats, layers layerStats,
 	acq map[int][]pipeline.Acquisition, cat pipeline.AcquisitionCatalogue,
 	wikiStats *pipeline.WikiAcquisitionStats, suits map[int]string) error {
 	var cov pipeline.Coverage
@@ -723,13 +743,16 @@ func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 	}
 	v := pipeline.CheckAcquisition(acq, cat, cov)
 	v = append(v, pipeline.CheckSuits(suits, cov)...)
-	if calc != nil {
-		v = append(v, pipeline.CheckCalcGrades(*calc, cov)...)
+	if layers.calc != nil {
+		v = append(v, pipeline.CheckCalcGrades(*layers.calc, cov)...)
+	}
+	if layers.agreed != nil {
+		v = append(v, pipeline.CheckAgreement(*layers.agreed, cov)...)
 	}
 	if wikiStats != nil {
 		v = append(v, pipeline.CheckAcquisitionNames(*wikiStats, cov)...)
 	}
-	if err := pipeline.CheckInvariants(entries, stages, stats, cov, acknowledged, sub); err != nil {
+	if err := pipeline.CheckInvariants(entries, stages, stats, cov, acknowledged, layers.sub); err != nil {
 		var found pipeline.Violations
 		if !errors.As(err, &found) {
 			return err
