@@ -8,7 +8,7 @@ import {
   ALL_MODES, NO_SOURCE, OWNED_KEY, PAST_NOTE, RESTARTED, SCORE_F, UNLOCK_NOTE, chipText, detailsLabel, hideLabel, ownsAnyPart,
   filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, improvesText, itemMeta,
   neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote,
-  recipeText, rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
+  recipeText, rowKey, rowName, scoreFNote, stageLabel, suitName, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
   worthSuits, type AcquireTable, type WorthApi,
   MORE_WAIT, askSteps, checkingText, handedOver, keptRows, moreText, rankSteps, rankingText, waitPercent, worthWait,
   type Stepped,
@@ -989,4 +989,20 @@ test('the ranking wait that follows the stage check shows at once, for as long a
     seen.push(now && lead)
   }
   assert.deepEqual(seen, [false, true, true, false, false])
+})
+
+test('suit names drop the qualifier the wiki adds to tell suits apart', () => {
+  assert.equal(suitName('Star Shadow (Hidden Suit)'), 'Star Shadow')
+  assert.equal(suitName('Night Rose (Gallery Suit)'), 'Night Rose')
+  assert.equal(suitName('Wish of Snow (Pigeon Suit)'), 'Wish of Snow')
+  assert.equal(suitName('Golden Dancer'), 'Golden Dancer')
+  assert.equal(suitName("Kitten's Book (Chill)"), "Kitten's Book (Chill)")
+})
+
+test('a suit row shows the plain suit name but keeps the full name as its key', () => {
+  const gallery = { suit: 'Night Rose (Gallery Suit)', items: [1, 2] }
+  const pigeon = { suit: 'Night Rose (Pigeon Suit)', items: [3, 4] }
+  assert.equal(rowName(gallery, new Map()), 'Night Rose')
+  assert.equal(rowName(pigeon, new Map()), 'Night Rose')
+  assert.notEqual(rowKey(gallery), rowKey(pigeon))
 })

@@ -1,8 +1,9 @@
 import { useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { Button, Checkbox, Empty, Grid, Input, Select, Space, Switch, Table, Tag, Tooltip, Typography } from 'antd'
 import type { Place } from '../outfit/comparison'
-import { ANY_SLOT, ATTRS, ITEM_STEP, gradesLine, inChoice, itemPage, moreItemsText, ownLabel, tickHint, tickLine, placeName, slotOptions, type Item } from './items'
+import { ANY_SLOT, ATTRS, ITEM_STEP, fold, gradesLine, inChoice, itemPage, moreItemsText, ownLabel, tickHint, tickLine, placeName, slotOptions, type Item } from './items'
 import { useStore } from '../store'
+import { suitName } from '../worth/worth'
 import { usePhone } from '../hooks/usePhone'
 
 export default function ItemBrowser({
@@ -53,14 +54,14 @@ export default function ItemBrowser({
   }, [shown])
 
   const results = useMemo(() => {
-    const needle = query.trim().toLowerCase()
+    const needle = fold(query)
     return items.filter(
       (it) =>
         inChoice(slot, it) &&
         (!ownedOnly || owned.has(it.id)) &&
         (!scoreableOnly || it.scoreable) &&
         (rarity === 'all' || String(it.rarity) === rarity) &&
-        (needle === '' || it.search.includes(needle) || it.suit.toLowerCase().includes(needle)),
+        (needle === '' || it.search.includes(needle) || fold(it.suit).includes(needle)),
     )
   }, [items, owned, query, slot, ownedOnly, scoreableOnly, rarity])
   const more = phone ? moreItemsText(results.length, shown) : null
@@ -89,9 +90,9 @@ export default function ItemBrowser({
           <Space size={4} wrap>
             <span>{name}</span>
             {it.suit && (
-              <Tooltip title={`Part of ${it.suit}`}>
+              <Tooltip title={`Part of ${suitName(it.suit)}`}>
                 <Tag color="purple" className="nb-tag-tight">
-                  {it.suit}
+                  {suitName(it.suit)}
                 </Tag>
               </Tooltip>
             )}

@@ -137,8 +137,10 @@ export function worthSuits(items: readonly { id: number; suit: string; scoreable
 
 export const rowKey = (row: Pick<WorthRow, 'suit' | 'items'>) => (row.suit ? `suit:${row.suit}` : row.items.join('+'))
 
+export const suitName = (suit: string) => suit.replace(/\s*\([^()]*\bSuit\)$/, '')
+
 export function rowName(row: Pick<WorthRow, 'suit' | 'items'>, names: ReadonlyMap<number, string>): string {
-  return row.suit ?? row.items.map((id) => names.get(id) ?? `#${id}`).join(' + ')
+  return row.suit ? suitName(row.suit) : row.items.map((id) => names.get(id) ?? `#${id}`).join(' + ')
 }
 
 export const rankedName = (rank: number, name: string) => `${rank}. ${name}`

@@ -35,12 +35,16 @@ export function parseItems(rows: Row[], places: ItemPlaces | null = null): Item[
       place: placeOf.get(r[0] as number) ?? -1,
       attrs: r.slice(3, 8) as number[],
       grades,
-      search: (r[1] as string).toLowerCase(),
+      search: fold(r[1] as string),
       scoreable: grades.some(Boolean),
       rarity: (r[13] as number) ?? 0,
       suit: (r[14] as unknown as string) ?? '',
     }
   })
+}
+
+export function fold(text: string): string {
+  return text.toLowerCase().replace(/[\s\-·'’]/g, '')
 }
 
 export const ANY_SLOT = 'any'

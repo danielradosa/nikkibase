@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  ANY_SLOT, ITEM_STEP, choiceLabel, gradesLine, inChoice, itemPage, itemsTabLabel, tickHint, tickLine, moreItemsText, ownLabel, parseItems, placeName, slotChoice, slotOptions,
+  ANY_SLOT, ITEM_STEP, choiceLabel, fold, gradesLine, inChoice, itemPage, itemsTabLabel, tickHint, tickLine, moreItemsText, ownLabel, parseItems, placeName, slotChoice, slotOptions,
   type Row,
 } from '../../src/items/items.ts'
 
@@ -136,4 +136,19 @@ test('a wait names the chosen slot or place with a capital, and says nothing for
 test('the tick hint claims the list is saved only while saving works', () => {
   assert.equal(tickLine(false), "Tick what you own. It's saved in this browser.")
   assert.equal(tickLine(true), 'Tick what you own. It will be gone when you reload.')
+})
+
+test('search finds a name however its separators and spaces are typed', () => {
+  const name = fold('Red Satin-Epic')
+  for (const typed of ['Red Satin-Epic', 'red satin - epic', 'RED SATIN EPIC', 'Red Satin·Epic', 'redsatinepic']) {
+    assert.ok(name.includes(fold(typed)), typed)
+  }
+  assert.ok(fold("Nikki's Pinky").includes(fold('nikkis pinky')))
+  assert.ok(fold('Nikki’s Pinky').includes(fold("Nikki's")))
+  assert.equal(fold('   '), '')
+})
+
+test('the search text of an item is its folded name', () => {
+  const [it] = parseItems([[10001, 'Red Satin-Epic', 0, 0, 2, 4, 6, 8, 'S', 'A', 'A', 'A', 'A', 3, '']] as Row[])
+  assert.equal(it.search, fold('Red Satin-Epic'))
 })
