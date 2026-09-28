@@ -266,78 +266,6 @@
       "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key Z11600 -> items-v0.14.json name) gives 181600 = 'Cookie Sweet Dream', with a description that has the item's buns cookie-shaped; the wiki page, titled 'Biscuits & Sweet Dream', has a different description, in which the bun is shaped like a biscuit. Nikki Calc's name fits its own description; the packed table's 饼干甜梦 fits either word."
     },
     {
-      "id": 80824,
-      "name": "Jasmine Hairpin (Jasmine)",
-      "was": "Jasmine Hairpin",
-      "basis": "Fandom page 'Jasmine Hairpin (Jasmine)' carries '|type = Accessory, Hair Ornament' and '|wardrobe nr = 824' and resolves to 80824; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 80824 is named by Nikki Calc, which gives 'Jasmine Hairpin' without the wiki's qualifier; the packed table names it 银钗茉莉. The qualifier tells it from 86450 Jasmine Hairpin (Lotus Dumpling Shop, 织锦茉莉簪), which is worn in the same place."
-    },
-    {
-      "id": 82467,
-      "name": "Dazzling Bracelet (Gloves)",
-      "was": "Dazzling Bracelet",
-      "basis": "Fandom page 'Dazzling Bracelet (Gloves)' carries '|type = Accessory, Gloves' and '|wardrobe nr = 2467' and resolves to 82467; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 82467 is named by Nikki Calc, which gives 'Dazzling Bracelet' without the wiki's qualifier; the packed table names it 炫彩手环. The qualifier tells it from 81743 'Dazzling Bracelet (Bracelet)'."
-    },
-    {
-      "id": 85797,
-      "name": "Blazing End (Earrings)",
-      "was": "Blazing End",
-      "basis": "Fandom page 'Blazing End (Earrings)' carries '|type = Accessory, Earrings' and '|wardrobe nr = 5797' and resolves to 85797; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85797 is named by Nikki Calc, which gives 'Blazing End' without the wiki's qualifier; the packed table names it 业火穷劫. The qualifier tells it from 186256 Blazing End, a hair ornament."
-    },
-    {
-      "id": 85993,
-      "name": "Summer Dream (Bracelet)",
-      "was": "Summer Dream",
-      "basis": "Fandom page 'Summer Dream (Bracelet)' carries '|type = Accessory, Bracelet (Left)' and '|wardrobe nr = 5993' and resolves to 85993; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85993 is named by Nikki Calc, which gives 'Summer Dream' without the wiki's qualifier; the packed table names it 夏日梦想. The qualifier tells it from 13534 Summer Dream (hair) and 11621."
-    },
-    {
-      "id": 85995,
-      "name": "Strawberry Cake (Face)",
-      "was": "Strawberry Cake",
-      "basis": "Fandom page 'Strawberry Cake (Face)' carries '|type = Accessory, Face' and '|wardrobe nr = 5995' and resolves to 85995; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85995 is named by Nikki Calc, which gives 'Strawberry Cake' without the wiki's qualifier; the packed table names it 草莓雪糕. The qualifier tells it from 80240 'Strawberry Cake (Hair Ornament)'."
-    },
-    {
-      "id": 85999,
-      "name": "Ocean Echo (Bracelet)",
-      "was": "Ocean Echo",
-      "basis": "Fandom page 'Ocean Echo (Bracelet)' carries '|type = Accessory, Bracelet (Left)' and '|wardrobe nr = 5999' and resolves to 85999; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 85999 is named by Nikki Calc, which gives 'Ocean Echo' without the wiki's qualifier; the packed table names it 深海余音. The qualifier tells it from 86973 Ocean Echo, a necklace."
-    },
-    {
-      "id": 86649,
-      "name": "Frost Feather (Gloves)",
-      "was": "Frost Feather",
-      "basis": "Fandom page 'Frost Feather (Gloves)' carries '|type = Accessory, Gloves' and '|wardrobe nr = 6649' and resolves to 86649; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 86649 is named by Nikki Calc, which gives 'Frost Feather' without the wiki's qualifier; the packed table names it 霜华雪翎. The qualifier tells it from 81767 'Frost Feather (Hair Ornament)' and 11814 Frost Feather (hair)."
-    },
-    {
-      "id": 86663,
-      "name": "Bloody Flame (Foreground)",
-      "was": "Bloody Flame",
-      "basis": "Fandom page 'Bloody Flame (Foreground)' carries '|type = Accessory, Foreground' and '|wardrobe nr = 6663' and resolves to 86663; four of its five grades match the packed table's row (Warm A on the page, S in that row). The item parser skips the page because its Attributes template starts on a new line, so 86663 is named by Nikki Calc, which gives 'Bloody Flame' without the wiki's qualifier; the packed table names it 血色焰火. The qualifier tells it from 84482 Bloody Flame, a tattoo."
-    },
-    {
-      "id": 21119,
-      "name": "Star Fall (Dress)",
-      "was": "Star Fall",
-      "basis": "Fandom page 'Star Fall (Dress)' carries '|type = Dress' and '|wardrobe nr = 1119' and resolves to 21119; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 21119 is named by Nikki Calc, which gives 'Star Fall' without the wiki's qualifier; the packed table names it 星落. The qualifier tells it from 88371 Star Fall, a necklace."
-    },
-    {
-      "id": 11732,
-      "name": "Innocent Daydream (Interesting Trends)",
-      "was": "Innocent Daydream",
-      "basis": "Fandom page 'Innocent Daydream (Interesting Trends)' carries '|type = Hair' and '|wardrobe nr = 1732' and resolves to 11732; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 11732 is named by Nikki Calc, which gives 'Innocent Daydream' without the wiki's qualifier; the packed table names it 纯真浅梦. The qualifier tells it from 11107 'Innocent Daydream (Cruise Fairy Tale)', also a hair."
-    },
-    {
-      "id": 12066,
-      "name": "Summer Time (Hair)",
-      "was": "Summer Time",
-      "basis": "Fandom page 'Summer Time (Hair)' carries '|type = Hair' and '|wardrobe nr = 2066' and resolves to 12066; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 12066 is named by Nikki Calc, which gives 'Summer Time' without the wiki's qualifier; the packed table names it 夏日时光. The qualifier tells it from 21808 'Summer Time (Dress)'."
-    },
-    {
-      "id": 12219,
-      "name": "Luminous Night (Hair)",
-      "was": "Luminous Night",
-      "basis": "Fandom page 'Luminous Night (Hair)' carries '|type = Hair' and '|wardrobe nr = 2219' and resolves to 12219; its grades match the packed table's row. The item parser skips the page because its Attributes template starts on a new line, so 12219 is named by Nikki Calc, which gives 'Luminous Night' without the wiki's qualifier; the packed table names it 夜之灼光. The qualifier tells it from 30819 'Luminous Night (Coat)'."
-    },
-    {
       "id": 11316,
       "name": "Quiet Night Poem (Night)",
       "was": "Quiet Night Poem/Night",
@@ -500,5 +428,29 @@
       "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key A2819 -> items-v0.14.json name) gives 82819 the plain name 'Blood Silk Temple', which is also the name of its day form 82805; the packed table names 82819 血绫殿[夜], marking it night (夜) against 82805's day (昼). The wiki has no item page for it; its list reads '{{WIL|2819|Blood Silk Temple/Night|Blood Silk Temple}}'. '(Night)' tells 82819 from 82805, which keeps the plain name, as for the night forms of the same suits that have a wiki page."
     }
   ],
-  "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where two items share a name and the wiki tells them apart with a qualifier its item page carries, where one source swaps the names of two items, and where the night form of a day and night pair would read like its day form or like the wiki's page address ('/Night'). 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling."
+  "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where two items share a name and the wiki tells them apart with a qualifier its item page carries, where one source swaps the names of two items, and where the night form of a day and night pair would read like its day form or like the wiki's page address ('/Night'). 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling.",
+  "gradeOverrides": [
+    {
+      "id": 40721,
+      "attribute": "Gorgeous",
+      "grade": "S",
+      "was": "A",
+      "basis": "The wiki's item page 'Magical Moment ♥Mickey' gives Gorgeous A. The packed table (wardrobe.js) gives Gorgeous S, and Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives S-, in the S band. The two agree on S."
+    },
+    {
+      "id": 85997,
+      "attribute": "Lively",
+      "grade": "S",
+      "was": "SS",
+      "basis": "The wiki's item page 'Fantasy Dolphin' gives Lively SS. The packed table (wardrobe.js) gives Lively S, and Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives S. The two agree on S."
+    },
+    {
+      "id": 86663,
+      "attribute": "Warm",
+      "grade": "S",
+      "was": "A",
+      "basis": "The wiki's item page 'Bloody Flame (Foreground)' gives Warm A. The packed table (wardrobe.js) gives Warm S, and Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives S-, in the S band. The two agree on S."
+    }
+  ],
+  "gradeOverridesNote": "Grades kept against the wiki's item page where the packed table and Nikki Calc's sub-grade agree on another letter for the same attribute. 'grade' is the letter kept, 'was' the one the wiki gives; the build fails if the sources no longer give 'was' on that attribute. The stat is worked out from the kept letter, and Nikki Calc's sub-grade then sets it as for any other stat."
 }

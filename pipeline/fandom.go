@@ -26,8 +26,8 @@ var attributeSides = [5]struct{ first, second []string }{
 }
 
 var (
-	attributesTemplate = regexp.MustCompile(`\{\{Attributes\|([^}]+)\}\}`)
-	infoboxField       = regexp.MustCompile(`(?m)^\s*\|\s*([a-z0-9 ]+?)\s*=\s*(.*)$`)
+	attributesTemplate = regexp.MustCompile(`\{\{Attributes\s*\|([^}]+)\}\}`)
+	infoboxField       = regexp.MustCompile(`(?m)^[ \t]*\|[ \t]*([a-z0-9 ]+?)[ \t]*=[ \t]*(.*)$`)
 	styleTag           = regexp.MustCompile(`\{\{S\|([^}|]+)`)
 )
 

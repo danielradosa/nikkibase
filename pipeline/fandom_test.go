@@ -140,3 +140,40 @@ func TestFandomIDs(t *testing.T) {
 		}
 	}
 }
+
+func TestParseFandomDumpReadsAttributesStartingOnANewLine(t *testing.T) {
+	want := [5]int8{scoring.Simple, scoring.Elegant, scoring.Cute, scoring.Pure, scoring.Cool}
+	for _, tc := range []struct{ name, attributes string }{
+		{"all values on the next line", "{{Attributes\n|Simple|A|Elegance|B|Cute|S|Pure|S|Cool|A}}"},
+		{"one value per line", "{{Attributes\n|Simple\n|A\n|Elegance\n|B\n|Cute\n|S\n|Pure\n|S\n|Cool\n|A\n}}"},
+		{"a pair per line", "{{Attributes\n|Simple|A\n|Elegance|B\n|Cute|S\n|Pure|S\n|Cool|A\n}}"},
+		{"a space before the line break", "{{Attributes \n|Simple|A\n|Elegance|B\n|Cute|S\n|Pure|S\n|Cool|A\n}}"},
+	} {
+		page := "<mediawiki><page><title>Shallow Laziness</title><ns>0</ns><revision><text>{{Clothing\n|type = Hair\n|wardrobe nr = 17\n}}\n" +
+			tc.attributes + "</text></revision></page></mediawiki>"
+		entries, stats, err := ParseFandomDump(strings.NewReader(page), map[int]bool{10017: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(entries) != 1 {
+			t.Errorf("%s: got %d entries, want 1 (NoGrades = %d)", tc.name, len(entries), stats.NoGrades)
+			continue
+		}
+		e := entries[0]
+		if e.Item.ID != 10017 || e.Item.Attrs != want || e.Grades != [5]string{"A", "B", "S", "S", "A"} {
+			t.Errorf("%s: got %d %v %v, want 10017 %v [A B S S A]", tc.name, e.Item.ID, e.Item.Attrs, e.Grades, want)
+		}
+	}
+}
+
+func TestParseFandomDumpKeepsAnEmptyInfoboxFieldOnItsOwnLine(t *testing.T) {
+	page := "<mediawiki><page><title>Silent Waiting (Makeup)</title><ns>0</ns><revision><text>{{Clothing\n|type = Makeup\n|color = Pink\n|secondary color =\n|wardrobe nr = 630\n}}\n" +
+		"{{Attributes|Gorgeous|SS|Elegant|S|Mature|A|Pure|SS|Warm|A}}</text></revision></page></mediawiki>"
+	entries, stats, err := ParseFandomDump(strings.NewReader(page), map[int]bool{90630: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Item.ID != 90630 {
+		t.Fatalf("got %d entries %+v, want 90630 (rejected = %d)", len(entries), entries, stats.UnknownAny)
+	}
+}
