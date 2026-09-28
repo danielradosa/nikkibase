@@ -47,6 +47,10 @@ type subgradeRecord struct {
 	Attrs    []int    `json:"attrs"`
 	NiGrades []string `json:"niGrades"`
 	Tags     []int    `json:"tags"`
+	Recipe   []struct {
+		ID  int `json:"id"`
+		Num int `json:"num"`
+	} `json:"recipe"`
 }
 
 func ParseSubgrades(batches [][]byte, keys []byte) (map[int][5]Subgrade, SubgradeStats, error) {
@@ -117,10 +121,22 @@ func ParseCalcItems(batches [][]byte, keys []byte) (map[int]CalcItem, SubgradeSt
 			if _, dup := out[id]; dup {
 				return nil, stats, fmt.Errorf("pipeline: two item keys give ID %d", id)
 			}
-			out[id] = CalcItem{Place: r.Slot, Row: row, Tags: r.Tags}
+			out[id] = CalcItem{Place: r.Slot, Row: row, Tags: r.Tags, Recipe: calcRecipe(r, keyOf)}
 		}
 	}
 	return out, stats, nil
+}
+
+func calcRecipe(r subgradeRecord, keyOf map[int]string) []Ingredient {
+	var out []Ingredient
+	for _, in := range r.Recipe {
+		id, ok := NikkicalcID(keyOf[in.ID])
+		if !ok || in.Num <= 0 {
+			return nil
+		}
+		out = append(out, Ingredient{ID: id, Qty: in.Num})
+	}
+	return out
 }
 
 func subgradeRow(r subgradeRecord) ([5]Subgrade, error) {

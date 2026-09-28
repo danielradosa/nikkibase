@@ -28,7 +28,7 @@ type config struct {
 	sourcesPath, exceptionsPath                           string
 	idCorrectionsPath, stageCorrectionsPath, coveragePath string
 	acquisitionMapPath, acquisitionExtraPath              string
-	allowUnlicensed, calcGrades                           bool
+	allowUnlicensed, calcGrades, calcRecipes              bool
 	builtAt                                               time.Time
 }
 
@@ -48,6 +48,7 @@ func main() {
 	flag.StringVar(&c.keysPath, "keys", "", "path to Nikki Calc's item-key JSON, required with -names and -subgrades")
 	flag.StringVar(&c.subgradesPath, "subgrades", "", "glob of Nikki Calc's item-batch files, whose sub-grades set each stat within its letter grade, e.g. .../item-batch-v0.14-*.json")
 	flag.StringVar(&c.calcSuitsPath, "calc-suits", "", "path to Nikki Calc's suits JSON, naming the suits the wiki has no page for; needs -keys")
+	flag.BoolVar(&c.calcRecipes, "calc-recipes", false, "give the ingredients of the -subgrades item batches' recipes to items the other sources say are crafted without naming them")
 	flag.BoolVar(&c.calcGrades, "calc-grades", false, "grade the items no other source grades from the -subgrades item batches: letters, sides, places and style tags; needs -names")
 	flag.StringVar(&c.outDir, "out", "web/public/data", "directory to write the bundle into")
 	flag.StringVar(&c.version, "version", "", "version directory name, e.g. 2026.09")
@@ -100,6 +101,9 @@ func run(c config) error {
 	}
 	if c.calcSuitsPath != "" && c.keysPath == "" {
 		return fmt.Errorf("-calc-suits needs -keys, which maps each suit's clothes to their items")
+	}
+	if c.calcRecipes && c.subgradesPath == "" {
+		return fmt.Errorf("-calc-recipes reads the -subgrades item batches, so it needs them")
 	}
 	if c.calcGrades && (c.subgradesPath == "" || c.namesPath == "") {
 		return fmt.Errorf("-calc-grades reads the -subgrades item batches for the items -names lists, so it needs both")
@@ -233,6 +237,9 @@ func run(c config) error {
 			entries, layers.calc = calcGrades(entries, items, names, corrections)
 		}
 		layers.sub = applySubgrades(items, stats, entries)
+		if c.calcRecipes {
+			layers.items = items
+		}
 	}
 	if namesPath != "" {
 		filled := pipeline.FillRarity(entries, names, rarity)
@@ -255,6 +262,7 @@ type layerStats struct {
 	sub    *pipeline.SubgradeStats
 	calc   *pipeline.CalcStats
 	agreed *pipeline.AgreementStats
+	items  map[int]pipeline.CalcItem
 }
 
 func agree(entries []pipeline.Entry, given map[int][5]string, packed map[int]pipeline.Entry,
@@ -473,7 +481,7 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 	}
 
 	cat := pipeline.NewAcquisitionCatalogue(entries, names, stages)
-	acq, wikiStats, suits, err := readAcquisition(c, known, corrections, cat)
+	acq, wikiStats, suits, err := readAcquisition(c, known, corrections, cat, layers.items)
 	if err != nil {
 		return err
 	}
@@ -654,7 +662,7 @@ func readStageCorrections(path string) (map[string]pipeline.StageCorrection, err
 }
 
 func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorrections,
-	cat pipeline.AcquisitionCatalogue) (map[int][]pipeline.Acquisition, *pipeline.WikiAcquisitionStats, map[int]string, error) {
+	cat pipeline.AcquisitionCatalogue, recipes map[int]pipeline.CalcItem) (map[int][]pipeline.Acquisition, *pipeline.WikiAcquisitionStats, map[int]string, error) {
 	var wiki pipeline.WikiAcquisition
 	var wikiStats *pipeline.WikiAcquisitionStats
 	if c.dumpPath != "" {
@@ -707,6 +715,10 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 	acq, stats := pipeline.MergeAcquisition(cat, wiki.Items, packed, wiki.Suits)
 	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page\n",
 		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits)
+	if recipes != nil {
+		fmt.Printf("acquisition: %d items the sources say are crafted, without naming what from, take Nikki Calc's recipe\n",
+			pipeline.ApplyCalcRecipes(acq, cat, recipes))
+	}
 	if c.acquisitionExtraPath != "" {
 		raw, err := os.ReadFile(c.acquisitionExtraPath)
 		if err != nil {

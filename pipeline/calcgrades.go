@@ -9,9 +9,10 @@ import (
 )
 
 type CalcItem struct {
-	Place int
-	Row   [5]Subgrade
-	Tags  []int
+	Place  int
+	Row    [5]Subgrade
+	Tags   []int
+	Recipe []Ingredient
 }
 
 type CalcStats struct {
@@ -129,4 +130,36 @@ func CheckCalcGrades(stats CalcStats, want Coverage) Violations {
 			stats.Graded, want.MaxCalcGradedItems)}
 	}
 	return nil
+}
+
+func ApplyCalcRecipes(acq map[int][]Acquisition, cat AcquisitionCatalogue, items map[int]CalcItem) int {
+	bare := func(a Acquisition) bool { return a.Kind == "craft" && a.Text == "Crafting" && len(a.From) == 0 }
+	given := func(a Acquisition) bool { return a.Kind == "craft" && len(a.From) > 0 }
+	detailed := 0
+	for _, id := range sortedIDs(acq) {
+		list, recipe := acq[id], items[id].Recipe
+		if len(recipe) == 0 || !slices.ContainsFunc(list, bare) || slices.ContainsFunc(list, given) {
+			continue
+		}
+		named := make([]namedIngredient, 0, len(recipe))
+		for _, in := range recipe {
+			if name := cat.shown(in.ID); name != "" && !hasHan(name) {
+				named = append(named, namedIngredient{name: name, id: in.ID, qty: in.Qty})
+			}
+		}
+		if len(named) != len(recipe) {
+			continue
+		}
+		craft := Acquisition{Kind: "craft", Text: "Craft: " + ingredientList(named), From: ingredients(named)}
+		out := make([]Acquisition, 0, len(list))
+		for _, a := range list {
+			if bare(a) {
+				a = craft
+			}
+			out = appendAcquisition(out, a)
+		}
+		acq[id] = out
+		detailed++
+	}
+	return detailed
 }

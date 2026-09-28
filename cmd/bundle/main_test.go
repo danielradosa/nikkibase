@@ -455,6 +455,14 @@ func TestCalcGradesNeedTheirSourcesAndStayUnderTheirCeiling(t *testing.T) {
 	}
 }
 
+func TestCalcRecipesNeedTheItemBatches(t *testing.T) {
+	c := testConfig(t)
+	c.dumpPath, c.calcRecipes = "testdata/wiki.xml", true
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "-calc-recipes") {
+		t.Errorf("err = %v, want a refusal naming -calc-recipes", err)
+	}
+}
+
 func TestCalcSuitsPlaceItemsTheOtherSourcesLeaveOut(t *testing.T) {
 	c := testConfig(t)
 	c.dumpPath = "testdata/wiki.xml"
