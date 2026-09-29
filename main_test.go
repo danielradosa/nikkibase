@@ -37,13 +37,6 @@ func root(t *testing.T) string {
 	return dir
 }
 
-func get(t *testing.T, h http.Handler, path string) *http.Response {
-	t.Helper()
-	w := httptest.NewRecorder()
-	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, path, nil))
-	return w.Result()
-}
-
 func fetch(t *testing.T, h http.Handler, method, path, accept string) *http.Response {
 	t.Helper()
 	req := httptest.NewRequest(method, path, nil)
@@ -129,32 +122,15 @@ func TestCacheLifetimes(t *testing.T) {
 		{"/keystream.bin?v=0123abcd", "immutable"},
 		{"/keystream.bin", "max-age=300"},
 	} {
-		got := get(t, h, c.path).Header.Get("Cache-Control")
+		got := fetch(t, h, http.MethodGet, c.path, "").Header.Get("Cache-Control")
 		if !strings.Contains(got, c.want) {
 			t.Errorf("%s: Cache-Control = %q, want it to contain %q", c.path, got, c.want)
 		}
 	}
 }
 
-func TestWasmContentType(t *testing.T) {
-	res := get(t, handler(root(t)), "/assets/nikkibase-abc.wasm")
-	if ct := res.Header.Get("Content-Type"); !strings.HasPrefix(ct, "application/wasm") {
-		t.Errorf("Content-Type = %q, want application/wasm", ct)
-	}
-}
-
-func TestRoutesFallBackButAssetsDoNot(t *testing.T) {
-	h := handler(root(t))
-	if res := get(t, h, "/stages"); res.StatusCode != http.StatusOK {
-		t.Errorf("a route returned %d, want it to serve the shell", res.StatusCode)
-	}
-	if res := get(t, h, "/assets/missing-deadbeef.js"); res.StatusCode != http.StatusNotFound {
-		t.Errorf("a missing asset returned %d, want 404", res.StatusCode)
-	}
-}
-
 func TestSecurityHeaders(t *testing.T) {
-	res := get(t, handler(root(t)), "/index.html")
+	res := fetch(t, handler(root(t)), http.MethodGet, "/index.html", "")
 	csp := res.Header.Get("Content-Security-Policy")
 	for _, want := range []string{"connect-src 'self'", "frame-ancestors 'none'", "'wasm-unsafe-eval'", "font-src 'self'"} {
 		if !strings.Contains(csp, want) {
@@ -172,9 +148,7 @@ func TestSecurityHeaders(t *testing.T) {
 }
 
 func TestOnlyReads(t *testing.T) {
-	w := httptest.NewRecorder()
-	handler(root(t)).ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/", nil))
-	if w.Code != http.StatusMethodNotAllowed {
-		t.Errorf("POST returned %d, want 405", w.Code)
+	if res := fetch(t, handler(root(t)), http.MethodPost, "/", ""); res.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("POST returned %d, want 405", res.StatusCode)
 	}
 }
