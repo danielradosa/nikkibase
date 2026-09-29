@@ -125,19 +125,17 @@ func run(c config) error {
 	}
 	prov := pipeline.NewProvenance(c.version, c.builtAt.Format(time.RFC3339), reg, ex, basis, inputs, c.allowUnlicensed)
 
-	itemsPath, dumpPath, knownPath := c.itemsPath, c.dumpPath, c.knownPath
-	packedPath, namesPath, keysPath := c.packedPath, c.namesPath, c.keysPath
 	names := map[int]string{}
 	var rarity map[int]int
-	if namesPath != "" {
-		if keysPath == "" {
+	if c.namesPath != "" {
+		if c.keysPath == "" {
 			return fmt.Errorf("-names needs -keys, which maps item keys to the name array")
 		}
-		rawNames, err := os.ReadFile(namesPath)
+		rawNames, err := os.ReadFile(c.namesPath)
 		if err != nil {
 			return err
 		}
-		rawKeys, err := os.ReadFile(keysPath)
+		rawKeys, err := os.ReadFile(c.keysPath)
 		if err != nil {
 			return err
 		}
@@ -145,7 +143,7 @@ func run(c config) error {
 			return err
 		}
 	}
-	known, err := readKnown(knownPath)
+	known, err := readKnown(c.knownPath)
 	if err != nil {
 		return err
 	}
@@ -155,17 +153,11 @@ func run(c config) error {
 			known[id] = true
 		}
 	}
-	var corrections *pipeline.IDCorrections
-	if c.idCorrectionsPath != "" {
-		raw, err := os.ReadFile(c.idCorrectionsPath)
-		if err != nil {
-			return err
-		}
-		if corrections, err = pipeline.ReadIDCorrections(raw); err != nil {
-			return err
-		}
+	corrections, err := readOptional(c.idCorrectionsPath, pipeline.ReadIDCorrections)
+	if err != nil {
+		return err
 	}
-	entries, skipped, err := readItems(itemsPath, dumpPath, known)
+	entries, skipped, err := readItems(c.itemsPath, c.dumpPath, known)
 	if err != nil {
 		return err
 	}
@@ -180,8 +172,8 @@ func run(c config) error {
 		given[e.Item.ID] = e.Grades
 	}
 	var packedPlaces, packedRows map[int]pipeline.Entry
-	if packedPath != "" {
-		raw, err := os.ReadFile(packedPath)
+	if c.packedPath != "" {
+		raw, err := os.ReadFile(c.packedPath)
 		if err != nil {
 			return err
 		}
@@ -198,8 +190,8 @@ func run(c config) error {
 		fmt.Printf("packed: %d rows, %d parsed, %d rejected, %d not in the global game, %d spirit bonuses, %d unknown tags -> catalogue %d to %d\n",
 			pstats.Rows, pstats.Parsed, pstats.UnknownAny, pstats.NotGlobal, pstats.Bonuses,
 			pstats.UnknownTag, before, len(entries))
-		if dumpPath != "" {
-			if err := checkSpiritBonuses(dumpPath, known, packed); err != nil {
+		if c.dumpPath != "" {
+			if err := checkSpiritBonuses(c.dumpPath, known, packed); err != nil {
 				return err
 			}
 		}
@@ -216,7 +208,7 @@ func run(c config) error {
 		fmt.Printf("identity: %d duplicate IDs resolved, %d slots restored, %d names corrected, %d grades corrected, %d items left out -> catalogue %d to %d\n",
 			len(corrections.Owner), len(corrections.Slot), len(corrections.Name), grades, len(corrections.Excluded), before, len(entries))
 	}
-	if packedPlaces != nil && namesPath != "" {
+	if packedPlaces != nil && c.namesPath != "" {
 		if wrong := pipeline.CheckGarments(entries, packedPlaces, names); len(wrong) > 0 {
 			return pipeline.Violations{fmt.Sprintf(
 				"%d item IDs carry a different garment from the one the packed table and Nikki Calc name; settle each in %s: %s",
@@ -225,7 +217,7 @@ func run(c config) error {
 	}
 	var layers layerStats
 	if c.subgradesPath != "" {
-		items, stats, err := readCalcItems(c.subgradesPath, keysPath)
+		items, stats, err := readCalcItems(c.subgradesPath, c.keysPath)
 		if err != nil {
 			return err
 		}
@@ -240,7 +232,7 @@ func run(c config) error {
 			layers.items = items
 		}
 	}
-	if namesPath != "" {
+	if c.namesPath != "" {
 		filled := pipeline.FillRarity(entries, names, rarity)
 		if v := pipeline.CheckRarity(entries, names, rarity); len(v) > 0 {
 			return v
@@ -456,17 +448,16 @@ func checkSpiritBonuses(dumpPath string, known map[int]bool, packed []pipeline.E
 
 func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.ItemNames, rarity map[int]int,
 	prov pipeline.Provenance, layers layerStats, known map[int]bool, corrections *pipeline.IDCorrections) error {
-	stagesPath, outDir, version := c.stagesPath, c.outDir, c.version
 	var stages []pipeline.Stage
 	var stageStats pipeline.StageStats
-	if stagesPath == "" {
+	if c.stagesPath == "" {
 		fmt.Println("WARNING: no -stages: the bundle has no stages, so the site cannot score any outfit")
 	} else {
-		raw, err := os.ReadFile(stagesPath)
+		raw, err := os.ReadFile(c.stagesPath)
 		if err != nil {
 			return err
 		}
-		corrections, err := readStageCorrections(c.stageCorrectionsPath)
+		corrections, err := readOptional(c.stageCorrectionsPath, pipeline.ReadStageCorrections)
 		if err != nil {
 			return err
 		}
@@ -494,7 +485,7 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 		return err
 	}
 
-	dir := filepath.Join(outDir, version)
+	dir := filepath.Join(c.outDir, c.version)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
@@ -504,7 +495,7 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 		"stages.json":     pipeline.WriteStages(stages),
 		"tags.json":       pipeline.WriteTags(),
 		"positions.json":  pipeline.WritePositions(),
-		"acquire.json":    pipeline.WriteAcquisition(version, acq),
+		"acquire.json":    pipeline.WriteAcquisition(c.version, acq),
 		"provenance.json": append(provenance, '\n'),
 	}
 	for name, data := range files {
@@ -513,8 +504,8 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 		}
 		fmt.Printf("%-12s %8d bytes\n", name, len(data))
 	}
-	index := fmt.Appendf(nil, "{\"version\":%q}\n", version)
-	if err := os.WriteFile(filepath.Join(outDir, "index.json"), index, 0o644); err != nil {
+	index := fmt.Appendf(nil, "{\"version\":%q}\n", c.version)
+	if err := os.WriteFile(filepath.Join(c.outDir, "index.json"), index, 0o644); err != nil {
 		return err
 	}
 
@@ -583,11 +574,7 @@ func readStages(c config, raw []byte, corrections map[string]pipeline.StageCorre
 		return nil, stats, err
 	}
 	if c.stageScopePath != "" {
-		b, err := os.ReadFile(c.stageScopePath)
-		if err != nil {
-			return nil, stats, err
-		}
-		scope, err := pipeline.ReadStageScope(b)
+		scope, err := readOptional(c.stageScopePath, pipeline.ReadStageScope)
 		if err != nil {
 			return nil, stats, err
 		}
@@ -616,11 +603,7 @@ func readStages(c config, raw []byte, corrections map[string]pipeline.StageCorre
 		}
 	}
 	if c.stageDifficultyPath != "" {
-		b, err := os.ReadFile(c.stageDifficultyPath)
-		if err != nil {
-			return nil, stats, err
-		}
-		variants, err := pipeline.ReadStageVariants(b)
+		variants, err := readOptional(c.stageDifficultyPath, pipeline.ReadStageVariants)
 		if err != nil {
 			return nil, stats, err
 		}
@@ -629,11 +612,7 @@ func readStages(c config, raw []byte, corrections map[string]pipeline.StageCorre
 		}
 	}
 	if c.stageRulesPath != "" {
-		b, err := os.ReadFile(c.stageRulesPath)
-		if err != nil {
-			return nil, stats, err
-		}
-		rules, err := pipeline.ReadStageRules(b)
+		rules, err := readOptional(c.stageRulesPath, pipeline.ReadStageRules)
 		if err != nil {
 			return nil, stats, err
 		}
@@ -645,15 +624,16 @@ func readStages(c config, raw []byte, corrections map[string]pipeline.StageCorre
 	return stages, stats, nil
 }
 
-func readStageCorrections(path string) (map[string]pipeline.StageCorrection, error) {
+func readOptional[T any](path string, parse func([]byte) (T, error)) (T, error) {
+	var none T
 	if path == "" {
-		return nil, nil
+		return none, nil
 	}
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return none, err
 	}
-	return pipeline.ReadStageCorrections(raw)
+	return parse(raw)
 }
 
 func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorrections,
@@ -713,11 +693,7 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 			pipeline.ApplyCalcRecipes(acq, cat, recipes))
 	}
 	if c.acquisitionExtraPath != "" {
-		raw, err := os.ReadFile(c.acquisitionExtraPath)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		extra, err := pipeline.ReadAcquisitionExtra(raw)
+		extra, err := readOptional(c.acquisitionExtraPath, pipeline.ReadAcquisitionExtra)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -781,15 +757,9 @@ func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 			return fmt.Errorf("%s: %w", c.coveragePath, err)
 		}
 	}
-	var acknowledged map[string]pipeline.Acknowledged
-	if c.stageCorrectionsPath != "" {
-		raw, err := os.ReadFile(c.stageCorrectionsPath)
-		if err != nil {
-			return err
-		}
-		if acknowledged, err = pipeline.ReadAcknowledged(raw); err != nil {
-			return err
-		}
+	acknowledged, err := readOptional(c.stageCorrectionsPath, pipeline.ReadAcknowledged)
+	if err != nil {
+		return err
 	}
 	v := pipeline.CheckAcquisition(acq, cat, cov)
 	v = append(v, pipeline.CheckSuits(suits, cov)...)
