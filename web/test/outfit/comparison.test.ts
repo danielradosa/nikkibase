@@ -15,8 +15,7 @@ import {
   rowOpens,
   unwornLabel,
 } from '../../src/outfit/comparison.ts'
-import { skillsLine } from '../../src/outfit/skills.ts'
-import { SITE_HOST } from '../../src/site.ts'
+import { SITE_HOST, skillsLine } from '../../src/outfit/skills.ts'
 import type { Outfit } from '../../src/engine/engine.ts'
 
 const TOP = 3
@@ -114,7 +113,7 @@ test('unknown places and unnamed items fall back to their numbers', () => {
 })
 
 test('the copied outfit lists the stage, score and each item by place', () => {
-  const text = outfitText(outfit(1234, [[40, 3], [10, 0]]), outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, SITE_HOST))
+  const text = outfitText(outfit(1234, [[40, 3], [10, 0]]), outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.deepEqual(text.split('\n'), [
     'Commission 1-1 — 1,234 (2 items)',
     'Hair: Rose Bun',
@@ -126,23 +125,23 @@ test('the copied outfit lists the stage, score and each item by place', () => {
 
 test('the copied outfit names the skills it was scored with', () => {
   const skilled = outfit(1234, [[10, 0]], { skills: { charmSmile: 3, smile: 5 } })
-  const text = outfitText(skilled, outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(skilled.skills, ATTRS, SITE_HOST))
+  const text = outfitText(skilled, outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(skilled.skills, ATTRS))
   assert.deepEqual(text.split('\n').slice(-2), [
     'best possible — 5,678',
     `Skills: Charming + Smile on Lively, Smile on Cute (max level). ${SITE_HOST}`,
   ])
-  const plain = outfitText(outfit(1234, [[10, 0]]), null, { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, SITE_HOST))
+  const plain = outfitText(outfit(1234, [[10, 0]]), null, { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.equal(plain.split('\n').at(-1), `Scores assume no skills. ${SITE_HOST}`)
 })
 
 test('the copied outfit names the difficulty on Story stages only', () => {
-  const story = outfitText(outfit(1, []), null, { mode: 'Story', name: '6-9' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, SITE_HOST))
+  const story = outfitText(outfit(1, []), null, { mode: 'Story', name: '6-9' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.equal(story.split('\n')[0], 'Story 6-9 (Maiden) — 1 (0 items)')
 })
 
 test('there is nothing to copy without an outfit and a stage', () => {
-  assert.equal(outfitText(null, null, { mode: 'Story', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, SITE_HOST)), '')
-  assert.equal(outfitText(outfit(1, []), null, null, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, SITE_HOST)), '')
+  assert.equal(outfitText(null, null, { mode: 'Story', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS)), '')
+  assert.equal(outfitText(outfit(1, []), null, null, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS)), '')
 })
 
 test('on phones each row names the best possible item under yours, or says yours is it', () => {

@@ -4,7 +4,6 @@ import { useStore } from '../store'
 import { ATTRS, SLOTS, type Item } from '../items/items'
 import { FINDING, NAMES_WAIT, comparisonRows, outfitText, resultView, type Place } from './comparison'
 import { skillsLine } from './skills'
-import { SITE_HOST } from '../site'
 import { missingMessage, stageKey, type Stage } from './stages'
 import { ENGINE_DOWN, manyUnscored, unscored } from '../wardrobe/wardrobeText'
 import WardrobeImport from '../wardrobe/WardrobeImport'
@@ -33,7 +32,7 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
   const chosen = stages.find((s) => stageKey(s) === stage)
   const rows = useMemo(() => comparisonRows(outfit, ideal, names, places, SLOTS), [outfit, ideal, names, places])
   const copyText = useMemo(
-    () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, places, SLOTS, skillsLine(outfit?.skills, ATTRS, SITE_HOST)),
+    () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, places, SLOTS, skillsLine(outfit?.skills, ATTRS)),
     [outfit, ideal, chosen, difficulty, names, places],
   )
   const view = resultView({ owned: owned.length, chosen: !!chosen, outfit: !!outfit, busy })

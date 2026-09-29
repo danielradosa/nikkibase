@@ -67,10 +67,12 @@ function levelsText(l: SkillLevels): string {
   return `${l.smile ? `Smile level ${l.smile}` : 'no Smile'}, ${l.charming ? `Charming level ${l.charming}` : 'no Charming'}`
 }
 
-export function skillsLine(p: SkillChoice | undefined, attrs: readonly string[], site: string): string {
-  if (!p) return `Scores assume no skills. ${site}`
+export const SITE_HOST = 'nikkibase.up.railway.app'
+
+export function skillsLine(p: SkillChoice | undefined, attrs: readonly string[]): string {
+  if (!p) return `Scores assume no skills. ${SITE_HOST}`
   const l = p.levels ?? MAX_LEVELS
-  return `Skills: ${placementPhrases(p, l, attrs).join(', ')} (${levelsText(l)}). ${site}`
+  return `Skills: ${placementPhrases(p, l, attrs).join(', ')} (${levelsText(l)}). ${SITE_HOST}`
 }
 
 export function scoredOn(p: SkillChoice, l: SkillLevels): number[] {
