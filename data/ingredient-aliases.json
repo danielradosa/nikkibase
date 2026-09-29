@@ -1,0 +1,11 @@
+{
+  "note": "Hand-checked spellings of ingredients and bases that match no catalogue item by name: an item page's recipe, evolution or customization writes the item one way and the catalogue another. Each entry names the item page, the name as that page writes it and the item it is. The build refuses an entry once the item leaves the catalogue, the page no longer gives the name unmatched, or the name matches an item without the alias, so the list stays short and current.",
+  "aliases": [
+    {
+      "page": "Horn of Cloud",
+      "name": "Bow Braclet-Red",
+      "id": 80784,
+      "basis": "The page's recipe asks for 4; Bow Bracelet-Red's page lists Horn of Cloud among the items it is used to craft, with 4 needed, and the wiki's list page Bracelets gives No. 784 as 'Bow Bracelet-Red'."
+    }
+  ]
+}

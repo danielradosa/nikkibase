@@ -774,6 +774,38 @@ func TestSuitPartAliasesPlaceWhatTheLookupCannot(t *testing.T) {
 	}
 }
 
+func TestIngredientAliasesLinkWhatTheLookupCannot(t *testing.T) {
+	page := "<page>\n  <title>Honey-Soaked Song</title>\n  <ns>0</ns>\n  <revision><text>{{Clothing\n" +
+		"|type = Hair\n|wardrobe nr = 2\n|how to obtain = [[Crafting]]\n}}\n=== Crafted From: ===\n" +
+		"{{Recipe\n|item1 = Test Ribon Hair\n|item1_quantity = 2\n|item2 = Test Plain Dress\n|item2_quantity = 1\n}}</text></revision>\n</page>\n"
+	c := packedConfig(t, page)
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "1 ingredients and bases") {
+		t.Fatalf("err = %v, want the misspelt ingredient refused as unmatched", err)
+	}
+	c.ingredientAliasesPath = filepath.Join(t.TempDir(), "ingredient-aliases.json")
+	alias := `{"aliases": [{"page": "Honey-Soaked Song", "name": "%s", "id": 10001, "basis": "b"}]}`
+	if err := os.WriteFile(c.ingredientAliasesPath, fmt.Appendf(nil, alias, "Test Ribon Hair"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(c); err != nil {
+		t.Fatal(err)
+	}
+	acq, err := os.ReadFile(filepath.Join(c.outDir, c.version, "acquire.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := `"from":[[10001,2],[20002,1]]`; !strings.Contains(string(acq), want) {
+		t.Errorf("acquire.json = %s, want it to hold %s", acq, want)
+	}
+	c.outDir = t.TempDir()
+	if err := os.WriteFile(c.ingredientAliasesPath, fmt.Appendf(nil, alias, "Test Ribbon Hair"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "ingredient aliases") {
+		t.Errorf("err = %v, want an alias for a name that matches an item refused", err)
+	}
+}
+
 func TestEventPagesNameWhatOnlyVagueLinesDescribe(t *testing.T) {
 	pages := "<page>\n  <title>Honey-Soaked Song</title>\n  <ns>0</ns>\n  <revision><text>{{Clothing\n" +
 		"|type = Hair\n|wardrobe nr = 2\n|how to obtain = Event\n}}</text></revision>\n</page>\n" +

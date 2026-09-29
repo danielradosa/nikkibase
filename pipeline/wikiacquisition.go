@@ -238,6 +238,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 		titles:    map[string]int{},
 		redirects: map[string]string{},
 		listed:    map[string]int{},
+		aliased:   map[int]bool{},
 		stats:     &stats,
 	}
 	var pages []acqPage
@@ -321,6 +322,9 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 			out.Items[p.id] = list
 			stats.WithEntries++
 		}
+	}
+	if err := ctx.checkIngredientAliases(); err != nil {
+		return WikiAcquisition{}, stats, err
 	}
 	stats.SuitPages = len(suits)
 	for _, s := range suits {
@@ -641,6 +645,7 @@ type acqContext struct {
 	norm        map[string][]int
 	customs     map[string]map[string][]Cost
 	customizers map[string][]string
+	aliased     map[int]bool
 	stats       *WikiAcquisitionStats
 }
 
@@ -1169,10 +1174,14 @@ func (c *acqContext) cost(amount, template, code string) (Cost, bool) {
 	return Cost{Amount: n, Unit: unit}, true
 }
 
-func (c *acqContext) named(name, suit string) namedIngredient {
+func (c *acqContext) named(page, name, suit string) namedIngredient {
 	name = strings.TrimSpace(cleanWiki(name))
 	it := namedIngredient{name: name}
-	if id := c.resolve(name, suit); id != 0 {
+	id := c.resolve(name, suit)
+	if id == 0 {
+		id = c.ingredientAlias(page, name)
+	}
+	if id != 0 {
 		it.id = id
 		if display := c.cat.shown(id); display != "" && !hasHan(display) {
 			it.name = display
@@ -1204,10 +1213,10 @@ func (c *acqContext) pageAcquisition(p acqPage) []Acquisition {
 	if suit == "" {
 		suit = c.suits[p.id]
 	}
-	recipes := c.recipes(p.sections["crafted from"], suit)
+	recipes := c.recipes(p.title, p.sections["crafted from"], suit)
 	details := map[string][]Acquisition{
 		"Crafting":       recipes,
-		"Evolution":      c.evolutions(evolvedFrom(p), suit),
+		"Evolution":      c.evolutions(p.title, evolvedFrom(p), suit),
 		"Reconstruction": c.reconstruction(p.sections["reconstructed from"]),
 		"Customization":  c.customization(p, suit),
 	}
@@ -1476,7 +1485,7 @@ func wikiStageName(arg string) (string, bool) {
 	return storyName(volume, m[3], m[5], m[4] != ""), true
 }
 
-func (c *acqContext) recipes(section, suit string) []Acquisition {
+func (c *acqContext) recipes(page, section, suit string) []Acquisition {
 	var out []Acquisition
 	for i := strings.Index(section, "{{Recipe"); i >= 0; {
 		args := namedArgs(templateArgs(section, i))
@@ -1487,7 +1496,7 @@ func (c *acqContext) recipes(section, suit string) []Acquisition {
 				continue
 			}
 			qty, _ := strconv.Atoi(args["item"+strconv.Itoa(n)+"_quantity"])
-			it := c.named(name, suit)
+			it := c.named(page, name, suit)
 			it.qty = qty
 			items = append(items, it)
 		}
@@ -1603,7 +1612,7 @@ type evolveStep struct {
 	costs []Cost
 }
 
-func (c *acqContext) evolutions(section, suit string) []Acquisition {
+func (c *acqContext) evolutions(page, section, suit string) []Acquisition {
 	var steps []evolveStep
 	names := 0
 	for _, line := range strings.Split(section, "\n") {
@@ -1634,7 +1643,7 @@ func (c *acqContext) evolutions(section, suit string) []Acquisition {
 	for _, s := range chosen {
 		for _, icon := range s.items {
 			m := wikiIconItem.FindStringSubmatch(icon)
-			it := c.named(m[1], suit)
+			it := c.named(page, m[1], suit)
 			it.qty = 1
 			if q := wikiQuantity.FindStringSubmatch(m[2]); q != nil {
 				it.qty, _ = strconv.Atoi(q[1])
@@ -1691,7 +1700,7 @@ func (c *acqContext) customization(p acqPage, suit string) []Acquisition {
 	if m[1] == "" {
 		m[1] = m[2]
 	}
-	base := c.named(m[1], suit)
+	base := c.named(p.title, m[1], suit)
 	target := strings.TrimSpace(m[1])
 	if base.id != 0 && !madeFrom(base.id, p.id) {
 		base, target = c.customizedFrom(p, suit)
@@ -1727,7 +1736,7 @@ func (c *acqContext) customizedFrom(p acqPage, suit string) (namedIngredient, st
 	if len(found) != 1 {
 		return namedIngredient{}, ""
 	}
-	return c.named(found[0], suit), found[0]
+	return c.named(p.title, found[0], suit), found[0]
 }
 
 type pricedSource struct {

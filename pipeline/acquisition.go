@@ -36,12 +36,13 @@ type Cost struct {
 }
 
 type AcquisitionCatalogue struct {
-	Names       map[int]string
-	Shown       map[int]string
-	Display     map[int]string
-	Suits       map[int]string
-	Stages      map[string]bool
-	PartAliases []SuitPartAlias
+	Names             map[int]string
+	Shown             map[int]string
+	Display           map[int]string
+	Suits             map[int]string
+	Stages            map[string]bool
+	PartAliases       []SuitPartAlias
+	IngredientAliases []IngredientAlias
 }
 
 func (c AcquisitionCatalogue) shown(id int) string {
