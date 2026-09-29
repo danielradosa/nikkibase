@@ -670,6 +670,48 @@ func TestSuitPagesZhLinksNameThemInChineseToo(t *testing.T) {
 	}
 }
 
+func eventPage(title, name, kind, suits string, categories ...string) string {
+	body := "{{Event Infobox\n|name = " + name + "\n|type = " + kind + "\n|suits = " + suits + "\n}}"
+	for _, c := range categories {
+		body += "\n[[Category:" + c + "]]"
+	}
+	return "<page>\n  <title>" + title + "</title>\n  <ns>0</ns>\n  <revision><text>" + body + "</text></revision>\n</page>\n"
+}
+
+func TestEventPagesNameTheEventOfTheSuitsTheyList(t *testing.T) {
+	dump := "<mediawiki>\n" +
+		suitPage("Alpha Suit", "[[Recharge]]", "Alpha Gown") +
+		suitPage("Beta Suit", "[[Recharge]]", "Beta Gown") +
+		suitPage("Gamma Suit", "[[Recharge]]", "Gamma Gown") +
+		suitPage("Delta Suit", "[[Recharge]]", "Delta Gown") +
+		suitPage("Epsilon Suit", "[[Recharge]]", "Epsilon Gown") +
+		"<page>\n  <title>Old Alpha</title>\n  <ns>0</ns>\n  <redirect title=\"Alpha Suit\" />\n  <revision><text>#REDIRECT [[Alpha Suit]]</text></revision>\n</page>\n" +
+		eventPage("Starry Gala Event", "", "Stages; Tiered", "[[Old Alpha]]") +
+		eventPage("Echo of Seasons/Season 1", "Echo of Seasons&lt;br&gt;Season 1", "Stages; Tiered", "Beta Suit") +
+		eventPage("Echo of Seasons/Season 2", "Echo of Seasons&lt;br&gt;Season 2", "Stages; Tiered", "Beta Suit") +
+		eventPage("$100 Recharge Event", "", "Recharge; Choice", "Gamma Suit; Delta Suit") +
+		eventPage("Delta Party Event", "", "Stages; Tiered", "Delta Suit") +
+		eventPage("Starry Gala Event/Epsilon Dream", "Epsilon Dream", "Rebate; Recharge", "Epsilon Suit") +
+		eventPage("Gamma Returns", "", "Stages; Tiered", "Gamma Suit;Alpha Suit", "Events", "Reoccurring Events") +
+		"</mediawiki>"
+	cat := AcquisitionCatalogue{Names: map[int]string{20001: "Alpha Gown", 20002: "Beta Gown", 20003: "Gamma Gown", 20004: "Delta Gown", 20005: "Epsilon Gown"}}
+	got, stats, err := ParseFandomAcquisition(strings.NewReader(dump), nil, nil, cat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"version":"t","items":{` +
+		`"20001":[{"k":"event","t":"Starry Gala event","past":1}],` +
+		`"20002":[{"k":"event","t":"Echo of Seasons event","past":1}],` +
+		`"20003":[{"k":"recharge","t":"$100 Recharge event","past":1}],` +
+		`"20005":[{"k":"recharge","t":"Epsilon Dream event","past":1}]}}`
+	if out := string(WriteAcquisition("t", got.Events)); out != want {
+		t.Errorf("events:\n got %s\nwant %s", out, want)
+	}
+	if stats.EventPages != 6 {
+		t.Errorf("%d event pages read, want 6: a reoccurring event names no event of its own", stats.EventPages)
+	}
+}
+
 func TestDayAndNightFormsBothJoinTheirSuit(t *testing.T) {
 	dump := "<mediawiki>\n" +
 		suitPage("Dawn Suit", "[[Recharge]]",

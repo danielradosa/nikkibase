@@ -15,6 +15,7 @@ import (
 type WikiAcquisition struct {
 	Items        map[int][]Acquisition
 	Suits        map[int][]Acquisition
+	Events       map[int][]Acquisition
 	SuitOf       map[int]string
 	ChineseSuits map[string]string
 	Packs        map[string]bool
@@ -33,6 +34,7 @@ type WikiAcquisitionStats struct {
 	Dropped      int
 	SuitPages    int
 	SuitItems    int
+	EventPages   int
 	SharedParts  int
 	Unresolved   int
 	UnknownParts int
@@ -62,6 +64,11 @@ type acqSuit struct {
 
 type suitPart struct {
 	name, kind string
+}
+
+type acqEvent struct {
+	line  Acquisition
+	suits []string
 }
 
 var (
@@ -202,6 +209,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 	}
 	var pages []acqPage
 	var suits []acqSuit
+	var events []acqEvent
 	err := eachPage(r, func(page wikiPage) {
 		switch {
 		case page.Redirect.Title != "":
@@ -217,6 +225,10 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 			}
 		case strings.Contains(page.Text, "{{Suit Infobox"):
 			suits = append(suits, acqSuitPage(page))
+		case strings.Contains(page.Text, "{{Event Infobox"):
+			if e, ok := acqEventPage(page); ok {
+				events = append(events, e)
+			}
 		}
 	})
 	if err != nil {
@@ -263,6 +275,8 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 
 	out := WikiAcquisition{Items: map[int][]Acquisition{}, Suits: map[int][]Acquisition{}, SuitOf: ctx.suits,
 		ChineseSuits: chineseSuits(suits), Packs: packTitles(suits), Unplaced: ctx.unplaced(suits)}
+	out.Events = ctx.eventLines(events)
+	stats.EventPages = len(events)
 	stats.Pages = len(pages)
 	for _, p := range pages {
 		if list := categoryRecharge(ctx.pageAcquisition(p), p.categories); len(list) > 0 {
@@ -398,6 +412,39 @@ func acqSuitPage(page wikiPage) acqSuit {
 		s.zh = append(s.zh, strings.TrimSpace(m[1]))
 	}
 	return s
+}
+
+func acqEventPage(page wikiPage) (acqEvent, bool) {
+	for _, m := range wikiCategory.FindAllStringSubmatch(page.Text, -1) {
+		if strings.EqualFold(m[1], "Reoccurring Events") {
+			return acqEvent{}, false
+		}
+	}
+	box := page.Text[strings.Index(page.Text, "{{Event Infobox"):]
+	if end := strings.Index(box, "\n}}"); end >= 0 {
+		box = box[:end]
+	}
+	fields := infobox(box)
+	var e acqEvent
+	for _, s := range strings.Split(fields["suits"], ";") {
+		if s = cleanWiki(s); s != "" {
+			e.suits = append(e.suits, s)
+		}
+	}
+	name := cleanWiki(wikiBreak.Split(fields["name"], 2)[0])
+	if name == "" {
+		name = page.Title
+	}
+	name = strings.TrimSuffix(name, " Event")
+	if len(e.suits) == 0 || name == "" {
+		return acqEvent{}, false
+	}
+	e.line = Acquisition{Kind: "event", Text: name + " event"}
+	if slices.ContainsFunc(strings.Split(fields["type"], ";"), func(t string) bool { return strings.EqualFold(strings.TrimSpace(t), "Recharge") }) {
+		e.line.Kind = "recharge"
+	}
+	e.line.Past = pastSource(e.line.Kind, e.line.Text)
+	return e, true
 }
 
 func infobox(box string) map[string]string {
@@ -700,6 +747,43 @@ func chineseSuits(suits []acqSuit) map[string]string {
 			}
 			claimed[name] = s.title
 			out[name] = s.title
+		}
+	}
+	return out
+}
+
+func (c *acqContext) members() map[string][]int {
+	out := map[string][]int{}
+	for id, s := range c.suits {
+		if s != "" {
+			key := strings.ToLower(suitName(s))
+			out[key] = append(out[key], id)
+		}
+	}
+	return out
+}
+
+func (c *acqContext) suitKey(name string) string {
+	if target, ok := c.redirects[name]; ok {
+		name = target
+	}
+	return strings.ToLower(suitName(name))
+}
+
+func (c *acqContext) eventLines(events []acqEvent) map[int][]Acquisition {
+	members := c.members()
+	named := map[int][]Acquisition{}
+	for _, e := range events {
+		for _, s := range e.suits {
+			for _, id := range members[c.suitKey(s)] {
+				named[id] = appendAcquisition(named[id], e.line)
+			}
+		}
+	}
+	out := map[int][]Acquisition{}
+	for id, lines := range named {
+		if len(lines) == 1 {
+			out[id] = lines
 		}
 	}
 	return out

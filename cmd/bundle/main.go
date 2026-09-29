@@ -469,12 +469,12 @@ func finish(c config, entries []pipeline.Entry, skipped int, names pipeline.Item
 	}
 
 	cat := pipeline.NewAcquisitionCatalogue(entries, names, stages)
-	acq, wikiStats, suits, err := readAcquisition(c, known, corrections, cat, layers.items)
+	acq, acqStats, wikiStats, suits, err := readAcquisition(c, known, corrections, cat, layers.items)
 	if err != nil {
 		return err
 	}
 	pipeline.ApplySuits(entries, suits)
-	if err := checkBundle(c, entries, stages, stageStats, layers, acq, cat, wikiStats, suits); err != nil {
+	if err := checkBundle(c, entries, stages, stageStats, layers, acq, *acqStats, cat, wikiStats, suits); err != nil {
 		return err
 	}
 
@@ -639,60 +639,60 @@ func readOptional[T any](path string, parse func([]byte) (T, error)) (T, error) 
 }
 
 func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorrections,
-	cat pipeline.AcquisitionCatalogue, recipes map[int]pipeline.CalcItem) (map[int][]pipeline.Acquisition, *pipeline.WikiAcquisitionStats, map[int]string, error) {
+	cat pipeline.AcquisitionCatalogue, recipes map[int]pipeline.CalcItem) (map[int][]pipeline.Acquisition, *pipeline.AcquisitionStats, *pipeline.WikiAcquisitionStats, map[int]string, error) {
 	var wiki pipeline.WikiAcquisition
 	var wikiStats *pipeline.WikiAcquisitionStats
 	if c.dumpPath != "" {
 		f, err := os.Open(c.dumpPath)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		defer f.Close()
 		if cat.PartAliases, err = readOptional(c.suitPartAliasesPath, pipeline.ReadSuitPartAliases); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		var stats pipeline.WikiAcquisitionStats
 		if wiki, stats, err = pipeline.ParseFandomAcquisition(f, known, corrections, cat); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		wikiStats = &stats
 		cat.Suits = wiki.SuitOf
-		fmt.Printf("acquisition: %d wiki item pages, %d say how to get the item, %d misnumbered read at their own ID, %d misnumbered or repeated left out; %d suit pages cover %d items; %d items in a suit the wiki names; %d names and %d suit parts unmatched, %d currencies unmatched, %d sources unread\n",
+		fmt.Printf("acquisition: %d wiki item pages, %d say how to get the item, %d misnumbered read at their own ID, %d misnumbered or repeated left out; %d suit pages cover %d items; %d items in a suit the wiki names; %d event pages that do not recur name the event of %d items; %d names and %d suit parts unmatched, %d currencies unmatched, %d sources unread\n",
 			stats.Pages, stats.WithEntries, stats.Moved, stats.Dropped, stats.SuitPages, stats.SuitItems,
-			len(wiki.SuitOf), stats.Unresolved, stats.UnknownParts, stats.UnknownUnits, stats.Unclassified)
+			len(wiki.SuitOf), stats.EventPages, len(wiki.Events), stats.Unresolved, stats.UnknownParts, stats.UnknownUnits, stats.Unclassified)
 	}
 	var packed map[int][]pipeline.Acquisition
 	var packedSuits map[int]pipeline.PackedSuit
 	if c.packedPath != "" {
 		raw, err := os.ReadFile(c.packedPath)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		sources, suits, err := pipeline.ParsePackedSources(raw, known)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		packedSuits = suits
 		raw, err = os.ReadFile(c.acquisitionMapPath)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		m, err := pipeline.ReadAcquisitionMap(raw)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		if packed, err = m.Translate(sources, cat); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		if c.dumpPath != "" {
 			if err := m.CheckBasis(sources, wiki.Items); err != nil {
-				return nil, nil, nil, err
+				return nil, nil, nil, nil, err
 			}
 		}
 	}
-	acq, stats := pipeline.MergeAcquisition(cat, wiki.Items, packed, wiki.Suits)
-	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page\n",
-		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits)
+	acq, stats := pipeline.MergeAcquisition(cat, wiki, packed)
+	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page; %d whose lines are all vague take the one event page that lists their suit\n",
+		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits, stats.Events)
 	if recipes != nil {
 		fmt.Printf("acquisition: %d items the sources say are crafted, without naming what from, take Nikki Calc's recipe\n",
 			pipeline.ApplyCalcRecipes(acq, cat, recipes))
@@ -700,10 +700,10 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 	if c.acquisitionExtraPath != "" {
 		extra, err := readOptional(c.acquisitionExtraPath, pipeline.ReadAcquisitionExtra)
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		if err := pipeline.ApplyAcquisitionExtra(acq, cat, extra); err != nil {
-			return nil, nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		fmt.Printf("acquisition: %d items the sources give no line for take a hand-checked one from %s\n", len(extra), c.acquisitionExtraPath)
 	}
@@ -714,7 +714,7 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 	slices.Sort(ids)
 	calcSuits, err := readCalcSuits(c)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, err
 	}
 	suits, suitStats := pipeline.LayerSuits(ids, wiki, packedSuits, calcSuits)
 	shared := 0
@@ -724,7 +724,7 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 	fmt.Printf("suits: %d of %d items in %d suits: %d from the wiki's suit and item pages (%d on more than one suit page), %d from the packed table under the wiki's English name, %d from a suit page whose part name fits several items once the others are placed, %d from the suit their other pieces are in, %d under Nikki Calc's name for a suit the wiki has no page for; %d the wiki lists only on a pack page, which is no suit, left to the packed table; not in a suit: %d the packed table files as a suit's base, %d whose packed suit has no English name, %d with no suit anywhere\n",
 		len(suits), len(ids), suitStats.Suits, suitStats.Wiki, shared, suitStats.Packed, suitStats.Late,
 		suitStats.Members, suitStats.Calc, suitStats.Packs, suitStats.Bases, suitStats.Unnamed, suitStats.None)
-	return acq, wikiStats, suits, nil
+	return acq, &stats, wikiStats, suits, nil
 }
 
 func readCalcSuits(c config) (map[int][]string, error) {
@@ -750,7 +750,7 @@ func readCalcSuits(c config) (map[int][]string, error) {
 
 func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 	stats pipeline.StageStats, layers layerStats,
-	acq map[int][]pipeline.Acquisition, cat pipeline.AcquisitionCatalogue,
+	acq map[int][]pipeline.Acquisition, acqStats pipeline.AcquisitionStats, cat pipeline.AcquisitionCatalogue,
 	wikiStats *pipeline.WikiAcquisitionStats, suits map[int]string) error {
 	var cov pipeline.Coverage
 	if c.coveragePath != "" {
@@ -767,6 +767,7 @@ func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 		return err
 	}
 	v := pipeline.CheckAcquisition(acq, cat, cov)
+	v = append(v, pipeline.CheckAcquisitionFallbacks(acqStats, cov)...)
 	v = append(v, pipeline.CheckSuits(suits, cov)...)
 	if layers.calc != nil {
 		v = append(v, pipeline.CheckCalcGrades(*layers.calc, cov)...)

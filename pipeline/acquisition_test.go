@@ -14,7 +14,7 @@ func TestMergeAcquisitionTakesTheWikiThenThePackedTableThenTheSuitPage(t *testin
 		2: {{Kind: "craft", Text: "Crafting", CN: true}},
 	}
 	suits := map[int][]Acquisition{2: {{Kind: "recharge", Text: "Recharge"}}, 3: {{Kind: "recharge", Text: "Recharge"}}}
-	got, stats := MergeAcquisition(cat, wiki, packed, suits)
+	got, stats := MergeAcquisition(cat, WikiAcquisition{Items: wiki, Suits: suits}, packed)
 	want := `{"version":"v","items":{"1":[{"k":"store","t":"Clothes Store"}],"2":[{"k":"craft","t":"Crafting","cn":1}],"3":[{"k":"recharge","t":"Recharge"}]}}`
 	if out := string(WriteAcquisition("v", got)); out != want {
 		t.Errorf("\n got %s\nwant %s", out, want)
@@ -38,7 +38,7 @@ func TestMergeAcquisitionSharpensVagueLinesFromTheOtherSources(t *testing.T) {
 		2: {{Kind: "event", Text: "Starry Night event", Past: true}},
 		3: {{Kind: "recharge", Text: "Recharge"}},
 	}
-	got, stats := MergeAcquisition(cat, wiki, packed, suits)
+	got, stats := MergeAcquisition(cat, WikiAcquisition{Items: wiki, Suits: suits}, packed)
 	want := `{"version":"v","items":{` +
 		`"1":[{"k":"event","t":"Starry Night event","past":1},{"k":"store","t":"Clothes Store"}],` +
 		`"2":[{"k":"event","t":"Limited event","cn":1},{"k":"craft","t":"Crafting","cn":1}],` +
@@ -49,6 +49,42 @@ func TestMergeAcquisitionSharpensVagueLinesFromTheOtherSources(t *testing.T) {
 	}
 	if stats.Named != 1 || stats.Based != 1 || stats.FromWiki != 1 || stats.FromPacked != 3 {
 		t.Errorf("stats = %+v", stats)
+	}
+}
+
+func TestMergeAcquisitionNamesAllVagueItemsFromTheirEventPage(t *testing.T) {
+	cat := AcquisitionCatalogue{Names: map[int]string{1: "A", 2: "B", 3: "C", 4: "D"}}
+	gala := []Acquisition{{Kind: "event", Text: "Starry Gala event", Past: true}}
+	wiki := WikiAcquisition{
+		Items:  map[int][]Acquisition{1: {{Kind: "recharge", Text: "Recharge", Past: true}}},
+		Suits:  map[int][]Acquisition{3: {{Kind: "event", Text: "Crystal event", Past: true}}},
+		Events: map[int][]Acquisition{1: gala, 2: gala, 3: gala, 4: gala},
+	}
+	packed := map[int][]Acquisition{
+		2: {{Kind: "event", Text: "Limited event", CN: true}, {Kind: "recharge", Text: "Event recharge", CN: true}},
+		3: {{Kind: "event", Text: "Limited event", CN: true}},
+		4: {{Kind: "store", Text: "Clothes Store", CN: true}},
+	}
+	got, stats := MergeAcquisition(cat, wiki, packed)
+	want := `{"version":"v","items":{` +
+		`"1":[{"k":"event","t":"Starry Gala event","past":1}],` +
+		`"2":[{"k":"event","t":"Starry Gala event","past":1}],` +
+		`"3":[{"k":"event","t":"Crystal event","past":1}],` +
+		`"4":[{"k":"store","t":"Clothes Store","cn":1}]}}`
+	if out := string(WriteAcquisition("v", got)); out != want {
+		t.Errorf("\n got %s\nwant %s", out, want)
+	}
+	if stats.Events != 2 || stats.Named != 1 || stats.Covered != 4 {
+		t.Errorf("stats = %+v, want 2 named by their event page after 1 named by its suit page", stats)
+	}
+}
+
+func TestEventLinesAreHeldUnderTheirCeiling(t *testing.T) {
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 2}, Coverage{MaxEventItems: 2}); len(v) != 0 {
+		t.Errorf("at the ceiling: %v", v)
+	}
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 3}, Coverage{MaxEventItems: 2}); len(v) != 1 || !strings.Contains(v[0], "3 items") {
+		t.Errorf("above the ceiling: %v", v)
 	}
 }
 

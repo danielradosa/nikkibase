@@ -182,6 +182,7 @@ type AcquisitionStats struct {
 	FromSuits  int
 	Named      int
 	Based      int
+	Events     int
 }
 
 func vagueKinds(a Acquisition) ([]string, bool) {
@@ -260,30 +261,41 @@ func basedByTable(wiki, packed []Acquisition) ([]Acquisition, bool) {
 	return out, changed
 }
 
-func MergeAcquisition(cat AcquisitionCatalogue, wiki, packed, suits map[int][]Acquisition) (map[int][]Acquisition, AcquisitionStats) {
+func namedByEvent(list, event []Acquisition) ([]Acquisition, bool) {
+	if len(event) == 0 || !allVague(list) {
+		return list, false
+	}
+	return event, true
+}
+
+func MergeAcquisition(cat AcquisitionCatalogue, wiki WikiAcquisition, packed map[int][]Acquisition) (map[int][]Acquisition, AcquisitionStats) {
 	stats := AcquisitionStats{Catalogue: len(cat.Names)}
 	out := make(map[int][]Acquisition, len(cat.Names))
 	for id := range cat.Names {
 		switch {
-		case len(wiki[id]) > 0:
-			list, based := basedByTable(wiki[id], packed[id])
+		case len(wiki.Items[id]) > 0:
+			list, based := basedByTable(wiki.Items[id], packed[id])
 			out[id] = list
 			stats.FromWiki++
 			if based {
 				stats.Based++
 			}
 		case len(packed[id]) > 0:
-			list, named := namedBySuit(packed[id], suits[id])
+			list, named := namedBySuit(packed[id], wiki.Suits[id])
 			out[id] = list
 			stats.FromPacked++
 			if named {
 				stats.Named++
 			}
-		case len(suits[id]) > 0:
-			out[id] = suits[id]
+		case len(wiki.Suits[id]) > 0:
+			out[id] = wiki.Suits[id]
 			stats.FromSuits++
 		default:
 			continue
+		}
+		if list, named := namedByEvent(out[id], wiki.Events[id]); named {
+			out[id] = list
+			stats.Events++
 		}
 		stats.Covered++
 	}
@@ -316,6 +328,14 @@ func CheckAcquisition(acq map[int][]Acquisition, cat AcquisitionCatalogue, want 
 			covered, want.AcquisitionItems))
 	}
 	return v
+}
+
+func CheckAcquisitionFallbacks(stats AcquisitionStats, want Coverage) Violations {
+	if stats.Events > want.MaxEventItems {
+		return Violations{fmt.Sprintf("%d items whose lines are all vague take the one event page that lists their suit; the committed ceiling is %d, so the event pages may have been misread",
+			stats.Events, want.MaxEventItems)}
+	}
+	return nil
 }
 
 func CheckAcquisitionNames(stats WikiAcquisitionStats, want Coverage) Violations {

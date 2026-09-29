@@ -29,6 +29,7 @@ type Coverage struct {
 	MaxCalcGradedItems   int            `json:"maxCalcGradedItems"`
 	MaxAgreedGrades      int            `json:"maxAgreedGrades"`
 	AcquisitionItems     int            `json:"acquisitionItems"`
+	MaxEventItems        int            `json:"maxEventItems"`
 	MaxUnmatchedNames    int            `json:"maxUnmatchedNames"`
 	SuitItems            int            `json:"suitItems"`
 }
