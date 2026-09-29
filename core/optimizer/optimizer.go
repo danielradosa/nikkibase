@@ -183,7 +183,7 @@ func enforceLimits(outfit []scoring.Item, st scoring.Stage, sk scoring.Skills) [
 		limit := scoring.SlotLimit(slot)
 		if len(items) > limit {
 			slices.SortStableFunc(items, func(a, b scoring.Item) int {
-				return cmpDesc(worth(a, st, sk, 1), worth(b, st, sk, 1))
+				return cmp.Compare(worth(b, st, sk, 1), worth(a, st, sk, 1))
 			})
 			items = items[:limit]
 		}
@@ -224,15 +224,13 @@ func bestAccessories(positions []accessory) []scoring.Item {
 			}
 		}
 		if len(required) > limit {
-			slices.SortStableFunc(required, func(a, b pick) int { return cmpDesc(a.value, b.value) })
+			slices.SortStableFunc(required, func(a, b pick) int { return cmp.Compare(b.value, a.value) })
 			required = required[:limit]
 		}
 		if worn < len(required) {
 			continue
 		}
-		slices.SortStableFunc(optional, func(a, b pick) int {
-			return cmpDesc(a.value, b.value)
-		})
+		slices.SortStableFunc(optional, func(a, b pick) int { return cmp.Compare(b.value, a.value) })
 
 		total := 0.0
 		items := make([]scoring.Item, 0, worn)
@@ -261,7 +259,7 @@ func Ranked(items []scoring.Item, st scoring.Stage, sk scoring.Skills) []scoring
 		order[i] = rank{worth(it, st, sk, 1), i}
 	}
 	slices.SortFunc(order, func(a, b rank) int {
-		if c := cmpDesc(a.worth, b.worth); c != 0 {
+		if c := cmp.Compare(b.worth, a.worth); c != 0 {
 			return c
 		}
 		return cmp.Compare(a.at, b.at)
@@ -356,15 +354,4 @@ func appendPick(items []scoring.Item, p *pick) []scoring.Item {
 		return items
 	}
 	return append(items, p.item)
-}
-
-func cmpDesc(a, b float64) int {
-	switch {
-	case a > b:
-		return -1
-	case a < b:
-		return 1
-	default:
-		return 0
-	}
 }
