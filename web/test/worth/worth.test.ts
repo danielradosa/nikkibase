@@ -6,7 +6,7 @@ import { NO_SKILLS, worthSettings, worthSkillsText, type SkillSettings } from '.
 import { variantStages, worthSkip, worthVersions, type IdealTable, type Stage } from '../../src/outfit/stages.ts'
 import {
   ALL_MODES, NO_SOURCE, OWNED_KEY, PAST_NOTE, RESTARTED, SCORE_F, UNLOCK_NOTE, chipText, detailsLabel, hideLabel, ownsAnyPart,
-  filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, improvesText, itemMeta,
+  filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, itemMeta,
   neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote,
   recipeText, rowKey, rowName, scoreFNote, stageLabel, suitName, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
   worthSuits, type AcquireTable, type WorthApi,
@@ -225,22 +225,21 @@ const row = (stages: number, worth: number, key: string, pct: number): WorthRow 
 
 test('each row says its gain per stage, on how many stages, and its best stage', () => {
   assert.equal(
-    improvesText(row(214, 85.6, 'Commission/20-7', 1), 'Story'),
+    improvesParts(row(214, 85.6, 'Commission/20-7', 1), 'Story').join(''),
     '+0.4% on 214 Story stages · best +1.0% on Commission 20-7',
   )
   assert.equal(
-    improvesText(row(1214, 121.4, 'Story/6-9#maiden', 2.25), ALL_MODES, new Set(['Story/6-9'])),
+    improvesParts(row(1214, 121.4, 'Story/6-9#maiden', 2.25), ALL_MODES, new Set(['Story/6-9'])).join(''),
     '+0.1% on 1,214 stages · best +2.3% on Story 6-9 (Maiden)',
   )
-  assert.equal(improvesText(row(1, 0.8, 'Arena/Beach Party', 0.8), 'Arena'), '+0.8% on Arena Beach Party')
+  assert.equal(improvesParts(row(1, 0.8, 'Arena/Beach Party', 0.8), 'Arena').join(''), '+0.8% on Arena Beach Party')
 })
 
 test('the stage in a row comes apart from the words, so it can be kept on one line', () => {
-  assert.deepEqual(improvesParts(row(1, 0.8, 'Story/1-9', 0.8), 'Story'), ['+0.8% on ', 'Story 1-9', ''])
-  const [lead, stage, tail] = improvesParts(row(22, 39.6, 'Story/1-9', 3.4), 'Story')
+  assert.deepEqual(improvesParts(row(1, 0.8, 'Story/1-9', 0.8), 'Story'), ['+0.8% on ', 'Story 1-9'])
+  const [lead, stage] = improvesParts(row(22, 39.6, 'Story/1-9', 3.4), 'Story')
   assert.equal(lead, '+1.8% on 22 Story stages · best +3.4% on ')
   assert.equal(stage, 'Story 1-9')
-  assert.equal(tail, '')
 })
 
 test('the needed line counts the stages left out', () => {

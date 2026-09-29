@@ -158,13 +158,12 @@ function Ways({
 }
 
 function Improves({ row, mode, variants, top }: { row: WorthRow; mode: string; variants: ReadonlySet<string>; top: number }) {
-  const [lead, stage, tail] = improvesParts(row, mode, variants)
+  const [lead, stage] = improvesParts(row, mode, variants)
   return (
     <div className="nb-worth-improves">
       <span>
         {lead}
         <span className="nb-worth-stage">{stage}</span>
-        {tail}
       </span>
       <div className="nb-worth-bar" aria-hidden="true">
         <span style={{ width: `${top > 0 ? Math.max(2, (row.worth / top) * 100) : 0}%` }} />

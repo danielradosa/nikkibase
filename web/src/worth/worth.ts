@@ -276,16 +276,12 @@ export function pctText(v: number): string {
   return String(Number(v.toPrecision(1)))
 }
 
-export function improvesParts(row: WorthRow, mode: string, variants?: ReadonlySet<string>): [string, string, string] {
+export function improvesParts(row: WorthRow, mode: string, variants?: ReadonlySet<string>): [string, string] {
   const best = stageLabel(row.best.key, variants)
-  if (row.stages <= 1) return [`+${pctText(row.best.pct)}% on `, best, '']
+  if (row.stages <= 1) return [`+${pctText(row.best.pct)}% on `, best]
   const kind = mode === ALL_MODES ? 'stages' : `${mode} stages`
   const average = pctText(row.worth / row.stages)
-  return [`+${average}% on ${row.stages.toLocaleString('en-US')} ${kind} · best +${pctText(row.best.pct)}% on `, best, '']
-}
-
-export function improvesText(row: WorthRow, mode: string, variants?: ReadonlySet<string>): string {
-  return improvesParts(row, mode, variants).join('')
+  return [`+${average}% on ${row.stages.toLocaleString('en-US')} ${kind} · best +${pctText(row.best.pct)}% on `, best]
 }
 
 export const SCORE_F = 'may score F'
