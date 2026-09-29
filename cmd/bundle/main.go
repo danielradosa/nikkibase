@@ -314,11 +314,7 @@ func calcGrades(entries []pipeline.Entry, items map[int]pipeline.CalcItem, names
 }
 
 func applySubgrades(items map[int]pipeline.CalcItem, stats pipeline.SubgradeStats, entries []pipeline.Entry) *pipeline.SubgradeStats {
-	subs := make(map[int][5]pipeline.Subgrade, len(items))
-	for id, it := range items {
-		subs[id] = it.Row
-	}
-	pipeline.ApplySubgrades(entries, subs, &stats)
+	pipeline.ApplySubgrades(entries, items, &stats)
 	fmt.Printf("subgrades: %d files, %d records, %d without a key, %d not in the catalogue -> %d stats set by sub-grade; %d keep their letter's stat: %d on the other side, %d under another letter, %d with no sub-grade\n",
 		stats.Files, stats.Records, stats.Unkeyed, stats.NotInCatalogue, stats.Applied,
 		stats.OtherSide+stats.OtherLetter+stats.Missing, stats.OtherSide, stats.OtherLetter, stats.Missing)

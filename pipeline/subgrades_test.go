@@ -18,7 +18,7 @@ func TestSubgradesMapToGameIDs(t *testing.T) {
 		"2": {"slot": 30, "attrs": [1, 2, 5, 6, 8], "niGrades": ["S", "S+", "SS-", "C+", "B-"]},
 		"3": {"slot": 0, "attrs": [1, 3, 5, 7, 8], "niGrades": ["A", "A", "A", "A", "A"]},
 		"8": {"slot": 0, "attrs": [1, 3, 5, 7, 8], "niGrades": ["A", "A", "A", "A", "A"]}}`)
-	subs, stats, err := ParseSubgrades([][]byte{first, second}, []byte(subgradeKeys))
+	items, stats, err := ParseCalcItems([][]byte{first, second}, []byte(subgradeKeys))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,12 +27,12 @@ func TestSubgradesMapToGameIDs(t *testing.T) {
 		170408: {{0, "SS+"}, {2, "C"}, {4, "B+"}, {6, "SSS"}, {9, ""}},
 		880005: {{1, "S"}, {2, "S+"}, {5, "SS-"}, {6, "C+"}, {8, "B-"}},
 	}
-	if len(subs) != len(want) {
-		t.Fatalf("parsed %d items %v, want %d", len(subs), subs, len(want))
+	if len(items) != len(want) {
+		t.Fatalf("parsed %d items %v, want %d", len(items), items, len(want))
 	}
 	for id, row := range want {
-		if subs[id] != row {
-			t.Errorf("%d: %v, want %v", id, subs[id], row)
+		if items[id].Row != row {
+			t.Errorf("%d: %v, want %v", id, items[id].Row, row)
 		}
 	}
 	if stats.Files != 2 || stats.Records != 5 || stats.Unkeyed != 2 {
@@ -62,7 +62,7 @@ func TestSubgradesRejectWhatTheTableCannotPrice(t *testing.T) {
 		"not an object": {[][]byte{[]byte(`[]`)}, subgradeKeys, "batch 1 of 1"},
 		"without a key": {[][]byte{[]byte(`{"9": {"attrs": [1, 3, 5, 7, 8], "niGrades": ["A", "A", "A", "A", "SSS+"]}}`)}, subgradeKeys, "record 9"},
 	} {
-		if _, _, err := ParseSubgrades(c.batches, []byte(c.keys)); err == nil || !strings.Contains(err.Error(), c.want) {
+		if _, _, err := ParseCalcItems(c.batches, []byte(c.keys)); err == nil || !strings.Contains(err.Error(), c.want) {
 			t.Errorf("%s: err = %v, want one naming %s", name, err, c.want)
 		}
 	}
@@ -76,13 +76,13 @@ func TestSubgradesSetStatsOnlyWithinTheirLetterAndSide(t *testing.T) {
 	entries := []Entry{hair, unsourced, ungraded}
 	before := append([]Entry(nil), entries...)
 
-	subs := map[int][5]Subgrade{
-		10001: {{1, "S-"}, {2, "A+"}, {5, "S"}, {7, "A"}, {8, ""}},
-		10003: {{0, "SS"}, {2, "SS"}, {4, "SS"}, {6, "SS"}, {8, "SS"}},
-		10004: {{0, "A"}, {2, "A"}, {4, "A"}, {6, "A"}, {8, "A"}},
+	items := map[int]CalcItem{
+		10001: {Row: [5]Subgrade{{1, "S-"}, {2, "A+"}, {5, "S"}, {7, "A"}, {8, ""}}},
+		10003: {Row: [5]Subgrade{{0, "SS"}, {2, "SS"}, {4, "SS"}, {6, "SS"}, {8, "SS"}}},
+		10004: {Row: [5]Subgrade{{0, "A"}, {2, "A"}, {4, "A"}, {6, "A"}, {8, "A"}}},
 	}
 	var stats SubgradeStats
-	ApplySubgrades(entries, subs, &stats)
+	ApplySubgrades(entries, items, &stats)
 
 	got := entries[0]
 	if want := [5]int{64, Stat("A", scoring.Hair), Stat("A", scoring.Hair), 57, Stat("A", scoring.Hair)}; got.Item.Stats != want {

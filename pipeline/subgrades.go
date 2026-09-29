@@ -53,18 +53,6 @@ type subgradeRecord struct {
 	} `json:"recipe"`
 }
 
-func ParseSubgrades(batches [][]byte, keys []byte) (map[int][5]Subgrade, SubgradeStats, error) {
-	items, stats, err := ParseCalcItems(batches, keys)
-	if err != nil {
-		return nil, stats, err
-	}
-	out := make(map[int][5]Subgrade, len(items))
-	for id, it := range items {
-		out[id] = it.Row
-	}
-	return out, stats, nil
-}
-
 func ParseCalcItems(batches [][]byte, keys []byte) (map[int]CalcItem, SubgradeStats, error) {
 	var stats SubgradeStats
 	var byKey map[string]int
@@ -157,15 +145,15 @@ func subgradeRow(r subgradeRecord) ([5]Subgrade, error) {
 	return row, nil
 }
 
-func ApplySubgrades(entries []Entry, subs map[int][5]Subgrade, stats *SubgradeStats) {
+func ApplySubgrades(entries []Entry, items map[int]CalcItem, stats *SubgradeStats) {
 	matched := 0
 	for i := range entries {
 		e := &entries[i]
-		row, ok := subs[e.Item.ID]
+		it, ok := items[e.Item.ID]
 		if ok {
 			matched++
 		}
-		for p, sub := range row {
+		for p, sub := range it.Row {
 			letter := strings.ToUpper(e.Grades[p])
 			switch {
 			case letter == "":
@@ -182,5 +170,5 @@ func ApplySubgrades(entries []Entry, subs map[int][5]Subgrade, stats *SubgradeSt
 			}
 		}
 	}
-	stats.NotInCatalogue = len(subs) - matched
+	stats.NotInCatalogue = len(items) - matched
 }
