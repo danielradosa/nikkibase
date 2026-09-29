@@ -1,7 +1,7 @@
-import { useLayoutEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react'
 import { flushSync } from 'react-dom'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
-import { Alert, Button, Empty, Grid, Segmented, Select, Space, Switch, Table, Typography } from 'antd'
+import { Alert, Button, Empty, Grid, Segmented, Select, Space, Switch, Table, Typography, type TableColumnsType } from 'antd'
 import type { Place } from '../outfit/comparison'
 import type { WorthRow } from '../engine/engine'
 import { ANY_SLOT, choiceLabel, placeName, slotChoice, slotOptions, type Item } from '../items/items'
@@ -400,14 +400,72 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
     )
   }
 
+  const rankColumn = {
+    title: '#',
+    key: 'rank',
+    width: 48,
+    responsive: ['sm' as const],
+    render: (_: unknown, r: { rank: number }) => <span className="nb-worth-rank">{r.rank}</span>,
+  }
+  const howToGetAll = (ids: number[]) => (
+    <div>
+      <Typography.Text strong>How to get {ids.length > 1 ? 'them' : 'it'}</Typography.Text>
+      {ids.map((id) => (
+        <div key={id} className="nb-worth-ways">
+          {ids.length > 1 && <Typography.Text className="nb-worth-subhead">{names.get(id) ?? `#${id}`}</Typography.Text>}
+          <Ways id={id} acquire={acquire} owned={owned} names={names} onOpen={open} />
+        </div>
+      ))}
+    </div>
+  )
+  const hideButton = (r: RankRow | UnlockRank, update: Dispatch<SetStateAction<string[]>>) => (
+    <Button
+      block
+      className="nb-worth-hide"
+      aria-label={hideLabel(rowName(r.row, names))}
+      onClick={() => hideRow(r.key, update)}
+    >
+      Hide details
+    </Button>
+  )
+  const rankTable = <R extends RankRow | UnlockRank>(
+    data: R[],
+    cols: TableColumnsType<R>,
+    keys: string[],
+    update: Dispatch<SetStateAction<string[]>>,
+    render: (r: R) => ReactNode,
+  ) => (
+    <Table<R>
+      size="small"
+      pagination={false}
+      rowKey="key"
+      aria-busy={stale || undefined}
+      dataSource={data}
+      columns={cols}
+      rowClassName="nb-row-tap"
+      expandable={{
+        expandedRowKeys: keys,
+        onExpand: (show, r) => {
+          if (!selecting()) toggleRow(r.key, show, update)
+        },
+        expandRowByClick: true,
+        columnWidth: 44,
+        expandIcon: ({ expanded, record }) => (
+          <Chevron
+            open={expanded}
+            label={rowName(record.row, names)}
+            onToggle={() => toggleRow(record.key, !expanded, update)}
+          />
+        ),
+        expandedRowRender: render,
+      }}
+      locale={{ emptyText: ' ' }}
+      className={stale ? 'nb-worth-table is-stale' : 'nb-worth-table'}
+    />
+  )
+
   const columns = [
-    {
-      title: '#',
-      key: 'rank',
-      width: 48,
-      responsive: ['sm' as const],
-      render: (_: unknown, r: RankRow) => <span className="nb-worth-rank">{r.rank}</span>,
-    },
+    rankColumn,
     {
       title: rankedSuits ? 'Suit' : 'Item',
       key: 'item',
@@ -483,35 +541,14 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
           )}
         </div>
       ) : (
-        <div>
-          <Typography.Text strong>How to get {r.row.items.length > 1 ? 'them' : 'it'}</Typography.Text>
-          {r.row.items.map((id) => (
-            <div key={id} className="nb-worth-ways">
-              {r.row.items.length > 1 && <Typography.Text className="nb-worth-subhead">{names.get(id) ?? `#${id}`}</Typography.Text>}
-              <Ways id={id} acquire={acquire} owned={owned} names={names} onOpen={open} />
-            </div>
-          ))}
-        </div>
+        howToGetAll(r.row.items)
       )}
-      <Button
-        block
-        className="nb-worth-hide"
-        aria-label={hideLabel(rowName(r.row, names))}
-        onClick={() => hideRow(r.key, setOpenKeys)}
-      >
-        Hide details
-      </Button>
+      {hideButton(r, setOpenKeys)}
     </div>
   )
 
   const unlockColumns = [
-    {
-      title: '#',
-      key: 'rank',
-      width: 48,
-      responsive: ['sm' as const],
-      render: (_: unknown, r: UnlockRank) => <span className="nb-worth-rank">{r.rank}</span>,
-    },
+    rankColumn,
     {
       title: 'Get',
       key: 'item',
@@ -567,23 +604,8 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
           </Typography.Paragraph>
         )}
       </div>
-      <div>
-        <Typography.Text strong>How to get {r.row.items.length > 1 ? 'them' : 'it'}</Typography.Text>
-        {r.row.items.map((id) => (
-          <div key={id} className="nb-worth-ways">
-            {r.row.items.length > 1 && <Typography.Text className="nb-worth-subhead">{names.get(id) ?? `#${id}`}</Typography.Text>}
-            <Ways id={id} acquire={acquire} owned={owned} names={names} onOpen={open} />
-          </div>
-        ))}
-      </div>
-      <Button
-        block
-        className="nb-worth-hide"
-        aria-label={hideLabel(rowName(r.row, names))}
-        onClick={() => hideRow(r.key, setOpenUnlocks)}
-      >
-        Hide details
-      </Button>
+      {howToGetAll(r.row.items)}
+      {hideButton(r, setOpenUnlocks)}
     </div>
   )
 
@@ -684,33 +706,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
           {ranking && !unlocks.length && !lead ? (
             <Empty description="You can pass every stage here with what you own." />
           ) : (
-            <Table<UnlockRank>
-              size="small"
-              pagination={false}
-              rowKey="key"
-              aria-busy={stale || undefined}
-              dataSource={unlocks}
-              columns={unlockColumns}
-              rowClassName="nb-row-tap"
-              expandable={{
-                expandedRowKeys: openUnlocks,
-                onExpand: (show, r) => {
-                  if (!selecting()) toggleRow(r.key, show, setOpenUnlocks)
-                },
-                expandRowByClick: true,
-                columnWidth: 44,
-                expandIcon: ({ expanded, record }) => (
-                  <Chevron
-                    open={expanded}
-                    label={rowName(record.row, names)}
-                    onToggle={() => toggleRow(record.key, !expanded, setOpenUnlocks)}
-                  />
-                ),
-                expandedRowRender: unlockDetails,
-              }}
-              locale={{ emptyText: ' ' }}
-              className={stale ? 'nb-worth-table is-stale' : 'nb-worth-table'}
-            />
+            rankTable(unlocks, unlockColumns, openUnlocks, setOpenUnlocks, unlockDetails)
           )}
         </>
       )}
@@ -736,33 +732,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
           {ranking && !rows.length && !loading ? (
             <Empty description={nothingText(rankedSuits)} />
           ) : (
-            <Table<RankRow>
-              size="small"
-              pagination={false}
-              rowKey="key"
-              aria-busy={stale || undefined}
-              dataSource={rows}
-              columns={columns}
-              rowClassName="nb-row-tap"
-              expandable={{
-                expandedRowKeys: openKeys,
-                onExpand: (show, r) => {
-                  if (!selecting()) toggleRow(r.key, show, setOpenKeys)
-                },
-                expandRowByClick: true,
-                columnWidth: 44,
-                expandIcon: ({ expanded, record }) => (
-                  <Chevron
-                    open={expanded}
-                    label={rowName(record.row, names)}
-                    onToggle={() => toggleRow(record.key, !expanded, setOpenKeys)}
-                  />
-                ),
-                expandedRowRender: details,
-              }}
-              locale={{ emptyText: ' ' }}
-              className={stale ? 'nb-worth-table is-stale' : 'nb-worth-table'}
-            />
+            rankTable(rows, columns, openKeys, setOpenKeys, details)
           )}
 
           {more && (
