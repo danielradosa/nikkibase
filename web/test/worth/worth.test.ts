@@ -2,11 +2,12 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { WorthFilter, WorthRanking, WorthRow, WorthSettings, WorthSuit, WorthVersion } from '../../src/engine/engine.ts'
 import { crashError } from '../../src/engine/recycle.ts'
+import { bookScale } from '../../src/outfit/comparison.ts'
 import { NO_SKILLS, worthSettings, worthSkillsText, type SkillSettings } from '../../src/outfit/skills.ts'
 import { variantStages, worthSkip, worthVersions, type IdealTable, type Stage } from '../../src/outfit/stages.ts'
 import {
   ALL_MODES, NO_SOURCE, OWNED_KEY, PAST_NOTE, RESTARTED, SCORE_F, UNLOCK_NOTE, chipText, detailsLabel, hideLabel, ownsAnyPart,
-  filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, itemMeta,
+  exampleGain, filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, itemMeta,
   neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote,
   recipeText, rowKey, rowName, scoreFNote, stageLabel, suitName, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
   worthSuits, type AcquireTable, type WorthApi,
@@ -682,6 +683,16 @@ test('on phones one row is open at a time, and on bigger screens rows open side 
   assert.deepEqual(openRows(['a', 'b'], 'b', true, false), ['a', 'b'])
   assert.deepEqual(openRows(['a', 'b'], 'a', false, false), ['b'])
   assert.deepEqual(openRows(['b'], 'b', false, true), [])
+})
+
+test("a stage line's gain counts Cloud Adventure on its own stage when that is a Commission stage", () => {
+  const read = bookScale(5)
+  assert.equal(exampleGain({ key: 'Commission/2-3', points: 16338, pct: 20.8 }, read), '+17,154 (+20.8%)')
+  assert.equal(exampleGain({ key: 'Commission/2-3', points: 16338, pct: 20.8 }, read, true), '+17,154 (+20.8%) · may score F')
+  for (const key of ['Story/1-1', 'Story/6-9#maiden', 'Arena/Beach Party', 'Co-op/Tea Party']) {
+    assert.equal(exampleGain({ key, points: 16338, pct: 20.8 }, read), '+16,338 (+20.8%)', key)
+  }
+  assert.equal(exampleGain({ key: 'Commission/2-3', points: 16338, pct: 20.8 }, bookScale(0)), '+16,338 (+20.8%)')
 })
 
 test('a stage line gives the gain in points and percent, and says when the stage may score F', () => {

@@ -21,6 +21,8 @@ export const bookReads = (mode: string | undefined, reads: number) => (mode === 
 
 export const bookScore = (score: number, reads: number) => Math.floor((score * (100 + reads)) / 100)
 
+export const bookScale = (reads: number) => (score: number, mode: string) => bookScore(score, bookReads(mode, reads))
+
 export function unwornLabel(pos: number, ownedPlaces: ReadonlySet<number>): string {
   return ownedPlaces.has(pos) ? 'not worn' : 'nothing owned'
 }

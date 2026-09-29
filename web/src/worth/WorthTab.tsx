@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNo
 import { flushSync } from 'react-dom'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import { Alert, Button, Empty, Grid, Segmented, Select, Space, Switch, Table, Typography, type TableColumnsType } from 'antd'
-import { bookReads, bookScore, type Place } from '../outfit/comparison'
+import { bookScale, type Place } from '../outfit/comparison'
 import type { WorthRow } from '../engine/engine'
 import { ANY_SLOT, choiceLabel, placeName, slotChoice, slotOptions, type Item } from '../items/items'
 import Petals from '../components/Petals'
@@ -19,7 +19,7 @@ import WaitLine from '../components/WaitLine'
 import { ENGINE_DOWN, LIST_FAILED, LIST_WAIT, SCORES_WAIT } from '../wardrobe/wardrobeText'
 import {
   ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, PAST_NOTE, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
-  detailsLabel, filterMode, filterSuits, gainText, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
+  detailsLabel, exampleGain, filterMode, filterSuits, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
   neededLine, nothingText, openRows, openTarget, ownsAnyPart, pieceList, piecesText, rankedName, rankingNote, recipeText,
   rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthSuits,
   type AcquireTable, type OpenTarget, type UnlockRow, type WorthRequest,
@@ -518,7 +518,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
             <li key={ex.key}>
               <StageRow
                 label={stageLabel(ex.key, variants)}
-                note={gainText({ ...ex, points: bookScore(ex.points, bookReads(openTarget(ex.key).mode, book)) }, unchecked(ex.key))}
+                note={exampleGain(ex, bookScale(book), unchecked(ex.key))}
                 onOpen={() => open(openTarget(ex.key, variants))}
               />
             </li>

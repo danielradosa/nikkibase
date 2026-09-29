@@ -291,6 +291,14 @@ export function gainText(ex: Pick<WorthExample, 'points' | 'pct'>, flagged = fal
   return flagged ? `${gain} · ${SCORE_F}` : gain
 }
 
+export function exampleGain(
+  ex: Pick<WorthExample, 'key' | 'points' | 'pct'>,
+  scale: (points: number, mode: string) => number,
+  flagged = false,
+): string {
+  return gainText({ ...ex, points: scale(ex.points, openTarget(ex.key).mode) }, flagged)
+}
+
 export function scoreFNote(gain: boolean): string {
   const note = "may score F: some items score F on this stage and NikkiBase doesn't check it"
   return gain ? `${note}, so the real gain may be smaller.` : `${note}.`
