@@ -156,6 +156,49 @@ func torsoOf(dress float64, hasDress bool, top, bottom float64) float64 {
 	return top + bottom
 }
 
+type torsoPick struct {
+	d, top, bottom                 float64
+	has                            bool
+	dressItem, topItem, bottomItem int32
+}
+
+func (e *evaluator) torsoNow() torsoPick {
+	return torsoPick{e.dress, e.top, e.bottom, e.hasDress, e.dressItem, e.topItem, e.bottomItem}
+}
+
+func (t *torsoPick) offer(k kind, v float64, i int32) bool {
+	switch k {
+	case dressKind:
+		if !t.has || first(v, i, t.d, t.dressItem) {
+			t.d, t.has, t.dressItem = v, true, i
+		}
+	case topKind:
+		if first(v, i, t.top, t.topItem) {
+			t.top, t.topItem = v, i
+		}
+	case bottomKind:
+		if first(v, i, t.bottom, t.bottomItem) {
+			t.bottom, t.bottomItem = v, i
+		}
+	default:
+		return false
+	}
+	return true
+}
+
+func (t *torsoPick) wear(out []scoring.Item, l *layout) []scoring.Item {
+	if t.has && t.d >= t.top+t.bottom {
+		return append(out, l.items[t.dressItem])
+	}
+	if t.topItem >= 0 {
+		out = append(out, l.items[t.topItem])
+	}
+	if t.bottomItem >= 0 {
+		out = append(out, l.items[t.bottomItem])
+	}
+	return out
+}
+
 func (e *evaluator) build(br *branch, sd *side) {
 	l := e.l
 	e.br, e.sd = br, sd
@@ -563,50 +606,24 @@ func (e *evaluator) outfit(buf []scoring.Item, c *change) []scoring.Item {
 			out = append(out, l.items[i])
 		}
 	}
-	dressItem, topItem, bottomItem := e.dressItem, e.topItem, e.bottomItem
-	d, has, top, bottom := e.dress, e.hasDress, e.top, e.bottom
+	t := e.torsoNow()
 	for j := range c.n {
 		at := c.at[j]
 		if e.br.blocked[at] {
 			continue
 		}
-		v := c.s[j] + c.f[j]
-		switch l.kinds[at] {
-		case dressKind:
-			if !has || first(v, c.item[j], d, dressItem) {
-				d, has, dressItem = v, true, c.item[j]
-			}
-		case topKind:
-			if first(v, c.item[j], top, topItem) {
-				top, topItem = v, c.item[j]
-			}
-		case bottomKind:
-			if first(v, c.item[j], bottom, bottomItem) {
-				bottom, bottomItem = v, c.item[j]
-			}
-		case accessoryKind:
-			if e.displaces(at, c.item[j], c.s[j], c.f[j]) {
-				accAt, accItem, accS, accF = at, c.item[j], c.s[j], c.f[j]
-			}
+		if k := l.kinds[at]; !t.offer(k, c.s[j]+c.f[j], c.item[j]) && k == accessoryKind && e.displaces(at, c.item[j], c.s[j], c.f[j]) {
+			accAt, accItem, accS, accF = at, c.item[j], c.s[j], c.f[j]
 		}
 	}
-	if has && d >= top+bottom {
-		out = append(out, l.items[dressItem])
-	} else {
-		if topItem >= 0 {
-			out = append(out, l.items[topItem])
-		}
-		if bottomItem >= 0 {
-			out = append(out, l.items[bottomItem])
-		}
-	}
+	out = t.wear(out, l)
 
 	var a int32 = -1
 	if accAt >= 0 {
 		a = l.accOf[accAt]
 		e.cs, e.cf = accS, accF
 	}
-	_, chosen, worn := e.settle(nonAcc+torsoOf(d, has, top, bottom), a, nil)
+	_, chosen, worn := e.settle(nonAcc+torsoOf(t.d, t.has, t.top, t.bottom), a, nil)
 	ch := &e.choices[chosen]
 	nr := len(ratios)
 	k := ratioOf[worn]

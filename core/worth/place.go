@@ -60,32 +60,13 @@ func (sc *scorer) placeWith(c *change) scoring.Placement {
 		a = l.accOf[at]
 		e.cs, e.cf = c.s[0], c.f[0]
 	default:
-		d, has, top, bottom := e.dress, e.hasDress, e.top, e.bottom
-		dressItem, topItem, bottomItem := e.dressItem, e.topItem, e.bottomItem
+		t := e.torsoNow()
 		for j := range c.n {
-			at := c.at[j]
-			if e.br.blocked[at] {
-				continue
-			}
-			v := c.s[j] + c.f[j]
-			switch l.kinds[at] {
-			case dressKind:
-				if !has || first(v, c.item[j], d, dressItem) {
-					d, has, dressItem = v, true, c.item[j]
-				}
-			case topKind:
-				if first(v, c.item[j], top, topItem) {
-					top, topItem = v, c.item[j]
-				}
-			case bottomKind:
-				if first(v, c.item[j], bottom, bottomItem) {
-					bottom, bottomItem = v, c.item[j]
-				}
-			default:
+			if at := c.at[j]; !e.br.blocked[at] && !t.offer(l.kinds[at], c.s[j]+c.f[j], c.item[j]) {
 				return sc.exactPlace(c)
 			}
 		}
-		if dressItem == e.dressItem && topItem == e.topItem && bottomItem == e.bottomItem {
+		if t.dressItem == e.dressItem && t.topItem == e.topItem && t.bottomItem == e.bottomItem {
 			return pl.place
 		}
 		if pl.dress {
@@ -94,13 +75,13 @@ func (sc *scorer) placeWith(c *change) scoring.Placement {
 			sc.shift(&dm, e.topItem, -1)
 			sc.shift(&dm, e.bottomItem, -1)
 		}
-		if has && d >= top+bottom {
-			sc.shift(&dm, dressItem, 1)
+		if t.has && t.d >= t.top+t.bottom {
+			sc.shift(&dm, t.dressItem, 1)
 		} else {
-			sc.shift(&dm, topItem, 1)
-			sc.shift(&dm, bottomItem, 1)
+			sc.shift(&dm, t.topItem, 1)
+			sc.shift(&dm, t.bottomItem, 1)
 		}
-		fixed = e.nonAcc + torsoOf(d, has, top, bottom)
+		fixed = e.nonAcc + torsoOf(t.d, t.has, t.top, t.bottom)
 	}
 	if _, chosen, worn := e.settle(fixed, a, nil); chosen != pl.chosen || worn != pl.worn {
 		return sc.exactPlace(c)

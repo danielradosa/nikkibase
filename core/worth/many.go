@@ -375,38 +375,13 @@ func (e *evaluator) outfitMany(buf []scoring.Item, ps []piece, chosen, worn int)
 			out = append(out, l.items[i])
 		}
 	}
-	d, has, top, bottom := e.dress, e.hasDress, e.top, e.bottom
-	dressItem, topItem, bottomItem := e.dressItem, e.topItem, e.bottomItem
+	t := e.torsoNow()
 	for _, p := range ps {
-		if e.br.blocked[p.at] {
-			continue
-		}
-		v := p.s + p.f
-		switch l.kinds[p.at] {
-		case dressKind:
-			if !has || first(v, p.item, d, dressItem) {
-				d, has, dressItem = v, true, p.item
-			}
-		case topKind:
-			if first(v, p.item, top, topItem) {
-				top, topItem = v, p.item
-			}
-		case bottomKind:
-			if first(v, p.item, bottom, bottomItem) {
-				bottom, bottomItem = v, p.item
-			}
+		if !e.br.blocked[p.at] {
+			t.offer(l.kinds[p.at], p.s+p.f, p.item)
 		}
 	}
-	if has && d >= top+bottom {
-		out = append(out, l.items[dressItem])
-	} else {
-		if topItem >= 0 {
-			out = append(out, l.items[topItem])
-		}
-		if bottomItem >= 0 {
-			out = append(out, l.items[bottomItem])
-		}
-	}
+	out = t.wear(out, l)
 	if chosen < 0 || worn < 0 {
 		return out
 	}
