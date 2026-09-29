@@ -1,5 +1,5 @@
 {
-  "note": "Hand-checked ways to get items the sources give no line for: the wiki names them only on an event or timeline page the pipeline does not read. Each entry gives the item's name, which must still be the one the catalogue has, and the build refuses an entry once the sources give the item a line of their own, so the list stays short and current.",
+  "note": "Hand-checked ways to get items the sources give no line for: the wiki names them only on an event or timeline page, which the pipeline reads only to name the event or recharge channel behind a line the sources already give. Each entry gives the item's name, which must still be the one the catalogue has, and the build refuses an entry once the sources give the item a line of their own, so the list stays short and current.",
   "items": [
     {
       "id": 82748,
