@@ -21,28 +21,16 @@ type Provenance = { version: string; builtAt: string; mode: string; sources: Sou
 type Contributors = { editors: string[]; anonymousEditors: number; note: string }
 
 function Terms({ s }: { s: SourceRecord }) {
-  if (s.basis === 'licence') {
+  if (s.basis === 'licence' || s.basis === 'permission') {
+    const [text, href] = s.basis === 'licence' ? [s.licence, s.licenceUrl] : ['Used with permission', s.permissionUrl]
     return (
       <Tag color="green">
-        {s.licenceUrl ? (
-          <a href={s.licenceUrl} target="_blank" rel="noreferrer">
-            {s.licence}
+        {href ? (
+          <a href={href} target="_blank" rel="noreferrer">
+            {text}
           </a>
         ) : (
-          s.licence
-        )}
-      </Tag>
-    )
-  }
-  if (s.basis === 'permission') {
-    return (
-      <Tag color="green">
-        {s.permissionUrl ? (
-          <a href={s.permissionUrl} target="_blank" rel="noreferrer">
-            Used with permission
-          </a>
-        ) : (
-          'Used with permission'
+          text
         )}
       </Tag>
     )
