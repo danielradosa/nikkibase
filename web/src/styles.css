@@ -955,6 +955,12 @@ h5 {
   font-size: 12px;
 }
 
+.ant-typography.nb-book-foot {
+  display: block;
+  padding: 6px 12px 4px;
+  font-size: 12px;
+}
+
 .ant-drawer.nb-skill-sheet .nb-skill-panel {
   width: auto;
 }

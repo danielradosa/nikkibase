@@ -5,6 +5,8 @@ import {
   NAMES_WAIT,
   alternativesLabel,
   bestNote,
+  bookReads,
+  bookScore,
   closeCall,
   closeCallText,
   comparisonRows,
@@ -132,6 +134,45 @@ test('the copied outfit names the skills it was scored with', () => {
   ])
   const plain = outfitText(outfit(1234, [[10, 0]]), null, { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.equal(plain.split('\n').at(-1), `Scores assume no skills. ${SITE_HOST}`)
+})
+
+test('each Cloud Adventure read adds 1% to the whole score, rounded down', () => {
+  assert.equal(bookScore(77438, 5), 81309)
+  assert.equal(bookScore(50541, 5), 53068)
+  assert.equal(bookScore(1000, 3), 1030)
+  assert.equal(bookScore(77438, 0), 77438)
+  assert.equal(bookScore(0, 5), 0)
+})
+
+test('Cloud Adventure counts on Commission stages only', () => {
+  assert.equal(bookReads('Commission', 4), 4)
+  for (const mode of ['Story', 'Arena', 'Co-op', undefined]) assert.equal(bookReads(mode, 4), 0)
+})
+
+test('with Cloud Adventure an alternative loses what your score would lose, and a tie stays a tie', () => {
+  const mine = outfit(1000, [[10, 0]])
+  mine.items[0].alts = [{ id: 20, delta: 0 }, { id: 30, delta: -10 }, { id: 40, delta: -1 }]
+  assert.deepEqual(comparisonRows(mine, null, NAMES, PLACES, SLOTS, 5)[0].alts, [
+    { id: 20, delta: 0 },
+    { id: 30, delta: -11 },
+    { id: 40, delta: -2 },
+  ])
+  assert.deepEqual(comparisonRows(mine, null, NAMES, PLACES, SLOTS)[0].alts, mine.items[0].alts)
+})
+
+test('the copied outfit counts Cloud Adventure in both scores and names it', () => {
+  const reads = bookReads('Commission', 5)
+  const text = outfitText(outfit(77438, [[40, 3], [10, 0]]), outfit(80000, []), { mode: 'Commission', name: '2-3' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, reads), reads)
+  assert.deepEqual(text.split('\n'), [
+    'Commission 2-3 — 81,309 (2 items)',
+    'Hair: Rose Bun',
+    'Top: Lace Top',
+    'best possible — 84,000',
+    `Scores assume no skills. Cloud Adventure +5%. ${SITE_HOST}`,
+  ])
+  const story = bookReads('Story', 5)
+  const plain = outfitText(outfit(77438, []), outfit(80000, []), { mode: 'Story', name: '2-3' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, story), story)
+  assert.deepEqual(plain.split('\n'), ['Story 2-3 (Maiden) — 77,438 (0 items)', 'best possible — 80,000', `Scores assume no skills. ${SITE_HOST}`])
 })
 
 test('the copied outfit names the difficulty on Story stages only', () => {

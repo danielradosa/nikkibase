@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { SlidersOutlined } from '@ant-design/icons'
+import { ReadOutlined, SlidersOutlined } from '@ant-design/icons'
 import { Button, Drawer, Popover, Segmented, Select, Typography } from 'antd'
 import { ATTRS } from '../items/items'
-import { CHARMING_PERCENT, SMILE_PERCENT, levelsLabel, pickerDefault, skillsOff, type SkillLevels } from './skills'
+import {
+  BOOK_READS, CHARMING_PERCENT, SMILE_PERCENT, bookChoice, bookLabel, levelsLabel, pickerDefault, skillsOff, type SkillLevels,
+} from './skills'
 import { useStore } from '../store'
 import { placementKey, resolveStage, type Stage } from './stages'
 import { usePhone } from '../hooks/usePhone'
 
-type Props = { chosen: Stage | undefined }
+type Props = { chosen: Stage | undefined; mode: string }
 
 type Container = (node: HTMLElement) => HTMLElement
 
@@ -20,6 +22,8 @@ const charmingOptions = CHARMING_PERCENT.map((pct, level) => ({
   value: level,
   label: level ? `Level ${level} · +${pct}%` : 'Locked or not used',
 }))
+
+const bookOptions = Array.from({ length: BOOK_READS + 1 }, (_, reads) => ({ value: reads, label: bookChoice(reads) }))
 
 const inPanel = (node: HTMLElement) => node.closest<HTMLElement>('.nb-skill-panel') ?? document.body
 
@@ -138,8 +142,8 @@ function Panel({ chosen, container }: { chosen: Stage | undefined; container?: C
   )
 }
 
-export default function SkillControls({ chosen }: Props) {
-  const { skills, setSkills } = useStore()
+export default function SkillControls({ chosen, mode }: Props) {
+  const { skills, setSkills, book, setBook } = useStore()
   const phone = usePhone()
   const [sheet, setSheet] = useState(false)
   useEffect(() => {
@@ -187,6 +191,26 @@ export default function SkillControls({ chosen }: Props) {
             </Button>
           </Drawer>
         </>
+      )}
+      {mode === 'Commission' && (
+        <Select
+          aria-label="Cloud Adventure (Library)"
+          className="nb-book-select"
+          prefix={<ReadOutlined />}
+          value={book}
+          options={bookOptions}
+          onChange={setBook}
+          labelRender={({ value }) => bookLabel(Number(value))}
+          popupRender={(menu) => (
+            <>
+              {menu}
+              <Typography.Text type="secondary" className="nb-book-foot">
+                Library book. Adds 1% to Commission scores per read.
+              </Typography.Text>
+            </>
+          )}
+          virtual={false}
+        />
       )}
     </>
   )

@@ -2,16 +2,16 @@ import { Fragment } from 'react'
 import { CopyOutlined } from '@ant-design/icons'
 import { Button, Progress, Statistic, Typography, message } from 'antd'
 import Sparkle from '../components/Sparkle'
-import { closeCall, closeCallText } from './comparison'
+import { bookScore, closeCall, closeCallText } from './comparison'
 import type { Outfit } from '../engine/engine'
 import { ATTRS } from '../items/items'
 import { MAX_LEVELS, bestElsewhere, levelsShort, placementPhrases } from './skills'
 import { useStore } from '../store'
 import type { Ideal } from './stages'
 
-type Props = { outfit: Outfit; ideal: Ideal | null; copyText: string; busy: boolean; naming: boolean }
+type Props = { outfit: Outfit; ideal: Ideal | null; copyText: string; busy: boolean; naming: boolean; reads: number }
 
-export default function OutfitScore({ outfit, ideal, copyText, busy, naming }: Props) {
+export default function OutfitScore({ outfit, ideal, copyText, busy, naming, reads }: Props) {
   const reachable = ideal && ideal.score > 0 ? outfit.score / ideal.score : null
   const close = closeCall(outfit)
   const skills = outfit.skills
@@ -34,7 +34,7 @@ export default function OutfitScore({ outfit, ideal, copyText, busy, naming }: P
         <Sparkle trigger={outfit.score}>
           <Statistic
             title="Your best"
-            value={outfit.score}
+            value={bookScore(outfit.score, reads)}
             suffix={
               <Typography.Text type="secondary" className="nb-count">
                 {outfit.items.length} items
@@ -46,7 +46,7 @@ export default function OutfitScore({ outfit, ideal, copyText, busy, naming }: P
         <Statistic
           className="nb-ideal"
           title="Best possible"
-          value={ideal?.score ?? 0}
+          value={bookScore(ideal?.score ?? 0, reads)}
           suffix={
             ideal ? (
               <Typography.Text type="secondary" className="nb-count">

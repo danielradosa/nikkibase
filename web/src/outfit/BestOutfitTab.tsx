@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo } from 'react'
 import { Alert, Empty } from 'antd'
 import { useStore } from '../store'
 import { ATTRS, SLOTS, type Item } from '../items/items'
-import { FINDING, NAMES_WAIT, comparisonRows, outfitText, resultView, type Place } from './comparison'
+import { FINDING, NAMES_WAIT, bookReads, comparisonRows, outfitText, resultView, type Place } from './comparison'
 import { skillsLine } from './skills'
 import { missingMessage, stageKey, type Stage } from './stages'
 import { ENGINE_DOWN, manyUnscored, unscored } from '../wardrobe/wardrobeText'
@@ -25,15 +25,16 @@ type Props = {
 }
 
 export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, places, onFile }: Props) {
-  const { owned, decoded, stage, outfit, ideal, busy, engine, difficulty, mode, tab, jump, set } = useStore()
+  const { owned, decoded, stage, outfit, ideal, busy, engine, difficulty, mode, tab, jump, book, set } = useStore()
 
   const names = useMemo(() => new Map((items ?? []).map((it) => [it.id, it.name])), [items])
   const naming = items === null && !itemsFailed
   const chosen = stages.find((s) => stageKey(s) === stage)
-  const rows = useMemo(() => comparisonRows(outfit, ideal, names, places, SLOTS), [outfit, ideal, names, places])
+  const reads = bookReads(chosen?.mode, book)
+  const rows = useMemo(() => comparisonRows(outfit, ideal, names, places, SLOTS, reads), [outfit, ideal, names, places, reads])
   const copyText = useMemo(
-    () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, places, SLOTS, skillsLine(outfit?.skills, ATTRS)),
-    [outfit, ideal, chosen, difficulty, names, places],
+    () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, places, SLOTS, skillsLine(outfit?.skills, ATTRS, reads), reads),
+    [outfit, ideal, chosen, difficulty, names, places, reads],
   )
   const view = resultView({ owned: owned.length, chosen: !!chosen, outfit: !!outfit, busy })
 
@@ -91,7 +92,7 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
                 description="The outfit below can't pass the stage."
               />
             ) : null}
-            <OutfitScore outfit={outfit} ideal={ideal} copyText={copyText} busy={busy} naming={naming} />
+            <OutfitScore outfit={outfit} ideal={ideal} copyText={copyText} busy={busy} naming={naming} reads={reads} />
             {naming && <WaitLine text={NAMES_WAIT} className="nb-names-wait" />}
             <ComparisonTable rows={rows} names={names} naming={naming} />
           </div>

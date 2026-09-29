@@ -1,9 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  CHARMING_PERCENT, MAX_LEVELS, NO_SKILLS, SITE_HOST, SMILE_PERCENT, bestElsewhere, idealSkills, isMax, levelsLabel, levelsShort,
-  parseSkills, pickerDefault, placementPhrases, samePlacement, scoredOn, searchPlan, skillRequest, skillsLine, skillsOff,
-  type SkillSettings,
+  BOOK_READS, CHARMING_PERCENT, MAX_LEVELS, NO_SKILLS, SITE_HOST, SMILE_PERCENT, bestElsewhere, bookChoice, bookLabel, idealSkills,
+  isMax, levelsLabel, levelsShort, parseBook, parseSkills, pickerDefault, placementPhrases, samePlacement, scoredOn, searchPlan,
+  skillRequest, skillsLine, skillsOff, type SkillSettings,
 } from '../../src/outfit/skills.ts'
 
 const ATTRS = ['Gorgeous', 'Simple', 'Elegant', 'Lively', 'Mature', 'Cute']
@@ -93,6 +93,29 @@ test('the copied line keeps its max-level wording and names other levels', () =>
     skillsLine({ charmSmile: 3, smile: -1, levels: { charming: 7, smile: 0 } }, ATTRS),
     `Skills: Charming on Lively (no Smile, Charming level 7). ${SITE_HOST}`,
   )
+})
+
+test('the copied line names Cloud Adventure only when it adds something', () => {
+  assert.equal(skillsLine(undefined, ATTRS, 0), `Scores assume no skills. ${SITE_HOST}`)
+  assert.equal(skillsLine(undefined, ATTRS, 5), `Scores assume no skills. Cloud Adventure +5%. ${SITE_HOST}`)
+  assert.equal(
+    skillsLine({ charmSmile: 3, smile: 5 }, ATTRS, 2),
+    `Skills: Charming + Smile on Lively, Smile on Cute (max level). Cloud Adventure +2%. ${SITE_HOST}`,
+  )
+})
+
+test('Cloud Adventure is read up to five times, and a missing or broken save means not read', () => {
+  assert.equal(BOOK_READS, 5)
+  for (const reads of [0, 1, 3, 5]) assert.equal(parseBook(String(reads)), reads)
+  for (const bad of [null, '', '6', '-1', '2.5', ' 3', '05', 'five', '{}']) assert.equal(parseBook(bad), 0)
+})
+
+test('the Cloud Adventure choices say how often it was read and what that adds', () => {
+  assert.equal(bookChoice(0), 'Not read')
+  assert.equal(bookChoice(1), '1 of 5 read · +1%')
+  assert.equal(bookChoice(5), '5 of 5 read · +5%')
+  assert.equal(bookLabel(0), 'Cloud Adventure · not read')
+  assert.equal(bookLabel(3), 'Cloud Adventure · +3%')
 })
 
 test('the levels button always names both levels', () => {

@@ -32,6 +32,10 @@ export function parseSkills(saved: string | null, legacy: string | null): SkillS
   return { ...NO_SKILLS, on: legacy === 'max' }
 }
 
+export const BOOK_READS = 5
+
+export const parseBook = (saved: string | null) => (/^\d$/.test(saved ?? '') && Number(saved) <= BOOK_READS ? Number(saved) : 0)
+
 export function idealSkills(s: SkillSettings): 'none' | 'max' | null {
   if (skillsOff(s)) return 'none'
   return isMax(s.levels) ? 'max' : null
@@ -47,6 +51,10 @@ export function skillRequest(s: SkillSettings, placement?: SkillChoice | null): 
 export function levelsLabel(l: SkillLevels): string {
   return `Smile ${l.smile || 'off'} · Charming ${l.charming || 'off'}`
 }
+
+export const bookChoice = (reads: number) => (reads ? `${reads} of ${BOOK_READS} read · +${reads}%` : 'Not read')
+
+export const bookLabel = (reads: number) => `Cloud Adventure · ${reads ? `+${reads}%` : 'not read'}`
 
 export function levelsShort(l: SkillLevels): string {
   if (isMax(l)) return 'max level'
@@ -69,10 +77,11 @@ function levelsText(l: SkillLevels): string {
 
 export const SITE_HOST = 'nikkibase.up.railway.app'
 
-export function skillsLine(p: SkillChoice | undefined, attrs: readonly string[]): string {
-  if (!p) return `Scores assume no skills. ${SITE_HOST}`
+export function skillsLine(p: SkillChoice | undefined, attrs: readonly string[], reads = 0): string {
+  const tail = `${reads > 0 ? `Cloud Adventure +${reads}%. ` : ''}${SITE_HOST}`
+  if (!p) return `Scores assume no skills. ${tail}`
   const l = p.levels ?? MAX_LEVELS
-  return `Skills: ${placementPhrases(p, l, attrs).join(', ')} (${levelsText(l)}). ${SITE_HOST}`
+  return `Skills: ${placementPhrases(p, l, attrs).join(', ')} (${levelsText(l)}). ${tail}`
 }
 
 export function scoredOn(p: SkillChoice, l: SkillLevels): number[] {

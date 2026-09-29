@@ -17,6 +17,10 @@ export type ComparisonRow = {
 
 export const CLOSE_CALL = 0.05
 
+export const bookReads = (mode: string | undefined, reads: number) => (mode === 'Commission' ? reads : 0)
+
+export const bookScore = (score: number, reads: number) => Math.floor((score * (100 + reads)) / 100)
+
 export function unwornLabel(pos: number, ownedPlaces: ReadonlySet<number>): string {
   return ownedPlaces.has(pos) ? 'not worn' : 'nothing owned'
 }
@@ -44,7 +48,10 @@ export function comparisonRows(
   names: ReadonlyMap<number, string>,
   places: readonly Place[],
   slots: readonly string[],
+  reads = 0,
 ): ComparisonRow[] {
+  const score = outfit?.score ?? 0
+  const lost = (alt: Alternative) => ({ id: alt.id, delta: bookScore(score + alt.delta, reads) - bookScore(score, reads) })
   const idealByPlace = new Map<number, number>()
   for (const it of ideal?.items ?? []) if (!idealByPlace.has(it.pos)) idealByPlace.set(it.pos, it.id)
   const held = new Set(outfit?.ownedPlaces)
@@ -64,7 +71,7 @@ export function comparisonRows(
         unworn: unwornLabel(pos, held),
         best: best !== undefined ? (names.get(best) ?? `#${best}`) : null,
         same: mine?.id === best,
-        alts: mine?.alts ?? [],
+        alts: (mine?.alts ?? []).map(lost),
         moreAlts: mine?.moreAlts ?? false,
         owned: mine?.id,
       }
@@ -80,16 +87,17 @@ export function outfitText(
   places: readonly Place[],
   slots: readonly string[],
   skills: string,
+  reads = 0,
 ): string {
   if (!outfit || !stage) return ''
   const level = stage.mode === 'Story' ? ` (${difficulty})` : ''
   const lines = [
-    `${stage.mode} ${stage.name}${level} — ${outfit.score.toLocaleString('en-US')} (${outfit.items.length} items)`,
+    `${stage.mode} ${stage.name}${level} — ${bookScore(outfit.score, reads).toLocaleString('en-US')} (${outfit.items.length} items)`,
   ]
   for (const it of [...outfit.items].sort((a, b) => a.pos - b.pos)) {
     lines.push(`${places[it.pos]?.name ?? slots[it.slot] ?? `#${it.pos}`}: ${names.get(it.id) ?? `#${it.id}`}`)
   }
-  if (ideal) lines.push(`best possible — ${ideal.score.toLocaleString('en-US')}`)
+  if (ideal) lines.push(`best possible — ${bookScore(ideal.score, reads).toLocaleString('en-US')}`)
   lines.push(skills)
   return lines.join('\n')
 }

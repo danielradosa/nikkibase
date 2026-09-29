@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { Outfit } from './engine/engine'
 import type { SkillChoice } from './engine/engine'
-import { parseSkills, type SkillSettings } from './outfit/skills'
+import { parseBook, parseSkills, type SkillSettings } from './outfit/skills'
 import type { WardrobeSource } from './wardrobe/storage'
 import type { OpenTarget } from './worth/worth'
 import type { Difficulty, Ideal } from './outfit/stages'
@@ -25,6 +25,8 @@ type State = {
   setDifficulty: (d: Difficulty) => void
   skills: SkillSettings
   setSkills: (s: SkillSettings) => void
+  book: number
+  setBook: (reads: number) => void
   placements: Record<string, SkillChoice>
   setPlacement: (key: string, p: SkillChoice | null) => void
   tab: string
@@ -32,12 +34,13 @@ type State = {
   jump: boolean
   worthY: number | null
   openStage: (target: OpenTarget, worthY: number) => void
-  set: (patch: Partial<Omit<State, 'set' | 'setDifficulty' | 'setSkills' | 'setPlacement' | 'openStage'>>) => void
+  set: (patch: Partial<Omit<State, 'set' | 'setDifficulty' | 'setSkills' | 'setBook' | 'setPlacement' | 'openStage'>>) => void
 }
 
 const DIFFICULTY_KEY = 'nikkibase.difficulty'
 const SKILLS_KEY = 'nikkibase.skillSettings'
 const LEGACY_SKILLS_KEY = 'nikkibase.skills'
+const BOOK_KEY = 'nikkibase.cloudAdventure'
 
 function keep(key: string, value: string) {
   try {
@@ -61,6 +64,14 @@ function savedSkills(): SkillSettings {
   } catch {
   }
   return parseSkills(null, null)
+}
+
+function savedBook(): number {
+  try {
+    return parseBook(localStorage.getItem(BOOK_KEY))
+  } catch {
+  }
+  return 0
 }
 
 export const useStore = create<State>((set) => ({
@@ -87,6 +98,11 @@ export const useStore = create<State>((set) => ({
   setSkills: (skills) => {
     keep(SKILLS_KEY, JSON.stringify(skills))
     set({ skills })
+  },
+  book: savedBook(),
+  setBook: (book) => {
+    keep(BOOK_KEY, String(book))
+    set({ book })
   },
   placements: {},
   setPlacement: (key, p) =>

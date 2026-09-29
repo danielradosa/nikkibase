@@ -2,7 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNo
 import { flushSync } from 'react-dom'
 import { DownOutlined, RightOutlined } from '@ant-design/icons'
 import { Alert, Button, Empty, Grid, Segmented, Select, Space, Switch, Table, Typography, type TableColumnsType } from 'antd'
-import type { Place } from '../outfit/comparison'
+import { bookReads, bookScore, type Place } from '../outfit/comparison'
 import type { WorthRow } from '../engine/engine'
 import { ANY_SLOT, choiceLabel, placeName, slotChoice, slotOptions, type Item } from '../items/items'
 import Petals from '../components/Petals'
@@ -195,6 +195,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
   const difficulty = useStore((s) => s.difficulty)
   const setDifficulty = useStore((s) => s.setDifficulty)
   const skills = useStore((s) => s.skills)
+  const book = useStore((s) => s.book)
   const openStage = useStore((s) => s.openStage)
   const worthY = useStore((s) => s.worthY)
   const set = useStore((s) => s.set)
@@ -517,7 +518,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
             <li key={ex.key}>
               <StageRow
                 label={stageLabel(ex.key, variants)}
-                note={gainText(ex, unchecked(ex.key))}
+                note={gainText({ ...ex, points: bookScore(ex.points, bookReads(openTarget(ex.key).mode, book)) }, unchecked(ex.key))}
                 onOpen={() => open(openTarget(ex.key, variants))}
               />
             </li>

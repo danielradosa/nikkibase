@@ -47,7 +47,7 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
             options={['Maiden', 'Princess']}
           />
         )}
-        <SkillControls chosen={chosen} />
+        <SkillControls chosen={chosen} mode={mode} />
         <Select
           showSearch
           aria-label="Stage"
