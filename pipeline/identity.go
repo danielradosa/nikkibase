@@ -41,11 +41,19 @@ type NameOverride struct {
 }
 
 type GradeOverride struct {
-	ID        int    `json:"id"`
-	Attribute string `json:"attribute"`
-	Grade     string `json:"grade"`
-	Was       string `json:"was"`
-	Basis     string `json:"basis"`
+	ID           int    `json:"id"`
+	Attribute    string `json:"attribute"`
+	Grade        string `json:"grade"`
+	Was          string `json:"was"`
+	WasAttribute string `json:"wasAttribute"`
+	Basis        string `json:"basis"`
+}
+
+type TagOverride struct {
+	ID    int    `json:"id"`
+	Tag   string `json:"tag"`
+	Was   string `json:"was"`
+	Basis string `json:"basis"`
 }
 
 var attributeNames = [...]string{
@@ -66,6 +74,7 @@ type Corrections struct {
 	Names      []NameOverride  `json:"nameOverrides"`
 	Shown      []NameOverride  `json:"displayNames"`
 	Grades     []GradeOverride `json:"gradeOverrides"`
+	Tags       []TagOverride   `json:"tagOverrides"`
 }
 
 type IDCorrections struct {
@@ -78,6 +87,7 @@ type IDCorrections struct {
 	Name     map[int]NameOverride
 	Shown    map[int]NameOverride
 	Grade    map[int][]GradeOverride
+	Tag      map[int][]TagOverride
 }
 
 func ReadIDCorrections(b []byte) (*IDCorrections, error) {
@@ -88,7 +98,7 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 	out := &IDCorrections{
 		Owner: map[int]string{}, Drop: map[int]string{}, RealID: map[int]int{}, Slot: map[int]scoring.Slot{},
 		Position: map[int]string{}, Excluded: map[int]string{}, Name: map[int]NameOverride{},
-		Shown: map[int]NameOverride{}, Grade: map[int][]GradeOverride{},
+		Shown: map[int]NameOverride{}, Grade: map[int][]GradeOverride{}, Tag: map[int][]TagOverride{},
 	}
 	for _, n := range c.Shown {
 		switch {
@@ -111,10 +121,15 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 			return nil, fmt.Errorf("id corrections: %d must give an item ID and one of its attributes", g.ID)
 		case gradeBase[g.Grade] == 0 || gradeBase[g.Was] == 0:
 			return nil, fmt.Errorf("id corrections: %d must give the grade to keep and the one its sources give", g.ID)
-		case g.Grade == g.Was:
+		case g.Grade == g.Was && (g.WasAttribute == "" || g.WasAttribute == g.Attribute):
 			return nil, fmt.Errorf("id corrections: %d keeps the grade its sources already give", g.ID)
 		case g.Basis == "":
 			return nil, fmt.Errorf("id corrections: %d gives no basis for its grade", g.ID)
+		}
+		if g.WasAttribute != "" {
+			if was, known := attributeOf(g.WasAttribute); !known || was/2 != a/2 {
+				return nil, fmt.Errorf("id corrections: %d moves %s to %s, which is not the other side of its pair", g.ID, g.WasAttribute, g.Attribute)
+			}
 		}
 		for _, o := range out.Grade[g.ID] {
 			if b, _ := attributeOf(o.Attribute); b/2 == a/2 {
@@ -122,6 +137,24 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 			}
 		}
 		out.Grade[g.ID] = append(out.Grade[g.ID], g)
+	}
+	for _, g := range c.Tags {
+		_, known := TagID(g.Tag)
+		_, knownWas := TagID(g.Was)
+		switch {
+		case g.ID <= 0 || !known || !knownWas:
+			return nil, fmt.Errorf("id corrections: %d must give an item ID, the tag to keep and the one its sources give", g.ID)
+		case g.Tag == g.Was:
+			return nil, fmt.Errorf("id corrections: %d keeps the tag its sources already give", g.ID)
+		case g.Basis == "":
+			return nil, fmt.Errorf("id corrections: %d gives no basis for its tag", g.ID)
+		}
+		for _, o := range out.Tag[g.ID] {
+			if o.Was == g.Was {
+				return nil, fmt.Errorf("id corrections: %d replaces %s twice", g.ID, g.Was)
+			}
+		}
+		out.Tag[g.ID] = append(out.Tag[g.ID], g)
 	}
 	for _, n := range c.Names {
 		switch {
@@ -236,7 +269,10 @@ func (c *IDCorrections) Apply(entries []Entry) ([]Entry, error) {
 	if err != nil {
 		return nil, err
 	}
-	return out, c.keepGrades(out)
+	if err := c.keepGrades(out); err != nil {
+		return out, err
+	}
+	return out, c.keepTags(out)
 }
 
 func (c *IDCorrections) keepGrades(entries []Entry) error {
@@ -247,12 +283,18 @@ func (c *IDCorrections) keepGrades(entries []Entry) error {
 		for _, g := range c.Grade[e.Item.ID] {
 			found[e.Item.ID] = true
 			a, _ := attributeOf(g.Attribute)
+			from, was := a, g.Attribute
+			if g.WasAttribute != "" {
+				from, _ = attributeOf(g.WasAttribute)
+				was = g.WasAttribute
+			}
 			p := a / 2
-			if e.Item.Attrs[p] != a || strings.ToUpper(e.Grades[p]) != g.Was {
+			if e.Item.Attrs[p] != from || strings.ToUpper(e.Grades[p]) != g.Was {
 				wrong = append(wrong, fmt.Sprintf("%d is %s %s, not %s %s",
-					e.Item.ID, attributeNames[e.Item.Attrs[p]], e.Grades[p], g.Attribute, g.Was))
+					e.Item.ID, attributeNames[e.Item.Attrs[p]], e.Grades[p], was, g.Was))
 				continue
 			}
+			e.Item.Attrs[p] = a
 			e.Grades[p] = g.Grade
 			e.Item.Stats[p] = Stat(g.Grade, e.Item.Slot)
 		}
@@ -264,6 +306,35 @@ func (c *IDCorrections) keepGrades(entries []Entry) error {
 	}
 	if len(wrong) > 0 {
 		return fmt.Errorf("id corrections: %d grades no longer fit what the sources give: %s",
+			len(wrong), strings.Join(wrong, "; "))
+	}
+	return nil
+}
+
+func (c *IDCorrections) keepTags(entries []Entry) error {
+	found := make(map[int]bool, len(c.Tag))
+	var wrong []string
+	for i := range entries {
+		e := &entries[i]
+		for _, g := range c.Tag[e.Item.ID] {
+			found[e.Item.ID] = true
+			tag, _ := TagID(g.Tag)
+			was, _ := TagID(g.Was)
+			at := slices.Index(e.Item.Tags, was)
+			if at < 0 || slices.Contains(e.Item.Tags, tag) {
+				wrong = append(wrong, fmt.Sprintf("%d does not carry %s alone of %s and %s", e.Item.ID, g.Was, g.Was, g.Tag))
+				continue
+			}
+			e.Item.Tags[at] = tag
+		}
+	}
+	for _, id := range slices.Sorted(maps.Keys(c.Tag)) {
+		if !found[id] {
+			wrong = append(wrong, fmt.Sprintf("%d is not in the catalogue", id))
+		}
+	}
+	if len(wrong) > 0 {
+		return fmt.Errorf("id corrections: %d tags no longer fit what the sources give: %s",
 			len(wrong), strings.Join(wrong, "; "))
 	}
 	return nil

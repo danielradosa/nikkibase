@@ -101,6 +101,15 @@ func TestReadIDCorrectionsRefusesBadEntries(t *testing.T) {
 		"grade without the old letter":    `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "basis": "b"}]}`,
 		"grade unchanged":                 `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "A", "was": "A", "basis": "b"}]}`,
 		"two grades on one pair":          `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A", "basis": "b"}, {"id": 40721, "attribute": "Simple", "grade": "S", "was": "A", "basis": "b"}]}`,
+		"side from another pair":          `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A", "wasAttribute": "Lively", "basis": "b"}]}`,
+		"side that is no attribute":       `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "S", "was": "A", "wasAttribute": "Shiny", "basis": "b"}]}`,
+		"side and grade unchanged":        `{"gradeOverrides": [{"id": 40721, "attribute": "Gorgeous", "grade": "A", "was": "A", "wasAttribute": "Gorgeous", "basis": "b"}]}`,
+		"tag without basis":               `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown"}]}`,
+		"tag without an ID":               `{"tagOverrides": [{"tag": "Chic", "was": "Evening Gown", "basis": "b"}]}`,
+		"tag that is no tag":              `{"tagOverrides": [{"id": 91095, "tag": "Shiny", "was": "Evening Gown", "basis": "b"}]}`,
+		"tag replacing no tag":            `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Shiny", "basis": "b"}]}`,
+		"tag unchanged":                   `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Chic", "basis": "b"}]}`,
+		"tag replaced twice":              `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "b"}, {"id": 91095, "tag": "Lady", "was": "Evening Gown", "basis": "b"}]}`,
 	} {
 		if _, err := ReadIDCorrections([]byte(doc)); err == nil {
 			t.Errorf("%s: accepted", name)
@@ -466,6 +475,59 @@ func TestGradeOverrideKeepsTheLetterTheOtherSourcesGive(t *testing.T) {
 	}
 	if e.Grades[1] != "B" || e.Item.Stats[1] != Stat("B", scoring.Dress) {
 		t.Errorf("Lively changed to %s %d", e.Grades[1], e.Item.Stats[1])
+	}
+}
+
+func TestGradeOverrideCanMoveAGradeToTheOtherSideOfItsPair(t *testing.T) {
+	c := corrections(t, `{"gradeOverrides": [{"id": 40721, "attribute": "Simple", "grade": "A", "was": "A", "wasAttribute": "Gorgeous", "basis": "checked in game"}, {"id": 40721, "attribute": "Elegant", "grade": "S", "was": "B", "wasAttribute": "Lively", "basis": "checked in game"}]}`)
+	got, err := c.Apply([]Entry{dress(40721, scoring.Gorgeous, "A")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := got[0]
+	if e.Item.Attrs[0] != scoring.Simple || e.Grades[0] != "A" || e.Item.Stats[0] != Stat("A", scoring.Dress) {
+		t.Errorf("pair 1 is %s %s %d, want Simple A", attributeNames[e.Item.Attrs[0]], e.Grades[0], e.Item.Stats[0])
+	}
+	if e.Item.Attrs[1] != scoring.Elegant || e.Grades[1] != "S" || e.Item.Stats[1] != Stat("S", scoring.Dress) {
+		t.Errorf("pair 2 is %s %s %d, want Elegant S", attributeNames[e.Item.Attrs[1]], e.Grades[1], e.Item.Stats[1])
+	}
+	if e.Item.Attrs[2] != scoring.Cute || e.Grades[2] != "C" {
+		t.Errorf("pair 3 changed to %s %s", attributeNames[e.Item.Attrs[2]], e.Grades[2])
+	}
+	if _, err := c.Apply([]Entry{dress(40721, scoring.Simple, "A")}); err == nil || !strings.Contains(err.Error(), "grades no longer fit") {
+		t.Errorf("an item already on the new side: %v", err)
+	}
+}
+
+func TestTagOverrideReplacesTheTagTheOtherSourcesGive(t *testing.T) {
+	c := corrections(t, `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "checked in game"}]}`)
+	gown, _ := TagID("Evening Gown")
+	chic, _ := TagID("Chic")
+	lady, _ := TagID("Lady")
+	e := dress(91095, scoring.Gorgeous, "A")
+	e.Item.Tags = []int{lady, gown}
+	got, err := c.Apply([]Entry{e})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if tags := got[0].Item.Tags; !slices.Equal(tags, []int{lady, chic}) {
+		t.Errorf("tags = %v, want %v", tags, []int{lady, chic})
+	}
+	for name, e := range map[string]Entry{
+		"no longer tagged": dress(91095, scoring.Gorgeous, "A"),
+		"another item":     dress(91096, scoring.Gorgeous, "A"),
+	} {
+		if name == "another item" {
+			e.Item.Tags = []int{gown}
+		}
+		if _, err := c.Apply([]Entry{e}); err == nil || !strings.Contains(err.Error(), "tags no longer fit") {
+			t.Errorf("%s: %v", name, err)
+		}
+	}
+	both := dress(91095, scoring.Gorgeous, "A")
+	both.Item.Tags = []int{gown, chic}
+	if _, err := c.Apply([]Entry{both}); err == nil || !strings.Contains(err.Error(), "tags no longer fit") {
+		t.Errorf("an item already tagged Chic: %v", err)
 	}
 }
 
