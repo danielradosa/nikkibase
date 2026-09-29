@@ -5,6 +5,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -29,7 +30,7 @@ func main() {
 
 func handler(root string) http.Handler {
 	mime.AddExtensionType(".wasm", "application/wasm")
-	files := http.FileServer(http.Dir(root))
+	files := http.FileServer(noListing{http.Dir(root)})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			w.Header().Set("Allow", "GET, HEAD")
@@ -53,6 +54,29 @@ func handler(root string) http.Handler {
 		}
 		files.ServeHTTP(w, r)
 	})
+}
+
+type noListing struct{ http.FileSystem }
+
+func (fs noListing) Open(name string) (http.File, error) {
+	f, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	info, err := f.Stat()
+	if err != nil {
+		f.Close()
+		return nil, err
+	}
+	if info.IsDir() {
+		index, err := fs.FileSystem.Open(path.Join(name, "index.html"))
+		if err != nil {
+			f.Close()
+			return nil, os.ErrNotExist
+		}
+		index.Close()
+	}
+	return f, nil
 }
 
 var encodings = []struct{ token, suffix string }{

@@ -152,3 +152,24 @@ func TestOnlyReads(t *testing.T) {
 		t.Errorf("POST returned %d, want 405", res.StatusCode)
 	}
 }
+
+func TestNoDirectoryListings(t *testing.T) {
+	h := handler(root(t))
+	for _, path := range []string{"/assets/", "/assets", "/data/", "/data", "/data/2026-09-22/", "/data/2026-09-22"} {
+		res := fetch(t, h, http.MethodGet, path, "br, gzip")
+		body, _ := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusNotFound {
+			t.Errorf("%s: status %d, want 404", path, res.StatusCode)
+		}
+		if strings.Contains(string(body), "index-abc123.js") || strings.Contains(string(body), "it.json") {
+			t.Errorf("%s: the response lists the folder: %q", path, body)
+		}
+	}
+	for _, path := range []string{"/", "/stages"} {
+		res := fetch(t, h, http.MethodGet, path, "")
+		body, _ := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusOK || !strings.Contains(string(body), "<title>shell</title>") {
+			t.Errorf("%s: status %d, body %q; want the shell", path, res.StatusCode, body)
+		}
+	}
+}
