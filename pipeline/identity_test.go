@@ -110,6 +110,10 @@ func TestReadIDCorrectionsRefusesBadEntries(t *testing.T) {
 		"tag replacing no tag":            `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Shiny", "basis": "b"}]}`,
 		"tag unchanged":                   `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Chic", "basis": "b"}]}`,
 		"tag replaced twice":              `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "b"}, {"id": 91095, "tag": "Lady", "was": "Evening Gown", "basis": "b"}]}`,
+		"tag by a retired name":           `{"tagOverrides": [{"id": 91095, "tag": "Office", "was": "Evening Gown", "basis": "b"}]}`,
+		"tag replacing a retired name":    `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Office", "basis": "b"}]}`,
+		"tags that chain":                 `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "b"}, {"id": 91095, "tag": "Wedding", "was": "Chic", "basis": "b"}]}`,
+		"two tags becoming one":           `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "b"}, {"id": 91095, "tag": "Chic", "was": "Lady", "basis": "b"}]}`,
 	} {
 		if _, err := ReadIDCorrections([]byte(doc)); err == nil {
 			t.Errorf("%s: accepted", name)
@@ -523,6 +527,11 @@ func TestTagOverrideReplacesTheTagTheOtherSourcesGive(t *testing.T) {
 		if _, err := c.Apply([]Entry{e}); err == nil || !strings.Contains(err.Error(), "tags no longer fit") {
 			t.Errorf("%s: %v", name, err)
 		}
+	}
+	twice := dress(91095, scoring.Gorgeous, "A")
+	twice.Item.Tags = []int{gown, lady, gown}
+	if _, err := c.Apply([]Entry{twice}); err == nil || !strings.Contains(err.Error(), "tags no longer fit") {
+		t.Errorf("an item carrying Evening Gown twice: %v", err)
 	}
 	both := dress(91095, scoring.Gorgeous, "A")
 	both.Item.Tags = []int{gown, chic}

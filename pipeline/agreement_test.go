@@ -108,3 +108,27 @@ func TestAgreementIsHeldUnderItsCeiling(t *testing.T) {
 		t.Errorf("over the ceiling: %v", v)
 	}
 }
+
+func TestAgreementLeavesTheGradesTheCorrectionsKeep(t *testing.T) {
+	c := corrections(t, `{"gradeOverrides": [{"id": 10001, "attribute": "Simple", "grade": "SS", "was": "A", "basis": "checked in game"}]}`)
+	sides := [5]int8{1, 3, 5, 7, 8}
+	a := [5]string{"A", "A", "A", "A", "A"}
+	entries, err := c.Apply([]Entry{agreementEntry(10001, scoring.Hair, sides, a)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	given := map[int][5]string{10001: a, 20002: a}
+	c.HoldGrades(given)
+	if given[10001] != [5]string{"", "A", "A", "A", "A"} || given[20002] != a {
+		t.Fatalf("given = %v", given)
+	}
+	packed := TableRows([]Entry{agreementEntry(10001, scoring.Hair, sides, [5]string{"S", "S", "A", "A", "A"})})
+	calc := map[int]CalcItem{10001: calcRow(sides, [5]string{"S-", "S", "A", "A", "A"})}
+	stats := CorrectByAgreement(entries, given, packed, calc)
+	if g := entries[0].Grades; g[0] != "SS" || g[1] != "S" {
+		t.Errorf("grades = %v, want the kept SS and the agreed S", g)
+	}
+	if stats.Pairs != 1 {
+		t.Errorf("pairs = %d, want 1", stats.Pairs)
+	}
+}

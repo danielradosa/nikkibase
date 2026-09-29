@@ -204,12 +204,16 @@ func run(c config) error {
 		if entries, err = corrections.Apply(entries); err != nil {
 			return err
 		}
-		grades := 0
+		corrections.HoldGrades(given)
+		grades, tags := 0, 0
 		for _, g := range corrections.Grade {
 			grades += len(g)
 		}
-		fmt.Printf("identity: %d duplicate IDs resolved, %d slots restored, %d names corrected, %d grades corrected, %d items left out -> catalogue %d to %d\n",
-			len(corrections.Owner), len(corrections.Slot), len(corrections.Name), grades, len(corrections.Excluded), before, len(entries))
+		for _, g := range corrections.Tag {
+			tags += len(g)
+		}
+		fmt.Printf("identity: %d duplicate IDs resolved, %d slots restored, %d names corrected, %d grades corrected, %d tags corrected, %d items left out -> catalogue %d to %d\n",
+			len(corrections.Owner), len(corrections.Slot), len(corrections.Name), grades, tags, len(corrections.Excluded), before, len(entries))
 	}
 	if packedPlaces != nil && c.namesPath != "" {
 		if wrong := pipeline.CheckGarments(entries, packedPlaces, names); len(wrong) > 0 {

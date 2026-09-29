@@ -144,14 +144,16 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 		switch {
 		case g.ID <= 0 || !known || !knownWas:
 			return nil, fmt.Errorf("id corrections: %d must give an item ID, the tag to keep and the one its sources give", g.ID)
+		case current(g.Tag) != g.Tag || current(g.Was) != g.Was:
+			return nil, fmt.Errorf("id corrections: %d names a retired style; use %s and %s", g.ID, current(g.Tag), current(g.Was))
 		case g.Tag == g.Was:
 			return nil, fmt.Errorf("id corrections: %d keeps the tag its sources already give", g.ID)
 		case g.Basis == "":
 			return nil, fmt.Errorf("id corrections: %d gives no basis for its tag", g.ID)
 		}
 		for _, o := range out.Tag[g.ID] {
-			if o.Was == g.Was {
-				return nil, fmt.Errorf("id corrections: %d replaces %s twice", g.ID, g.Was)
+			if o.Was == g.Was || o.Tag == g.Tag || o.Tag == g.Was || o.Was == g.Tag {
+				return nil, fmt.Errorf("id corrections: %d gives %s and %s overlapping tag replacements", g.ID, o.Was, g.Was)
 			}
 		}
 		out.Tag[g.ID] = append(out.Tag[g.ID], g)
@@ -311,6 +313,20 @@ func (c *IDCorrections) keepGrades(entries []Entry) error {
 	return nil
 }
 
+func (c *IDCorrections) HoldGrades(given map[int][5]string) {
+	for id, gs := range c.Grade {
+		row, ok := given[id]
+		if !ok {
+			continue
+		}
+		for _, g := range gs {
+			a, _ := attributeOf(g.Attribute)
+			row[a/2] = ""
+		}
+		given[id] = row
+	}
+}
+
 func (c *IDCorrections) keepTags(entries []Entry) error {
 	found := make(map[int]bool, len(c.Tag))
 	var wrong []string
@@ -321,7 +337,7 @@ func (c *IDCorrections) keepTags(entries []Entry) error {
 			tag, _ := TagID(g.Tag)
 			was, _ := TagID(g.Was)
 			at := slices.Index(e.Item.Tags, was)
-			if at < 0 || slices.Contains(e.Item.Tags, tag) {
+			if at < 0 || slices.Contains(e.Item.Tags[at+1:], was) || slices.Contains(e.Item.Tags, tag) {
 				wrong = append(wrong, fmt.Sprintf("%d does not carry %s alone of %s and %s", e.Item.ID, g.Was, g.Was, g.Tag))
 				continue
 			}
