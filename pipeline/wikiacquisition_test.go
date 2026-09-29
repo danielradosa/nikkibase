@@ -647,6 +647,29 @@ func TestSuitPagesGiveTheirChineseNamesTrimmed(t *testing.T) {
 	}
 }
 
+func zhLinked(page, zh string) string {
+	return strings.Replace(page, "</text>", "\n[[zh:"+zh+"]]</text>", 1)
+}
+
+func TestSuitPagesZhLinksNameThemInChineseToo(t *testing.T) {
+	dump := "<mediawiki>\n" +
+		zhLinked(typedSuitPage("Alpha Suit", "Collection Suit", "甲套", "Alpha Gown"), "甲装") +
+		zhLinked(suitPage("Beta Suit", "[[Recharge]]", "Beta Gown"), " 乙套 ") +
+		zhLinked(typedSuitPage("Gamma Suit", "Collection Suit", "丙套", "Gamma Gown"), "丙套") +
+		zhLinked(suitPage("Delta Suit", "[[Recharge]]", "Delta Gown"), "丁套") +
+		typedSuitPage("Epsilon Suit", "Collection Suit", "丁套", "Epsilon Gown") +
+		"</mediawiki>"
+	cat := AcquisitionCatalogue{Names: map[int]string{20001: "Alpha Gown", 20002: "Beta Gown", 20003: "Gamma Gown", 20004: "Delta Gown", 20005: "Epsilon Gown"}}
+	got, _, err := ParseFandomAcquisition(strings.NewReader(dump), nil, nil, cat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{"甲套": "Alpha Suit", "甲装": "Alpha Suit", "乙套": "Beta Suit", "丙套": "Gamma Suit"}
+	if !maps.Equal(got.ChineseSuits, want) {
+		t.Errorf("Chinese names %v, want %v: a zh link names its page like cnwiki, and a name two pages claim through either names neither", got.ChineseSuits, want)
+	}
+}
+
 func TestDayAndNightFormsBothJoinTheirSuit(t *testing.T) {
 	dump := "<mediawiki>\n" +
 		suitPage("Dawn Suit", "[[Recharge]]",

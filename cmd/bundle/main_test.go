@@ -729,6 +729,22 @@ func TestSuitsComeFromTheWikiThenThePackedTable(t *testing.T) {
 	}
 }
 
+func TestSuitsTakeTheChineseNameOfTheWikisZhLink(t *testing.T) {
+	page := "<page>\n  <title>Test Suit</title>\n  <ns>0</ns>\n  <revision><text>{{Suit Infobox\n" +
+		"|type = Collection Suit\n|how to obtain = [[Recharge]]\n}}\n==Wardrobe==\n" +
+		"{{Suit Part|Test Ribbon Hair|type=Hair}}\n[[zh:测试套装]]</text></revision>\n</page>\n"
+	c := packedConfig(t, page)
+	if err := run(c); err != nil {
+		t.Fatal(err)
+	}
+	rows := itemRows(t, c)
+	for id, want := range map[int]string{10001: "Test Suit", 10002: "Test Suit", 30003: ""} {
+		if got := rows[id][14]; got != want {
+			t.Errorf("%d: suit %q, want %q", id, got, want)
+		}
+	}
+}
+
 func TestSuitsAreHeldToTheirFloor(t *testing.T) {
 	c := packedConfig(t, "")
 	c.coveragePath = filepath.Join(t.TempDir(), "coverage.json")

@@ -55,6 +55,7 @@ type acqSuit struct {
 	obtain  string
 	pack    bool
 	chinese string
+	zh      []string
 	parts   []suitPart
 	reward  []string
 }
@@ -97,6 +98,7 @@ var (
 	wikiEventWord    = regexp.MustCompile(`(?i)\bevents?\b`)
 	wikiCustomTarget = regexp.MustCompile(`(?m)^\*\s*\{\{IconItem\|([^}|]+)[^}]*\}\}\s*:?(.*)$`)
 	wikiCategory     = regexp.MustCompile(`\[\[Category:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]`)
+	wikiZh           = regexp.MustCompile(`\[\[zh:([^\]|]+)`)
 )
 
 var rechargeCategories = []string{"Abyssal Island", "Lucky Bags", "Zodiac Lucky Pack", "Time-limited Pack", "First Recharge Giftpack"}
@@ -389,6 +391,9 @@ func acqSuitPage(page wikiPage) acqSuit {
 		}
 		s.parts = append(s.parts, part)
 	}
+	for _, m := range wikiZh.FindAllStringSubmatch(text, -1) {
+		s.zh = append(s.zh, strings.TrimSpace(m[1]))
+	}
 	return s
 }
 
@@ -675,17 +680,21 @@ func pickQualified(ids []int, name string) int {
 
 func chineseSuits(suits []acqSuit) map[string]string {
 	out := map[string]string{}
-	claimed := map[string]bool{}
+	claimed := map[string]string{}
 	for _, s := range suits {
-		if s.chinese == "" {
-			continue
+		for _, name := range append([]string{s.chinese}, s.zh...) {
+			if name == "" {
+				continue
+			}
+			if by, ok := claimed[name]; ok {
+				if by != s.title {
+					delete(out, name)
+				}
+				continue
+			}
+			claimed[name] = s.title
+			out[name] = s.title
 		}
-		if claimed[s.chinese] {
-			delete(out, s.chinese)
-			continue
-		}
-		claimed[s.chinese] = true
-		out[s.chinese] = s.title
 	}
 	return out
 }
