@@ -8,14 +8,6 @@ const MIN_SAVING = 0.1
 
 if (!existsSync('dist')) throw new Error('compress: run after vite build, from web/')
 
-function* files(dir) {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const path = join(dir, entry.name)
-    if (entry.isDirectory()) yield* files(path)
-    else yield path
-  }
-}
-
 const brotli = (body) =>
   brotliCompressSync(body, {
     params: {
@@ -29,7 +21,8 @@ const gzip = (body) => gzipSync(body, { level: 9 })
 let count = 0
 let before = 0
 let after = 0
-for (const path of [...files('dist')]) {
+for (const rel of readdirSync('dist', { recursive: true })) {
+  const path = join('dist', rel)
   if (!COMPRESSIBLE.has(extname(path))) continue
   const body = readFileSync(path)
   if (body.length < MIN_BYTES) continue
