@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-var hidden = os.Getenv("NOINDEX") != ""
-
 func main() {
 	root := envOr("WEB_ROOT", "web/dist")
 	port := envOr("PORT", "8080")
@@ -149,9 +147,6 @@ func security(w http.ResponseWriter) {
 	h.Set("Referrer-Policy", "no-referrer")
 	h.Set("Cross-Origin-Opener-Policy", "same-origin")
 	h.Set("Permissions-Policy", "geolocation=(), camera=(), microphone=(), interest-cohort=()")
-	if hidden {
-		h.Set("X-Robots-Tag", "noindex, nofollow")
-	}
 }
 
 func envOr(key, fallback string) string {

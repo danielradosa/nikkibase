@@ -25,6 +25,5 @@ go run ./cmd/bundle -check "web/dist/data/$version/provenance.json"
 
 go test -tags dataset ./golden/ -args -data ../web/dist/data
 
-service="${1:-}"
-echo "==> railway up${service:+ --service $service}"
-railway up ${service:+--service "$service"}
+echo "==> railway up"
+railway up

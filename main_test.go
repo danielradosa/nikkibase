@@ -171,20 +171,6 @@ func TestSecurityHeaders(t *testing.T) {
 	}
 }
 
-func TestHiddenCopyAsksNotToBeIndexed(t *testing.T) {
-	if got := get(t, handler(root(t)), "/").Header.Get("X-Robots-Tag"); got != "" {
-		t.Errorf("the public site sends X-Robots-Tag %q", got)
-	}
-	hidden = true
-	t.Cleanup(func() { hidden = false })
-	h := handler(root(t))
-	for _, path := range []string{"/", "/some/route", "/assets/index-abc123.js", "/data/index.json", "/missing.js"} {
-		if got := get(t, h, path).Header.Get("X-Robots-Tag"); got != "noindex, nofollow" {
-			t.Errorf("%s: X-Robots-Tag %q, want noindex, nofollow", path, got)
-		}
-	}
-}
-
 func TestOnlyReads(t *testing.T) {
 	w := httptest.NewRecorder()
 	handler(root(t)).ServeHTTP(w, httptest.NewRequest(http.MethodPost, "/", nil))
