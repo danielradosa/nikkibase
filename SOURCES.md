@@ -25,7 +25,7 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `2026-09-29c` rebuilds byte-for-byte from the files below
+The bundle `apple` rebuilds byte-for-byte from the files below
 (verified 2026-09-29, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/`, and the
 wiki dump extracted to `/tmp/fandom` and brought up to date by
@@ -44,14 +44,17 @@ SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
   -calc-grades -calc-recipes \
   -calc-suits .ai/research/sources/nikkicalc/suits-v0.14.json \
   -out     web/public/data \
-  -version 2026-09-29c
+  -version apple
 ```
 
-A version directory is served as immutable once deployed. A version is named
-after the day it is built, and `SOURCE_DATE_EPOCH` is that day's midnight UTC;
-a further build on the same day takes a letter (`2026-09-29b`, `2026-09-29c`).
+A version directory is served as immutable once deployed. Versions are named
+after the seven nations of Miraland, in the order the wiki's 7 Nations page
+lists them: `apple`, `lilith`, `cloud`, `pigeon`, `north`, `wasteland`,
+`ruin`; after `ruin` the list starts again with a number (`apple-2`,
+`lilith-2`, …). `SOURCE_DATE_EPOCH` is the build day's midnight UTC. Versions
+built before `apple` are named after their build day (`2026-09-29b`).
 
-`2026-09-29c` changes `items.json`, `items.bin` and `acquire.json` from
+`apple` changes `items.json`, `items.bin` and `acquire.json` from
 `2026-09-29b`; its `stages.json`, `tags.json` and `positions.json` are the same
 byte for byte, and `items.bin` gives every item the same stats, sides, places
 and tags, in another row order. The wiki is read as its dump of 2026-07-29
@@ -65,10 +68,9 @@ how to get 34,000 items instead of 33,998, and 964 items' lines change. 185
 items whose lines were all vague take the event of the one wiki event page
 that lists their suit: 109 the $100 Recharge event, 76 one of eight rebate
 recharge events. 760 items whose only line was a plain "Recharge" or "Event
-recharge" gain the recharge channels the wiki's Events timeline reruns them
-on, with the month of the latest rerun (Abyssal Island on 709 items,
-Cumulative Recharge on 56, the One-Dollar Sale on 23 and Lucky Bags on 1; a
-plain "Recharge" line gives way to them). Neither reaches the items a suit
+recharge" take in its place the recharge channels the wiki's Events timeline
+reruns them on, with the month of the latest rerun (Abyssal Island on 709 items,
+Cumulative Recharge on 56, the One-Dollar Sale on 23 and Lucky Bags on 1). Neither reaches the items a suit
 page lists only as additional items or gives in its gift box: those were
 sold on their own or come with the suit's completion. Two items gain lines
 through the suit part spellings. 17 change with the newer pages: the Metallic
