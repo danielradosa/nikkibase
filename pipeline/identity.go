@@ -12,20 +12,16 @@ import (
 )
 
 type Duplicate struct {
-	ID         int    `json:"id"`
-	Keep       string `json:"keep"`
-	Drop       string `json:"drop"`
-	Page       string `json:"dropWikiPage"`
-	RealID     int    `json:"correctIdForDropped"`
-	Basis      string `json:"basis"`
-	Confidence string `json:"confidence"`
+	ID     int    `json:"id"`
+	Keep   string `json:"keep"`
+	Drop   string `json:"drop"`
+	RealID int    `json:"correctIdForDropped"`
+	Basis  string `json:"basis"`
 }
 
 type SlotOverride struct {
 	ID            int    `json:"id"`
-	Name          string `json:"name"`
 	Slot          string `json:"slot"`
-	Was           string `json:"was"`
 	Position      string `json:"position"`
 	PositionBasis string `json:"positionBasis"`
 	Basis         string `json:"basis"`
@@ -33,8 +29,6 @@ type SlotOverride struct {
 
 type Excluded struct {
 	ID     int    `json:"id"`
-	Name   string `json:"name"`
-	Slot   string `json:"slot"`
 	Reason string `json:"reason"`
 	Effect string `json:"effect"`
 }
@@ -66,8 +60,6 @@ func attributeOf(name string) (int8, bool) {
 }
 
 type Corrections struct {
-	Note       string          `json:"note"`
-	DerivedOn  string          `json:"derivedOn"`
 	Duplicates []Duplicate     `json:"duplicates"`
 	Overrides  []SlotOverride  `json:"slotOverrides"`
 	Excluded   []Excluded      `json:"excluded"`

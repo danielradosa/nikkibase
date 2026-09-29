@@ -37,7 +37,6 @@ type Source struct {
 }
 
 type Registry struct {
-	Note    string   `json:"note"`
 	Sources []Source `json:"sources"`
 }
 
@@ -49,7 +48,6 @@ type Exception struct {
 }
 
 type Exceptions struct {
-	Note       string      `json:"note"`
 	Exceptions []Exception `json:"exceptions"`
 }
 
