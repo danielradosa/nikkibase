@@ -80,7 +80,7 @@ export default function Credits({ open, onClose, version }: { open: boolean; onC
       {prov && (
         <>
           <Typography.Paragraph type="secondary" className="nb-small">
-            Data version {prov.version}, built {prov.builtAt.slice(0, 10)}. Full record:{' '}
+            Data version <span className="nb-version">{prov.version}</span>, built {prov.builtAt.slice(0, 10)}. Full record:{' '}
             <a href={`/data/${prov.version}/provenance.json`} target="_blank" rel="noreferrer">
               provenance.json
             </a>

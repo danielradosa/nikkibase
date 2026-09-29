@@ -1036,6 +1036,10 @@ h5 {
   font-size: 13px;
 }
 
+.nb-version {
+  text-transform: capitalize;
+}
+
 .nb-credit {
   margin-bottom: 14px;
 }
