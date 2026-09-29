@@ -747,11 +747,11 @@ func TestTimelinePagesNameTheRechargeChannelsItemsReturnedOn(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := `{"version":"t","items":{` +
-		`"20001":[{"k":"recharge","t":"Abyssal Island (last Dec 2023)","past":1},{"k":"recharge","t":"Lucky Bags (last Feb 2024)","past":1}],` +
-		`"20002":[{"k":"recharge","t":"Abyssal Island (last Jan 2024)","past":1},{"k":"recharge","t":"Cumulative Recharge (last Dec 2017)","past":1}],` +
-		`"20004":[{"k":"recharge","t":"Cumulative Recharge (last Dec 2017)","past":1}],` +
+		`"20001":[{"k":"recharge","t":"Abyssal Island","last":"2023-12","past":1},{"k":"recharge","t":"Lucky Bags","last":"2024-02","past":1}],` +
+		`"20002":[{"k":"recharge","t":"Abyssal Island","last":"2024-01","past":1},{"k":"recharge","t":"Cumulative Recharge","last":"2017-12","past":1}],` +
+		`"20004":[{"k":"recharge","t":"Cumulative Recharge","last":"2017-12","past":1}],` +
 		`"20005":[{"k":"recharge","t":"Abyssal Island","past":1}],` +
-		`"80009":[{"k":"recharge","t":"One-Dollar Sale (last Jan 2024)","past":1}]}}`
+		`"80009":[{"k":"recharge","t":"One-Dollar Sale","last":"2024-01","past":1}]}}`
 	if out := string(WriteAcquisition("t", got.Reruns)); out != want {
 		t.Errorf("reruns:\n got %s\nwant %s", out, want)
 	}
@@ -782,10 +782,10 @@ func TestAdditionalItemsTakeNoEventOrRerunFromTheirSuit(t *testing.T) {
 		t.Errorf("additional items in %q and %q, want them kept in the suit that lists them", got.SuitOf[90001], got.SuitOf[90002])
 	}
 	want := `{"version":"t","items":{` +
-		`"20001":[{"k":"recharge","t":"Abyssal Island (last Jan 2024)","past":1}],` +
-		`"20002":[{"k":"recharge","t":"Cumulative Recharge (last Jan 2024)","past":1}],` +
-		`"80001":[{"k":"recharge","t":"Abyssal Island (last Jan 2024)","past":1}],` +
-		`"90002":[{"k":"recharge","t":"Cumulative Recharge (last Jan 2024)","past":1}]}}`
+		`"20001":[{"k":"recharge","t":"Abyssal Island","last":"2024-01","past":1}],` +
+		`"20002":[{"k":"recharge","t":"Cumulative Recharge","last":"2024-01","past":1}],` +
+		`"80001":[{"k":"recharge","t":"Abyssal Island","last":"2024-01","past":1}],` +
+		`"90002":[{"k":"recharge","t":"Cumulative Recharge","last":"2024-01","past":1}]}}`
 	if out := string(WriteAcquisition("t", got.Reruns)); out != want {
 		t.Errorf("reruns:\n got %s\nwant %s", out, want)
 	}

@@ -21,6 +21,7 @@ type Acquisition struct {
 	Recipe string
 	Stage  string
 	Level  string
+	Last   string
 	Past   bool
 	CN     bool
 }
@@ -164,7 +165,7 @@ func ingredients(items []namedIngredient) []Ingredient {
 }
 
 func sameAcquisition(a, b Acquisition) bool {
-	return a.Kind == b.Kind && a.Text == b.Text && a.Stage == b.Stage && a.Level == b.Level &&
+	return a.Kind == b.Kind && a.Text == b.Text && a.Stage == b.Stage && a.Level == b.Level && a.Last == b.Last &&
 		a.Recipe == b.Recipe && slices.Equal(a.From, b.From) && slices.Equal(a.Cost, b.Cost)
 }
 

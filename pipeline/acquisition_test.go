@@ -84,7 +84,7 @@ func TestMergeAcquisitionNamesAllVagueItemsFromTheirEventPage(t *testing.T) {
 
 func TestMergeAcquisitionNamesPlainRechargeItemsFromTheirReruns(t *testing.T) {
 	cat := AcquisitionCatalogue{Names: map[int]string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}}
-	reruns := []Acquisition{{Kind: "recharge", Text: "Abyssal Island (last Mar 2024)", Past: true}, {Kind: "recharge", Text: "One-Dollar Sale", Past: true}}
+	reruns := []Acquisition{{Kind: "recharge", Text: "Abyssal Island", Past: true, Last: "2024-03"}, {Kind: "recharge", Text: "One-Dollar Sale", Past: true}}
 	wiki := WikiAcquisition{
 		Items:  map[int][]Acquisition{5: {{Kind: "recharge", Text: "Abyssal Island", Past: true}}},
 		Events: map[int][]Acquisition{4: {{Kind: "recharge", Text: "$100 Recharge event", Past: true}}},
@@ -98,8 +98,8 @@ func TestMergeAcquisitionNamesPlainRechargeItemsFromTheirReruns(t *testing.T) {
 	}
 	got, stats := MergeAcquisition(cat, wiki, packed)
 	want := `{"version":"v","items":{` +
-		`"1":[{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
-		`"2":[{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
+		`"1":[{"k":"recharge","t":"Abyssal Island","last":"2024-03","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
+		`"2":[{"k":"recharge","t":"Abyssal Island","last":"2024-03","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
 		`"3":[{"k":"recharge","t":"Recharge","cn":1},{"k":"event","t":"Limited event","cn":1}],` +
 		`"4":[{"k":"recharge","t":"$100 Recharge event","past":1}],` +
 		`"5":[{"k":"recharge","t":"Abyssal Island","past":1}]}}`

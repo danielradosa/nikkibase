@@ -857,7 +857,7 @@ func TestTimelineRerunsNameWhatOnlyARechargeLineDescribes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := `"10002":[{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1}]`; !strings.Contains(string(acq), want) {
+	if want := `"10002":[{"k":"recharge","t":"Abyssal Island","last":"2024-03","past":1}]`; !strings.Contains(string(acq), want) {
 		t.Errorf("acquire.json = %s, want it to hold %s", acq, want)
 	}
 }

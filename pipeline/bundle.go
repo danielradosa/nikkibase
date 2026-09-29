@@ -302,7 +302,7 @@ func writeAcquisition(b *strings.Builder, a Acquisition) {
 		b.WriteByte(']')
 	}
 	for _, f := range []struct{ key, value string }{
-		{"recipe", a.Recipe}, {"stage", a.Stage}, {"level", a.Level},
+		{"recipe", a.Recipe}, {"stage", a.Stage}, {"level", a.Level}, {"last", a.Last},
 	} {
 		if f.value != "" {
 			b.WriteString(`,"`)

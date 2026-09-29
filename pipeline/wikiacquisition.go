@@ -946,11 +946,11 @@ func (c *acqContext) rerunLines(reruns []acqRerun, members map[string][]int) map
 	out := make(map[int][]Acquisition, len(latest))
 	for id, channels := range latest {
 		for _, channel := range slices.Sorted(maps.Keys(channels)) {
-			text := channel
+			a := Acquisition{Kind: "recharge", Text: channel, Past: pastSource("recharge", channel)}
 			if when := channels[channel]; !when.IsZero() {
-				text += " (last " + when.Format("Jan 2006") + ")"
+				a.Last = when.Format("2006-01")
 			}
-			out[id] = append(out[id], Acquisition{Kind: "recharge", Text: text, Past: pastSource("recharge", text)})
+			out[id] = append(out[id], a)
 		}
 	}
 	return out
