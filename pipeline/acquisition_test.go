@@ -99,7 +99,7 @@ func TestMergeAcquisitionNamesPlainRechargeItemsFromTheirReruns(t *testing.T) {
 	got, stats := MergeAcquisition(cat, wiki, packed)
 	want := `{"version":"v","items":{` +
 		`"1":[{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
-		`"2":[{"k":"recharge","t":"Event recharge","cn":1},{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
+		`"2":[{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
 		`"3":[{"k":"recharge","t":"Recharge","cn":1},{"k":"event","t":"Limited event","cn":1}],` +
 		`"4":[{"k":"recharge","t":"$100 Recharge event","past":1}],` +
 		`"5":[{"k":"recharge","t":"Abyssal Island","past":1}]}}`

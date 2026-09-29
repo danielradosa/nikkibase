@@ -267,7 +267,7 @@ func rerunOn(list, reruns []Acquisition) ([]Acquisition, bool) {
 	if len(reruns) == 0 || !allVague(list) || slices.ContainsFunc(list, func(a Acquisition) bool { return a.Kind != "recharge" }) {
 		return list, false
 	}
-	out := slices.DeleteFunc(slices.Clone(list), func(a Acquisition) bool { return a.Text == "Recharge" })
+	var out []Acquisition
 	for _, a := range reruns {
 		out = appendAcquisition(out, a)
 	}
