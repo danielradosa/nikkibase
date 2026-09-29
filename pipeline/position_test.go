@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/danielradosa/nikkibase/core/scoring"
@@ -107,7 +108,7 @@ func TestCanonicaliseReportsEveryBadPlace(t *testing.T) {
 		t.Fatal("two unplaceable items were accepted")
 	}
 	for _, want := range []string{"monocle", "necklace"} {
-		if !contains(err.Error(), want) {
+		if !strings.Contains(err.Error(), want) {
 			t.Errorf("the error does not name %q: %v", want, err)
 		}
 	}
@@ -135,13 +136,4 @@ func TestExclusionGroups(t *testing.T) {
 	if GroupIndex(GroupHandheld) == GroupIndex(GroupTorso) {
 		t.Error("the two groups share a number")
 	}
-}
-
-func contains(haystack, needle string) bool {
-	for i := 0; i+len(needle) <= len(haystack); i++ {
-		if haystack[i:i+len(needle)] == needle {
-			return true
-		}
-	}
-	return false
 }
