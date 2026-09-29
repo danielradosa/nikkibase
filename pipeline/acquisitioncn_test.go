@@ -47,7 +47,7 @@ func packedCatalogue() AcquisitionCatalogue {
 }
 
 func TestParsePackedSources(t *testing.T) {
-	got, err := ParsePackedSources([]byte(packedSourcesSrc), map[int]bool{10001: true, 10002: true, 10003: true})
+	got, _, err := ParsePackedSources([]byte(packedSourcesSrc), map[int]bool{10001: true, 10002: true, 10003: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestParsePackedSources(t *testing.T) {
 	if s := got[10003]; len(s) != 2 || s[0] != want[0] || s[1] != want[1] {
 		t.Errorf("10003 = %+v, want %+v", s, want)
 	}
-	all, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
+	all, _, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +93,7 @@ var codewardrobe = [
 `
 
 func TestParsePackedSourcesDropsCrossWiredBases(t *testing.T) {
-	got, err := ParsePackedSources([]byte(crossWiredSrc), nil)
+	got, _, err := ParsePackedSources([]byte(crossWiredSrc), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestTranslatePackedSources(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	src, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
+	src, _, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -211,7 +211,7 @@ func TestTranslatePrintsShownNames(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	src, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
+	src, _, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -236,7 +236,7 @@ func TestTranslateRejectsUnknownSources(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	src, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
+	src, _, err := ParsePackedSources([]byte(packedSourcesSrc), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

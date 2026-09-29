@@ -683,13 +683,11 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		sources, err := pipeline.ParsePackedSources(raw, known)
+		sources, suits, err := pipeline.ParsePackedSources(raw, known)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		if packedSuits, err = pipeline.ParsePackedSuits(raw, known); err != nil {
-			return nil, nil, nil, err
-		}
+		packedSuits = suits
 		raw, err = os.ReadFile(c.acquisitionMapPath)
 		if err != nil {
 			return nil, nil, nil, err

@@ -12,49 +12,6 @@ type PackedSuit struct {
 	Base bool
 }
 
-func ParsePackedSuits(src []byte, known map[int]bool) (map[int]PackedSuit, error) {
-	suits, err := packedList(src, "code2suit")
-	if err != nil {
-		return nil, err
-	}
-	body := packedArray.FindSubmatch(src)
-	if body == nil {
-		return nil, fmt.Errorf("pipeline: no codewardrobe array in the packed table")
-	}
-	out := map[int]PackedSuit{}
-	seen := map[int]bool{}
-	for _, m := range jsString.FindAllSubmatch(body[1], -1) {
-		w := strings.Split(string(m[1]), "|")
-		if len(w) < 5 {
-			continue
-		}
-		id, _, ok := packedRowID(w[1])
-		if !ok || (len(known) > 0 && !known[id]) || seen[id] {
-			continue
-		}
-		seen[id] = true
-		code := w[4]
-		if code == "" {
-			continue
-		}
-		var s PackedSuit
-		switch code[0] {
-		case '!':
-			s.Base = true
-			code = code[1:]
-		case '*', '@':
-			code = code[1:]
-		}
-		n := code2num(code)
-		if code == "" || n >= len(suits) {
-			return nil, fmt.Errorf("pipeline: packed item %d names suit %q, and code2suit has %d", id, w[4], len(suits))
-		}
-		s.Name = strings.TrimSpace(suits[n])
-		out[id] = s
-	}
-	return out, nil
-}
-
 type SuitStats struct {
 	Wiki    int
 	Late    int

@@ -188,21 +188,22 @@ type PackedSource struct {
 	ID    int
 }
 
-func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource, error) {
+func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource, map[int]PackedSuit, error) {
 	suits, err := packedList(src, "code2suit")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	codes, err := packedList(src, "code2src")
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	body := packedArray.FindSubmatch(src)
 	if body == nil {
-		return nil, fmt.Errorf("pipeline: no codewardrobe array in the packed table")
+		return nil, nil, fmt.Errorf("pipeline: no codewardrobe array in the packed table")
 	}
 	rows := packedRows(body[1])
 	out := map[int][]PackedSource{}
+	suitOf := map[int]PackedSuit{}
 	for _, m := range jsString.FindAllSubmatch(body[1], -1) {
 		w := strings.Split(string(m[1]), "|")
 		if len(w) < 7 {
@@ -215,6 +216,22 @@ func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource,
 		if _, seen := out[id]; seen {
 			continue
 		}
+		if code := w[4]; code != "" {
+			var s PackedSuit
+			switch code[0] {
+			case '!':
+				s.Base = true
+				code = code[1:]
+			case '*', '@':
+				code = code[1:]
+			}
+			n := code2num(code)
+			if code == "" || n >= len(suits) {
+				return nil, nil, fmt.Errorf("pipeline: packed item %d names suit %q, and code2suit has %d", id, w[4], len(suits))
+			}
+			s.Name = strings.TrimSpace(suits[n])
+			suitOf[id] = s
+		}
 		list := []PackedSource{}
 		for _, t := range strings.Split(w[6], "/") {
 			if t == "" {
@@ -225,7 +242,7 @@ func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource,
 			case t[0] == '*':
 				n := code2num(t[1:])
 				if n >= len(suits) {
-					return nil, fmt.Errorf("pipeline: packed item %d names suit %d, and code2suit has %d", id, n, len(suits))
+					return nil, nil, fmt.Errorf("pipeline: packed item %d names suit %d, and code2suit has %d", id, n, len(suits))
 				}
 				s = PackedSource{Kind: "suit", Value: suits[n]}
 			case t[0] == '@' || t[0] == '!':
@@ -241,7 +258,7 @@ func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource,
 			case packedIsCode(t):
 				n := code2num(t)
 				if n >= len(codes) {
-					return nil, fmt.Errorf("pipeline: packed item %d names source %d, and code2src has %d", id, n, len(codes))
+					return nil, nil, fmt.Errorf("pipeline: packed item %d names source %d, and code2src has %d", id, n, len(codes))
 				}
 				s = PackedSource{Kind: "code", Value: codes[n]}
 			default:
@@ -251,7 +268,7 @@ func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource,
 		}
 		out[id] = list
 	}
-	return out, nil
+	return out, suitOf, nil
 }
 
 type packedRowInfo struct {

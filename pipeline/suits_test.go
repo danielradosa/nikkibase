@@ -11,6 +11,7 @@ import (
 
 const packedSuitsSrc = `
 var code2suit = ['甲套','乙套','丙套'];
+var code2src = ['赠送'];
 var codewardrobe = [
 '甲|01|0||0|0|0|0',
 '乙|02|0||*1|0|0|0',
@@ -23,7 +24,7 @@ var codewardrobe = [
 `
 
 func TestParsePackedSuits(t *testing.T) {
-	got, err := ParsePackedSuits([]byte(packedSuitsSrc), nil)
+	_, got, err := ParsePackedSources([]byte(packedSuitsSrc), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +38,7 @@ func TestParsePackedSuits(t *testing.T) {
 	if !maps.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
-	known, err := ParsePackedSuits([]byte(packedSuitsSrc), map[int]bool{10001: true})
+	_, known, err := ParsePackedSources([]byte(packedSuitsSrc), map[int]bool{10001: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +49,7 @@ func TestParsePackedSuits(t *testing.T) {
 
 func TestParsePackedSuitsRefusesASuitTheTableLacks(t *testing.T) {
 	src := strings.Replace(packedSuitsSrc, "'庚|09|0||2|0|0|0'", "'庚|09|0||3|0|0|0'", 1)
-	if _, err := ParsePackedSuits([]byte(src), nil); err == nil || !strings.Contains(err.Error(), "10009") {
+	if _, _, err := ParsePackedSources([]byte(src), nil); err == nil || !strings.Contains(err.Error(), "10009") {
 		t.Errorf("err = %v, want the row naming suit 3 of 3 refused", err)
 	}
 }
