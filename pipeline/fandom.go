@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -180,15 +181,11 @@ func gameID(slot scoring.Slot, n int) int {
 
 func attributeCode(pair int, side string) (int, bool) {
 	side = strings.ToLower(strings.TrimSpace(side))
-	for _, name := range attributeSides[pair].first {
-		if side == name {
-			return pair * 2, true
-		}
+	if slices.Contains(attributeSides[pair].first, side) {
+		return pair * 2, true
 	}
-	for _, name := range attributeSides[pair].second {
-		if side == name {
-			return pair*2 + 1, true
-		}
+	if slices.Contains(attributeSides[pair].second, side) {
+		return pair*2 + 1, true
 	}
 	return 0, false
 }

@@ -807,12 +807,7 @@ func (c *acqContext) unfileMisnamed(pages []acqPage, suits []acqSuit, out map[in
 }
 
 func (c *acqContext) lists(s acqSuit, id int) bool {
-	for _, part := range s.parts {
-		if c.resolvePart(part.name, s.title) == id {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(s.parts, func(p suitPart) bool { return c.resolvePart(p.name, s.title) == id })
 }
 
 func (c *acqContext) dayNightForms(part suitPart) []int {
@@ -868,13 +863,8 @@ func (c *acqContext) pick(ids []int, suit string, part bool) int {
 	if suit == "" {
 		return 0
 	}
-	held := 0
-	for _, id := range ids {
-		if strings.EqualFold(c.suits[id], suit) {
-			held++
-		}
-	}
-	if id := only(ids, func(id int) bool { return strings.EqualFold(c.suits[id], suit) }); id != 0 || !part || held > 1 {
+	inSuit := func(id int) bool { return strings.EqualFold(c.suits[id], suit) }
+	if id := only(ids, inSuit); id != 0 || !part || slices.ContainsFunc(ids, inSuit) {
 		return id
 	}
 	return only(ids, func(id int) bool { return c.suits[id] == "" })
@@ -1590,12 +1580,9 @@ func currentClause(before string) bool {
 }
 
 func listsShop(list []Acquisition, f fixedSource) bool {
-	for _, a := range list {
-		if a.Kind == f.kind && (a.Text == f.text || strings.HasPrefix(a.Text, f.text+" · ")) {
-			return true
-		}
-	}
-	return false
+	return slices.ContainsFunc(list, func(a Acquisition) bool {
+		return a.Kind == f.kind && (a.Text == f.text || strings.HasPrefix(a.Text, f.text+" · "))
+	})
 }
 
 var priceable = map[string]bool{"store": true, "association": true, "pavilion": true, "craft": true}

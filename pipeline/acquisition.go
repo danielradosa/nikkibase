@@ -167,10 +167,8 @@ func sameAcquisition(a, b Acquisition) bool {
 }
 
 func appendAcquisition(list []Acquisition, a Acquisition) []Acquisition {
-	for _, b := range list {
-		if sameAcquisition(a, b) {
-			return list
-		}
+	if slices.ContainsFunc(list, func(b Acquisition) bool { return sameAcquisition(a, b) }) {
+		return list
 	}
 	return append(list, a)
 }
