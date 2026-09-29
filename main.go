@@ -24,15 +24,11 @@ func main() {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	log.Printf("serve: %s on :%s", root, port)
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(err)
-	}
+	log.Fatal(srv.ListenAndServe())
 }
 
 func handler(root string) http.Handler {
-	if err := mime.AddExtensionType(".wasm", "application/wasm"); err != nil {
-		log.Printf("serve: registering the wasm media type: %v", err)
-	}
+	mime.AddExtensionType(".wasm", "application/wasm")
 	files := http.FileServer(http.Dir(root))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
