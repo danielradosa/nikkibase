@@ -38,16 +38,19 @@ Text on the [Love Nikki Wiki](https://lovenikki.fandom.com) is licensed under
 [Fandom's licensing terms](https://www.fandom.com/licensing).
 
 NikkiBase adapts the wiki's item pages (pages-current dump, latest revision
-2026-07-29): it extracts item names, slots and places, letter grades and style
+2026-07-29, with the pages changed up to 2026-09-22 read through the wiki's
+API): it extracts item names, slots and places, letter grades and style
 tags, respaces names and corrects some, reads misnumbered pages at the item
 they describe or drops them, renames pages titled after another item, and
 merges the result with the other sources. From the same pages, and from suit
 pages for items that have no page of their own, it takes how each item is
 obtained (shop and price, crafting recipe, evolution, customization, stage,
-event or pack) and writes it as short lines of its own in `acquire.json`; the
-entries there not marked `"cn":1` all come from the wiki. From its suit
-pages, and the suit field of its item pages, it takes the suit each item
-belongs to, named as the suit's page is titled, for the suit column of
+event or pack) and writes it as short lines of its own in `acquire.json`, and
+from its event pages and its Events timeline it takes the event or recharge
+channel behind lines that say only that an item came from an event or a
+recharge; the entries there not marked `"cn":1` all come from the wiki. From
+its suit pages, and the suit field of its item pages, it takes the suit each
+item belongs to, named as the suit's page is titled, for the suit column of
 `items.json`, and each suit page's Chinese name, which gives the English name
 of the suits nikkiup2u3 names in Chinese. It also uses the style codes of
 Template:S; from the stage pages of Story 5-12, 6-7 and 6-9, which tags Maiden

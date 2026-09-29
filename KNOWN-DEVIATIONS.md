@@ -141,13 +141,13 @@ item would be a letter off on that stat.
 
 ## Items in no suit
 
-`items.json` places 30,193 of 34,012 items in 2,293 suits: 29,323 as the
-Love Nikki Wiki's suit and item pages place them, 121 the wiki places in none
-that nikkiup2u3 files under a suit the wiki names in Chinese, 16 that nikkiup2u3
-files with pieces the wiki already places, and 733 under Nikki Calc's name for
-48 suits the wiki has no page for yet (the wiki dump is from 2026-07-29). The
-other 3,819 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base,
-1 whose Chinese suit no source names in English (To Eternity), and 2,463 no
+`items.json` places 30,194 of 34,012 items in 2,293 suits: 29,337 as the
+Love Nikki Wiki's suit and item pages place them, 122 the wiki places in none
+that nikkiup2u3 files under a suit the wiki names in Chinese, 15 that nikkiup2u3
+files with pieces the wiki already places, and 720 under Nikki Calc's name for
+47 suits the wiki has no page for yet (the wiki is read as of 2026-09-22). The
+other 3,818 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base,
+1 whose Chinese suit no source names in English (To Eternity), and 2,462 no
 source places.
 A suit is named as its wiki page is titled, and the site shows it without the
 qualifier the wiki adds to tell suits apart ("Star Shadow", not "Star Shadow
