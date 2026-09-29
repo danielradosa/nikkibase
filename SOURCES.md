@@ -62,8 +62,13 @@ Elegant SS, Mature A, Pure S and Cool SS (`gradeOverrides`, whose
 `wasAttribute` moves a grade to the other side of its pair). All 19 Nightfall
 Menace pieces, which the packed table tags Evening Gown, take Chic, the tag
 the game shows on Crisis in the Mist and Nikki Calc gives them all
-(`tagOverrides`, both in `data/id-corrections.json`). The best possible score
-changes on 22 of 605 stage versions, from −0.7% to +2.1%.
+(`tagOverrides`, both in `data/id-corrections.json`). Four items take the
+name the game shows (`displayNames`): Army of Discipline and Dawn of
+Independence, as Nikki Calc names them, in place of the wiki's Discipline Army
+and Independent Light; Colorful Illusion, as the wiki names it, in place of
+Nikki Calc's Colorful Illusions; and the Moon Leaning on High Mountain, with
+the lower-case first word the game uses. The best possible score changes on 22
+of 605 stage versions, from −0.7% to +2.1%.
 
 `lilith` changes only `acquire.json` from `apple`: the 789 rerun lines on
 760 items give the month of their latest rerun in a field of their own
