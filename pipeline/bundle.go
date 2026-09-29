@@ -2,6 +2,8 @@ package pipeline
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -287,7 +289,7 @@ func WriteAcquisition(version string, acq map[int][]Acquisition) []byte {
 	b.WriteString(quote(version))
 	b.WriteString(`,"items":{`)
 	first := true
-	for _, id := range sortedIDs(acq) {
+	for _, id := range slices.Sorted(maps.Keys(acq)) {
 		if len(acq[id]) == 0 {
 			continue
 		}

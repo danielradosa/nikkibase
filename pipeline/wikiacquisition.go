@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"io"
+	"maps"
 	"regexp"
 	"slices"
 	"sort"
@@ -544,7 +545,7 @@ type acqContext struct {
 func (c *acqContext) indexCatalogue() {
 	c.lower = map[string][]int{}
 	c.norm = map[string][]int{}
-	for _, id := range sortedIDs(c.cat.Names) {
+	for _, id := range slices.Sorted(maps.Keys(c.cat.Names)) {
 		lower, norm := strings.ToLower(strings.TrimSpace(c.cat.Names[id])), normalizeGarment(c.cat.Names[id])
 		c.lower[lower] = append(c.lower[lower], id)
 		c.norm[norm] = append(c.norm[norm], id)

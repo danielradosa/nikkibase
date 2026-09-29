@@ -3,9 +3,9 @@ package pipeline
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"regexp"
 	"slices"
-	"sort"
 	"strings"
 )
 
@@ -52,7 +52,7 @@ func ReadAcquisitionMap(b []byte) (*AcquisitionMap, error) {
 		return nil, err
 	}
 	for _, set := range []map[string]MappedSource{m.Codes, m.Texts} {
-		for _, key := range sortedStrings(set) {
+		for _, key := range slices.Sorted(maps.Keys(set)) {
 			if err := check(key, set[key]); err != nil {
 				return nil, err
 			}
@@ -66,19 +66,10 @@ func ReadAcquisitionMap(b []byte) (*AcquisitionMap, error) {
 	return &m, nil
 }
 
-func sortedStrings[T any](m map[string]T) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
-}
-
 func (m *AcquisitionMap) Translate(src map[int][]PackedSource, cat AcquisitionCatalogue) (map[int][]Acquisition, error) {
 	out := map[int][]Acquisition{}
 	unknown := map[string]bool{}
-	for _, id := range sortedIDs(src) {
+	for _, id := range slices.Sorted(maps.Keys(src)) {
 		if _, ok := cat.Names[id]; !ok {
 			continue
 		}
@@ -97,7 +88,7 @@ func (m *AcquisitionMap) Translate(src map[int][]PackedSource, cat AcquisitionCa
 		}
 	}
 	if len(unknown) > 0 {
-		keys := sortedStrings(unknown)
+		keys := slices.Sorted(maps.Keys(unknown))
 		return nil, fmt.Errorf("acquisition: %d sources in the packed table have no English line in data/acquisition-cn.json: %s",
 			len(keys), truncate(keys))
 	}
@@ -173,7 +164,7 @@ func (m *AcquisitionMap) CheckBasis(src map[int][]PackedSource, wiki map[int][]A
 		kind  string
 		lines map[string]MappedSource
 	}{{"code", m.Codes}, {"text", m.Texts}} {
-		for _, key := range sortedStrings(set.lines) {
+		for _, key := range slices.Sorted(maps.Keys(set.lines)) {
 			s := set.lines[key]
 			if s.Basis == "" {
 				continue

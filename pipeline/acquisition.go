@@ -2,8 +2,8 @@ package pipeline
 
 import (
 	"fmt"
+	"maps"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -293,7 +293,7 @@ func CheckAcquisition(acq map[int][]Acquisition, cat AcquisitionCatalogue, want 
 	var v Violations
 	covered := 0
 	var bad []string
-	for _, id := range sortedIDs(acq) {
+	for _, id := range slices.Sorted(maps.Keys(acq)) {
 		list := acq[id]
 		if len(list) > 0 {
 			covered++
@@ -355,13 +355,4 @@ func acquisitionProblem(id int, a Acquisition, cat AcquisitionCatalogue) string 
 		}
 	}
 	return ""
-}
-
-func sortedIDs[T any](m map[int]T) []int {
-	ids := make([]int, 0, len(m))
-	for id := range m {
-		ids = append(ids, id)
-	}
-	sort.Ints(ids)
-	return ids
 }

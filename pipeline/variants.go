@@ -136,7 +136,5 @@ func ApplyVariants(stages []Stage, variants []StageVariant, src []byte, stats *S
 }
 
 func variantNames(s Stage) []string {
-	names := slices.Collect(maps.Keys(s.Variants))
-	slices.Sort(names)
-	return names
+	return slices.Sorted(maps.Keys(s.Variants))
 }

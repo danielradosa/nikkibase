@@ -2,6 +2,8 @@ package pipeline
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 )
 
@@ -263,7 +265,7 @@ func CheckSuits(suits map[int]string, want Coverage) Violations {
 		v = append(v, fmt.Sprintf("%d items are in a suit, below the committed floor of %d", len(suits), want.SuitItems))
 	}
 	var foreign []string
-	for _, id := range sortedIDs(suits) {
+	for _, id := range slices.Sorted(maps.Keys(suits)) {
 		if hasHan(suits[id]) {
 			foreign = append(foreign, fmt.Sprintf("%d %q", id, suits[id]))
 		}

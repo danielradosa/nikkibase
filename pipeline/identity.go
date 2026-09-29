@@ -3,6 +3,8 @@ package pipeline
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 
@@ -205,7 +207,7 @@ func (c *IDCorrections) DisplayNames(entries []Entry, names ItemNames) (map[int]
 	}
 	out := make(map[int]string, len(c.Shown))
 	var wrong []string
-	for _, id := range sortedIDs(c.Shown) {
+	for _, id := range slices.Sorted(maps.Keys(c.Shown)) {
 		n := c.Shown[id]
 		name, ok := given[id]
 		switch {
@@ -267,7 +269,7 @@ func (c *IDCorrections) keepGrades(entries []Entry) error {
 			e.Item.Stats[p] = Stat(g.Grade, e.Item.Slot)
 		}
 	}
-	for _, id := range sortedIDs(c.Grade) {
+	for _, id := range slices.Sorted(maps.Keys(c.Grade)) {
 		if !found[id] {
 			wrong = append(wrong, fmt.Sprintf("%d is not in the catalogue", id))
 		}

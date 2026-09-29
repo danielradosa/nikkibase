@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -136,7 +137,7 @@ func ApplyCalcRecipes(acq map[int][]Acquisition, cat AcquisitionCatalogue, items
 	bare := func(a Acquisition) bool { return a.Kind == "craft" && a.Text == "Crafting" && len(a.From) == 0 }
 	given := func(a Acquisition) bool { return a.Kind == "craft" && len(a.From) > 0 }
 	detailed := 0
-	for _, id := range sortedIDs(acq) {
+	for _, id := range slices.Sorted(maps.Keys(acq)) {
 		list, recipe := acq[id], items[id].Recipe
 		if len(recipe) == 0 || !slices.ContainsFunc(list, bare) || slices.ContainsFunc(list, given) {
 			continue
