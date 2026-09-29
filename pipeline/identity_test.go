@@ -411,7 +411,7 @@ func TestCheckGarments(t *testing.T) {
 		graded(10004, scoring.Hair, "Unbacked", "hair", a),
 		graded(10005, scoring.Hair, "表中名", "hair", b),
 	}
-	tables := map[int]Placed{
+	tables := map[int]Entry{
 		20003: {Name: "真礼服", Grades: b},
 		82829: {Name: "测试吊坠", Grades: b},
 		71100: {Name: "测试低语·隐", Grades: b},
@@ -443,7 +443,7 @@ func TestPlacesOfDropsASourceThatContradictsItself(t *testing.T) {
 	if _, ok := got[80001]; ok {
 		t.Error("an ID filed in two places was kept")
 	}
-	if p := got[80002]; p.Slot != scoring.Accessory || p.Position != "accessory_scarf" || p.Name != "y" {
+	if p := got[80002]; p.Item.Slot != scoring.Accessory || p.Position != "accessory_scarf" || p.Name != "y" {
 		t.Errorf("80002 = %+v", p)
 	}
 }

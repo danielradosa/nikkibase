@@ -179,8 +179,7 @@ func run(c config) error {
 	for _, e := range entries {
 		given[e.Item.ID] = e.Grades
 	}
-	var packedPlaces map[int]pipeline.Placed
-	var packedRows map[int]pipeline.Entry
+	var packedPlaces, packedRows map[int]pipeline.Entry
 	if packedPath != "" {
 		raw, err := os.ReadFile(packedPath)
 		if err != nil {

@@ -55,18 +55,7 @@ func CorrectByAgreement(entries []Entry, given map[int][5]string, packed map[int
 }
 
 func TableRows(entries []Entry) map[int]Entry {
-	out := make(map[int]Entry, len(entries))
-	torn := map[int]bool{}
-	for _, e := range entries {
-		if prev, seen := out[e.Item.ID]; seen && (prev.Grades != e.Grades || prev.Item.Attrs != e.Item.Attrs) {
-			torn[e.Item.ID] = true
-		}
-		out[e.Item.ID] = e
-	}
-	for id := range torn {
-		delete(out, id)
-	}
-	return out
+	return rowsByID(entries, func(a, b Entry) bool { return a.Grades == b.Grades && a.Item.Attrs == b.Item.Attrs })
 }
 
 func CheckAgreement(stats AgreementStats, want Coverage) Violations {

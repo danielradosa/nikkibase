@@ -329,24 +329,18 @@ func (c *IDCorrections) dropDuplicates(entries []Entry, strict bool) ([]Entry, e
 	return out, nil
 }
 
-type Placed struct {
-	Slot     scoring.Slot
-	Position string
-	Name     string
-	Grades   [5]string
+func PlacesOf(entries []Entry) map[int]Entry {
+	return rowsByID(entries, func(a, b Entry) bool { return a.Item.Slot == b.Item.Slot && a.Position == b.Position })
 }
 
-func (p Placed) samePlace(q Placed) bool { return p.Slot == q.Slot && p.Position == q.Position }
-
-func PlacesOf(entries []Entry) map[int]Placed {
-	out := make(map[int]Placed, len(entries))
+func rowsByID(entries []Entry, same func(a, b Entry) bool) map[int]Entry {
+	out := make(map[int]Entry, len(entries))
 	torn := map[int]bool{}
 	for _, e := range entries {
-		p := Placed{e.Item.Slot, e.Position, e.Name, e.Grades}
-		if prev, seen := out[e.Item.ID]; seen && !prev.samePlace(p) {
+		if prev, seen := out[e.Item.ID]; seen && !same(prev, e) {
 			torn[e.Item.ID] = true
 		}
-		out[e.Item.ID] = p
+		out[e.Item.ID] = e
 	}
 	for id := range torn {
 		delete(out, id)
@@ -354,7 +348,7 @@ func PlacesOf(entries []Entry) map[int]Placed {
 	return out
 }
 
-func CheckGarments(entries []Entry, tables map[int]Placed, names map[int]string) []string {
+func CheckGarments(entries []Entry, tables map[int]Entry, names map[int]string) []string {
 	var out []string
 	for _, e := range entries {
 		t, ok := tables[e.Item.ID]
@@ -370,7 +364,7 @@ func CheckGarments(entries []Entry, tables map[int]Placed, names map[int]string)
 	return out
 }
 
-func sameGarmentAs(e Entry, p Placed) bool {
+func sameGarmentAs(e, p Entry) bool {
 	return sameGarment(e.Name, p.Name) || e.Grades == p.Grades
 }
 
