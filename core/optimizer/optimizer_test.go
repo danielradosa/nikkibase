@@ -198,13 +198,13 @@ func TestBestPlaced(t *testing.T) {
 		if got.Score < unskilled.Score {
 			t.Fatalf("trial %d: %d with skills is below %d without", trial, got.Score, unskilled.Score)
 		}
-		if from, p := BestPlacedFrom(positions, stage, unskilled); p != placement || from.Score != got.Score {
+		space := Space{branches: [][]Position{positions}}
+		if from, p := space.BestPlacedFrom(stage, unskilled); p != placement || from.Score != got.Score {
 			t.Fatalf("trial %d: from the unskilled result %+v scores %d, and from scratch %+v scores %d",
 				trial, p, from.Score, placement, got.Score)
 		}
 		placements[placement] = true
 
-		space := Space{branches: [][]Position{positions}}
 		if atMax, p := space.BestPlacedAt(stage, scoring.MaxLevels); p != placement || atMax.Score != got.Score || !slices.EqualFunc(atMax.Items, got.Items, sameItem) {
 			t.Fatalf("trial %d: max levels gave %+v %d, BestPlaced %+v %d", trial, p, atMax.Score, placement, got.Score)
 		}

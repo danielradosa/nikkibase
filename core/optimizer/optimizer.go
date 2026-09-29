@@ -74,15 +74,11 @@ func Best(positions []Position, st scoring.Stage, sk scoring.Skills) Result {
 }
 
 func BestPlaced(positions []Position, st scoring.Stage) (Result, scoring.Placement) {
-	return BestPlacedFrom(positions, st, Best(positions, st, nil))
+	return BestPlacedAt(positions, st, scoring.MaxLevels)
 }
 
 func BestPlacedAt(positions []Position, st scoring.Stage, l scoring.Levels) (Result, scoring.Placement) {
 	return Space{branches: [][]Position{positions}}.BestPlacedAt(st, l)
-}
-
-func BestPlacedFrom(positions []Position, st scoring.Stage, unskilled Result) (Result, scoring.Placement) {
-	return Space{branches: [][]Position{positions}}.BestPlacedFrom(st, unskilled)
 }
 
 func groupChoices(grouped map[uint8][]accessory) [][]accessory {
