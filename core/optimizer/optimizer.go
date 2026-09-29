@@ -2,6 +2,7 @@ package optimizer
 
 import (
 	"cmp"
+	"maps"
 	"math"
 	"slices"
 
@@ -60,7 +61,7 @@ func Best(positions []Position, st scoring.Stage, sk scoring.Skills) Result {
 
 	var best []scoring.Item
 	bestScore := -1
-	for _, filled := range groupChoices(grouped) {
+	for _, filled := range GroupChoices(nil, grouped, func(a accessory) bool { return a.Exclusive }, func(a accessory) bool { return a.Required }) {
 		pool := append(slices.Clone(accessories), filled...)
 		items := append(slices.Clone(outfit), bestAccessories(pool)...)
 		items = enforceLimits(dedupe(items), st, sk)
@@ -81,32 +82,23 @@ func BestPlacedAt(positions []Position, st scoring.Stage, l scoring.Levels) (Res
 	return Space{branches: [][]Position{positions}}.BestPlacedAt(st, l)
 }
 
-func groupChoices(grouped map[uint8][]accessory) [][]accessory {
-	keys := make([]uint8, 0, len(grouped))
-	for g := range grouped {
-		keys = append(keys, g)
-	}
-	slices.Sort(keys)
-
-	choices := [][]accessory{nil}
-	for _, g := range keys {
-		var shared, whole []accessory
-		for _, p := range grouped[g] {
-			if p.Exclusive {
-				whole = append(whole, p)
+func GroupChoices[T any](seed []T, grouped map[uint8][]T, exclusive, required func(T) bool) [][]T {
+	choices := [][]T{seed}
+	for _, g := range slices.Sorted(maps.Keys(grouped)) {
+		var shared []T
+		var whole [][]T
+		for _, x := range grouped[g] {
+			if exclusive(x) {
+				whole = append(whole, []T{x})
 			} else {
-				shared = append(shared, p)
+				shared = append(shared, x)
 			}
 		}
-		options := [][]accessory{shared}
-		for _, w := range whole {
-			options = append(options, []accessory{w})
-		}
-		options = keepRequired(options, grouped[g])
-		var next [][]accessory
+		options := keepRequired(append([][]T{shared}, whole...), required)
+		var next [][]T
 		for _, prefix := range choices {
-			for _, option := range options {
-				next = append(next, append(slices.Clone(prefix), option...))
+			for _, o := range options {
+				next = append(next, append(slices.Clone(prefix), o...))
 			}
 		}
 		choices = next
@@ -114,20 +106,11 @@ func groupChoices(grouped map[uint8][]accessory) [][]accessory {
 	return choices
 }
 
-func keepRequired(options [][]accessory, members []accessory) [][]accessory {
-	required := 0
-	for _, p := range members {
-		if p.Required {
-			required++
-		}
-	}
-	if required == 0 {
-		return options
-	}
-	kept := func(option []accessory) int {
+func keepRequired[T any](options [][]T, required func(T) bool) [][]T {
+	count := func(o []T) int {
 		n := 0
-		for _, p := range option {
-			if p.Required {
+		for _, x := range o {
+			if required(x) {
 				n++
 			}
 		}
@@ -135,15 +118,18 @@ func keepRequired(options [][]accessory, members []accessory) [][]accessory {
 	}
 	most := 0
 	for _, o := range options {
-		most = max(most, kept(o))
+		most = max(most, count(o))
 	}
-	var out [][]accessory
+	if most == 0 {
+		return options
+	}
+	var kept [][]T
 	for _, o := range options {
-		if kept(o) == most {
-			out = append(out, o)
+		if count(o) == most {
+			kept = append(kept, o)
 		}
 	}
-	return out
+	return kept
 }
 
 func dedupe(outfit []scoring.Item) []scoring.Item {

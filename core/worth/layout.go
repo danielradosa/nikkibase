@@ -340,66 +340,16 @@ func (l *layout) newBranch(pool [][]int32, narrowed []bool) *branch {
 func (l *layout) choicesFor(required []bool) [][]int32 {
 	var ungrouped []int32
 	grouped := map[uint8][]int32{}
-	var keys []uint8
 	for a, at := range l.accAt {
-		g := l.positions[at].Group
-		if g == 0 {
+		if g := l.positions[at].Group; g != 0 {
+			grouped[g] = append(grouped[g], int32(a))
+		} else {
 			ungrouped = append(ungrouped, int32(a))
-			continue
-		}
-		if _, seen := grouped[g]; !seen {
-			keys = append(keys, g)
-		}
-		grouped[g] = append(grouped[g], int32(a))
-	}
-	slices.Sort(keys)
-	choices := [][]int32{ungrouped}
-	for _, g := range keys {
-		var shared []int32
-		var whole [][]int32
-		for _, a := range grouped[g] {
-			if l.positions[l.accAt[a]].Exclusive {
-				whole = append(whole, []int32{a})
-			} else {
-				shared = append(shared, a)
-			}
-		}
-		options := keepRequired(append([][]int32{shared}, whole...), required)
-		var next [][]int32
-		for _, prefix := range choices {
-			for _, o := range options {
-				next = append(next, append(slices.Clone(prefix), o...))
-			}
-		}
-		choices = next
-	}
-	return choices
-}
-
-func keepRequired(options [][]int32, required []bool) [][]int32 {
-	count := func(o []int32) int {
-		n := 0
-		for _, a := range o {
-			if required[a] {
-				n++
-			}
-		}
-		return n
-	}
-	most := 0
-	for _, o := range options {
-		most = max(most, count(o))
-	}
-	if most == 0 {
-		return options
-	}
-	var kept [][]int32
-	for _, o := range options {
-		if count(o) == most {
-			kept = append(kept, o)
 		}
 	}
-	return kept
+	return optimizer.GroupChoices(ungrouped, grouped,
+		func(a int32) bool { return l.positions[l.accAt[a]].Exclusive },
+		func(a int32) bool { return required[a] })
 }
 
 func (l *layout) branchOf(positions []optimizer.Position, base [][]int32) *branch {
