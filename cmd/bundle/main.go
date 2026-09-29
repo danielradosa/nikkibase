@@ -616,7 +616,7 @@ func readStages(c config, raw []byte, corrections map[string]pipeline.StageCorre
 		if err != nil {
 			return nil, stats, err
 		}
-		if _, err := pipeline.ApplyStageNames(stages, b); err != nil {
+		if err := pipeline.ApplyStageNames(stages, b); err != nil {
 			return nil, stats, err
 		}
 	}

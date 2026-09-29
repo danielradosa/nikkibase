@@ -341,7 +341,7 @@ var competitionsRaw = {
 	if err != nil {
 		t.Fatal(err)
 	}
-	missing, err := ApplyStageNames(stages, []byte(`var tasksRaw = {
+	err = ApplyStageNames(stages, []byte(`var tasksRaw = {
   '协战:Neve-Maiden(黑卡-女仆)': [1, 1, 1, 1, 1],
   '协战:Yvette-Ofiice Lady(洁洁云-办公室)': [1, 1, 1, 1, 1],
   '协战:Fu Su-Simple&Cool Cloud(拂苏-简约清凉云端)': [1, 1, 1, 1, 1],
@@ -359,9 +359,6 @@ var competitionsRaw = {
 	want := []string{"1-1", "Neva - Maiden", "Yvette - Office Lady", "Fu Su - Simple & Cool Cloud", "Beach Party", "无名的竞技场"}
 	if !slices.Equal(got, want) {
 		t.Errorf("names %q, want %q", got, want)
-	}
-	if !slices.Equal(missing, []string{"无名的竞技场"}) {
-		t.Errorf("missing = %q, want the one arena stage with no English name", missing)
 	}
 }
 

@@ -385,10 +385,10 @@ func DisplayName(s Stage) string {
 	return display
 }
 
-func ApplyStageNames(stages []Stage, src []byte) ([]string, error) {
+func ApplyStageNames(stages []Stage, src []byte) error {
 	theirs, _, err := readStageTables(uncomment(src), nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	names := map[string]string{}
 	for _, t := range theirs {
@@ -396,7 +396,6 @@ func ApplyStageNames(stages []Stage, src []byte) ([]string, error) {
 			names[joinKey(t.Name)] = display
 		}
 	}
-	var missing []string
 	for i := range stages {
 		display, _ := SplitStageName(stages[i].Name)
 		if !hasHan(display) {
@@ -404,11 +403,9 @@ func ApplyStageNames(stages []Stage, src []byte) ([]string, error) {
 		}
 		if english, ok := names[joinKey(stages[i].Name)]; ok {
 			stages[i].Display = english
-		} else {
-			missing = append(missing, display)
 		}
 	}
-	return missing, nil
+	return nil
 }
 
 var stageToken = strings.NewReplacer(
