@@ -190,11 +190,7 @@ func (e *evaluator) build(br *branch, sd *side) {
 
 	nr := len(ratios)
 	for a := range l.accAt {
-		low := sd.pick[a*nr]
-		for _, v := range sd.pick[a*nr+1 : (a+1)*nr] {
-			low = min(low, v)
-		}
-		e.minPick[a] = low
+		e.minPick[a] = slices.Min(sd.pick[a*nr : (a+1)*nr])
 	}
 	if cap(e.choices) < len(br.choices) {
 		e.choices = append(e.choices[:cap(e.choices)], make([]choice, len(br.choices)-cap(e.choices))...)
