@@ -10,11 +10,10 @@ import (
 )
 
 var (
-	packedArray  = regexp.MustCompile(`(?s)var codewardrobe = \[(.*?)\n\];`)
-	packedRow    = regexp.MustCompile(`'((?:[^'\\]|\\.)*)'`)
-	packedTable  = `var %s = \[(.*?)\];`
-	packedString = regexp.MustCompile(`'((?:[^'\\]|\\.)*)'`)
-	packedBonus  = regexp.MustCompile(`^[^+]+\+(\d+)$`)
+	packedArray = regexp.MustCompile(`(?s)var codewardrobe = \[(.*?)\n\];`)
+	jsString    = regexp.MustCompile(`'((?:[^'\\]|\\.)*)'`)
+	packedTable = `var %s = \[(.*?)\];`
+	packedBonus = regexp.MustCompile(`^[^+]+\+(\d+)$`)
 )
 
 func letter2num(c byte) int {
@@ -79,7 +78,7 @@ func ParsePacked(src []byte, known map[int]bool) ([]Entry, PackedStats, error) {
 	}
 
 	var entries []Entry
-	for _, m := range packedRow.FindAllSubmatch(body[1], -1) {
+	for _, m := range jsString.FindAllSubmatch(body[1], -1) {
 		stats.Rows++
 		entry, ok := packedEntry(string(m[1]), category, tags, &stats)
 		if !ok {
@@ -105,7 +104,7 @@ func packedList(src []byte, name string) ([]string, error) {
 		return nil, fmt.Errorf("pipeline: packed table has no %s array", name)
 	}
 	var out []string
-	for _, s := range packedString.FindAllSubmatch(m[1], -1) {
+	for _, s := range jsString.FindAllSubmatch(m[1], -1) {
 		out = append(out, string(s[1]))
 	}
 	return out, nil
@@ -204,7 +203,7 @@ func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource,
 	}
 	rows := packedRows(body[1])
 	out := map[int][]PackedSource{}
-	for _, m := range packedRow.FindAllSubmatch(body[1], -1) {
+	for _, m := range jsString.FindAllSubmatch(body[1], -1) {
 		w := strings.Split(string(m[1]), "|")
 		if len(w) < 7 {
 			continue
@@ -268,7 +267,7 @@ type packedRowSet struct {
 
 func packedRows(body []byte) packedRowSet {
 	set := packedRowSet{rows: map[int]packedRowInfo{}, families: map[string]int{}}
-	for _, m := range packedRow.FindAllSubmatch(body, -1) {
+	for _, m := range jsString.FindAllSubmatch(body, -1) {
 		w := strings.Split(string(m[1]), "|")
 		if len(w) < 2 {
 			continue

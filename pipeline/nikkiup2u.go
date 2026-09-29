@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -55,8 +54,6 @@ var idPrefix = map[scoring.Slot]int{
 	scoring.Bottom: 5, scoring.Hosiery: 6, scoring.Shoes: 7, scoring.Accessory: 8,
 	scoring.Makeup: 9,
 }
-
-var jsString = regexp.MustCompile(`'((?:[^'\\]|\\.)*)'`)
 
 func ParseWardrobe(src []byte) (entries []Entry, skipped int, err error) {
 	tags := map[string]int{}

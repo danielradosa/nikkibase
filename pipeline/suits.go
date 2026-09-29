@@ -21,7 +21,7 @@ func ParsePackedSuits(src []byte, known map[int]bool) (map[int]PackedSuit, error
 	}
 	out := map[int]PackedSuit{}
 	seen := map[int]bool{}
-	for _, m := range packedRow.FindAllSubmatch(body[1], -1) {
+	for _, m := range jsString.FindAllSubmatch(body[1], -1) {
 		w := strings.Split(string(m[1]), "|")
 		if len(w) < 5 {
 			continue

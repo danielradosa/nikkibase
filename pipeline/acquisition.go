@@ -2,7 +2,6 @@ package pipeline
 
 import (
 	"fmt"
-	"regexp"
 	"slices"
 	"sort"
 	"strconv"
@@ -83,8 +82,6 @@ func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) A
 }
 
 func StageKey(mode, name string) string { return mode + "/" + name }
-
-var storyStage = regexp.MustCompile(`^(II-|III-)?(\d+)-(Side )?(\d+)$`)
 
 func storyAcquisition(name, level string, cat AcquisitionCatalogue) Acquisition {
 	a := Acquisition{Kind: "stage", Text: "Story " + name, Level: level}
