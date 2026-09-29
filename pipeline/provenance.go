@@ -118,10 +118,8 @@ func (e *Exceptions) find(id string) *Exception {
 	if e == nil {
 		return nil
 	}
-	for i := range e.Exceptions {
-		if e.Exceptions[i].Source == id {
-			return &e.Exceptions[i]
-		}
+	if i := slices.IndexFunc(e.Exceptions, func(x Exception) bool { return x.Source == id }); i >= 0 {
+		return &e.Exceptions[i]
 	}
 	return nil
 }

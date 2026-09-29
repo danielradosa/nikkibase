@@ -61,12 +61,8 @@ var attributeNames = [...]string{
 }
 
 func attributeOf(name string) (int8, bool) {
-	for a, n := range attributeNames {
-		if n == name {
-			return int8(a), true
-		}
-	}
-	return 0, false
+	a := slices.Index(attributeNames[:], name)
+	return int8(a), a >= 0
 }
 
 type Corrections struct {

@@ -154,12 +154,8 @@ func ResolvePosition(raw string, slot scoring.Slot) (SubSlot, error) {
 }
 
 func PositionIndex(name string) (int, bool) {
-	for i, s := range subSlots {
-		if s.Name == name {
-			return i, true
-		}
-	}
-	return 0, false
+	i := slices.IndexFunc(subSlots, func(s SubSlot) bool { return s.Name == name })
+	return i, i >= 0
 }
 
 func GroupIndex(group string) int {
