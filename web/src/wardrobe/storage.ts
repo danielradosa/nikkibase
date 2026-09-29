@@ -33,13 +33,13 @@ function open(): Promise<IDBDatabase | null> {
   })
 }
 
-export async function saveWardrobe(entry: SavedWardrobe): Promise<boolean> {
+async function write(op: (store: IDBObjectStore) => void): Promise<boolean> {
   const db = await open()
   if (!db) return false
-  const saved = await new Promise<boolean>((resolve) => {
+  const written = await new Promise<boolean>((resolve) => {
     try {
       const tx = db.transaction(STORE, 'readwrite')
-      tx.objectStore(STORE).put(entry, KEY)
+      op(tx.objectStore(STORE))
       tx.oncomplete = () => resolve(true)
       tx.onerror = () => resolve(false)
       tx.onabort = () => resolve(false)
@@ -48,8 +48,10 @@ export async function saveWardrobe(entry: SavedWardrobe): Promise<boolean> {
     }
   })
   db.close()
-  return saved
+  return written
 }
+
+export const saveWardrobe = (entry: SavedWardrobe) => write((store) => store.put(entry, KEY))
 
 export type LoadResult =
   | { status: 'none' }
@@ -88,20 +90,4 @@ export async function loadWardrobe(version: string): Promise<LoadResult> {
   return read.ok ? classify(read.entry, version) : { status: 'unreadable' }
 }
 
-export async function clearWardrobe(): Promise<boolean> {
-  const db = await open()
-  if (!db) return false
-  const cleared = await new Promise<boolean>((resolve) => {
-    try {
-      const tx = db.transaction(STORE, 'readwrite')
-      tx.objectStore(STORE).delete(KEY)
-      tx.oncomplete = () => resolve(true)
-      tx.onerror = () => resolve(false)
-      tx.onabort = () => resolve(false)
-    } catch {
-      resolve(false)
-    }
-  })
-  db.close()
-  return cleared
-}
+export const clearWardrobe = () => write((store) => store.delete(KEY))
