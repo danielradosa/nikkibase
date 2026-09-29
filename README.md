@@ -50,6 +50,13 @@ another calculator, not against the game.
   levels use the same formula as the maximum, the only level the community has
   checked. The other skills act on your opponent or shield you, so they don't
   change your best outfit and aren't modelled.
+- **Library books.** Of the Library's books only Cloud Adventure changes a
+  battle score: Commission scores rise 1% for each time you've read it. Set
+  your reads next to Skills on a Commission stage; it counts as none until you
+  do. It's applied to the whole score; assuming all five reads, that matches
+  the one Commission score checked in game to within 0.3%. Whether the game
+  applies it to the whole score or only to the points from attributes isn't
+  settled.
 - **Stage rules.** Stages where some items or styles score F are flagged, but
   not checked.
 - **Whether you pass.** It doesn't know the opponent's score or the B/A/S
