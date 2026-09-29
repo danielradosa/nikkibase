@@ -2,7 +2,9 @@ package pipeline
 
 import (
 	"fmt"
+	"maps"
 	"math"
+	"slices"
 	"sort"
 	"strings"
 
@@ -65,7 +67,7 @@ func checkPositions(entries []Entry) Violations {
 		places[slot][e.Position]++
 	}
 	var v Violations
-	for _, slot := range sortedSlots(places) {
+	for _, slot := range slices.Sorted(maps.Keys(places)) {
 		want, known := wearablePlaces[slot]
 		got := len(places[slot])
 		switch {
@@ -73,7 +75,7 @@ func checkPositions(entries []Entry) Violations {
 			v = append(v, fmt.Sprintf("slot %d is not a slot the game has", slot))
 		case got > want:
 			v = append(v, fmt.Sprintf("%s holds %d wearable places, and the game has %d: %s",
-				SlotName(slot), got, want, namesOf(places[slot])))
+				SlotName(slot), got, want, truncate(slices.Sorted(maps.Keys(places[slot])))))
 		}
 	}
 	return v
@@ -198,7 +200,7 @@ func checkCoverage(entries []Entry, stages []Stage, want Coverage) Violations {
 			tagged++
 		}
 	}
-	for _, mode := range sortedKeys(want.StagesByMode) {
+	for _, mode := range slices.Sorted(maps.Keys(want.StagesByMode)) {
 		if byMode[mode] < want.StagesByMode[mode] {
 			v = append(v, fmt.Sprintf("%s holds %d stages, and the committed floor is %d",
 				mode, byMode[mode], want.StagesByMode[mode]))
@@ -241,33 +243,6 @@ func truncate(items []string) string {
 		return strings.Join(items, "; ")
 	}
 	return strings.Join(items[:show], "; ") + fmt.Sprintf("; and %d more", len(items)-show)
-}
-
-func namesOf(places map[string]int) string {
-	names := make([]string, 0, len(places))
-	for p := range places {
-		names = append(names, p)
-	}
-	sort.Strings(names)
-	return truncate(names)
-}
-
-func sortedSlots(m map[scoring.Slot]map[string]int) []scoring.Slot {
-	out := make([]scoring.Slot, 0, len(m))
-	for s := range m {
-		out = append(out, s)
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i] < out[j] })
-	return out
-}
-
-func sortedKeys(m map[string]int) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
 }
 
 func SlotName(s scoring.Slot) string {
@@ -314,7 +289,7 @@ func checkOutliers(stages []Stage, acknowledged map[string]Acknowledged) Violati
 			if n := len(s.Stage.Tags); n != ack.Awards {
 				v = append(v, fmt.Sprintf("%s is acknowledged with %d awards, and it pays %d", label, ack.Awards, n))
 			}
-			for _, id := range sortedTags(s.Stage.Tags) {
+			for _, id := range slices.Sorted(maps.Keys(s.Stage.Tags)) {
 				if a := s.Stage.Tags[id]; moved(float64(a), ack.Value) {
 					v = append(v, fmt.Sprintf("%s is acknowledged with awards of %.0f, and it pays %d for %s",
 						label, ack.Value, a, TagName(id)))
@@ -332,7 +307,7 @@ func checkOutliers(stages []Stage, acknowledged map[string]Acknowledged) Violati
 			v = append(v, checkAwards(variantLabel(label, d), s.Variants[d])...)
 		}
 	}
-	for _, name := range sortedAcknowledged(acknowledged) {
+	for _, name := range slices.Sorted(maps.Keys(acknowledged)) {
 		if !present[name] {
 			v = append(v, fmt.Sprintf("%s is acknowledged as an outlier, and the bundle has no such stage", name))
 		}
@@ -350,7 +325,7 @@ func checkWeightSum(label string, sum, mid float64) Violations {
 func checkAwards(label string, st scoring.Stage) Violations {
 	sum := weightSum(Stage{Stage: st})
 	var v Violations
-	for _, id := range sortedTags(st.Tags) {
+	for _, id := range slices.Sorted(maps.Keys(st.Tags)) {
 		a := st.Tags[id]
 		if sum > 0 && float64(a) > sum*awardCeiling {
 			v = append(v, fmt.Sprintf("%s pays %d for %s, %.0f per unit of weight where no ordinary award pays over %.0f",
@@ -402,24 +377,6 @@ func moved(got, want float64) bool {
 	return math.Abs(got-want) > 0.01*want
 }
 
-func sortedTags(m map[int]int) []int {
-	out := make([]int, 0, len(m))
-	for id := range m {
-		out = append(out, id)
-	}
-	sort.Ints(out)
-	return out
-}
-
-func sortedAcknowledged(m map[string]Acknowledged) []string {
-	out := make([]string, 0, len(m))
-	for k := range m {
-		out = append(out, k)
-	}
-	sort.Strings(out)
-	return out
-}
-
 func weightSum(s Stage) float64 {
 	var sum float64
 	for _, w := range s.Stage.Weights {
@@ -432,8 +389,5 @@ func median(xs []float64) float64 {
 	if len(xs) == 0 {
 		return 0
 	}
-	sorted := make([]float64, len(xs))
-	copy(sorted, xs)
-	sort.Float64s(sorted)
-	return sorted[len(sorted)/2]
+	return slices.Sorted(slices.Values(xs))[len(xs)/2]
 }
