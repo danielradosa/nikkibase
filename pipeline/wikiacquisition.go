@@ -671,24 +671,11 @@ func qualifierSlot(name string) (scoring.Slot, bool) {
 }
 
 func pickQualified(ids []int, name string) int {
-	m := wikiQualifier.FindStringSubmatch(name)
-	if m == nil {
-		return 0
-	}
-	slot, ok := slotByName(m[1])
+	slot, ok := qualifierSlot(name)
 	if !ok {
 		return 0
 	}
-	found := 0
-	for _, id := range ids {
-		if SlotOfID(id) == slot {
-			if found != 0 {
-				return 0
-			}
-			found = id
-		}
-	}
-	return found
+	return only(ids, func(id int) bool { return SlotOfID(id) == slot })
 }
 
 func chineseSuits(suits []acqSuit) map[string]string {
@@ -887,13 +874,13 @@ func (c *acqContext) pick(ids []int, suit string, part bool) int {
 			held++
 		}
 	}
-	if id := c.only(ids, func(id int) bool { return strings.EqualFold(c.suits[id], suit) }); id != 0 || !part || held > 1 {
+	if id := only(ids, func(id int) bool { return strings.EqualFold(c.suits[id], suit) }); id != 0 || !part || held > 1 {
 		return id
 	}
-	return c.only(ids, func(id int) bool { return c.suits[id] == "" })
+	return only(ids, func(id int) bool { return c.suits[id] == "" })
 }
 
-func (c *acqContext) only(ids []int, keep func(int) bool) int {
+func only(ids []int, keep func(int) bool) int {
 	found := 0
 	for _, id := range ids {
 		if keep(id) {
