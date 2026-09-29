@@ -159,8 +159,8 @@ func TestFloorForgivesOnlyFloatError(t *testing.T) {
 		{0, 0},
 		{12.5, 12},
 	} {
-		if got := floor(c.x); got != c.want {
-			t.Errorf("floor(%.12f) = %d, want %d", c.x, got, c.want)
+		if got := Floor(c.x); got != c.want {
+			t.Errorf("Floor(%.12f) = %d, want %d", c.x, got, c.want)
 		}
 	}
 }
@@ -313,8 +313,8 @@ func TestPointsAndFixedMakeTheScore(t *testing.T) {
 	if math.Abs(sum-want) > 1e-9*want {
 		t.Errorf("points %v plus fixed %v = %v, and the unfloored score is %v", points, fixed, sum, want)
 	}
-	if got := Score(outfit, st, nil); floor(sum) != got {
-		t.Errorf("points and fixed floor to %d, and Score says %d", floor(sum), got)
+	if got := Score(outfit, st, nil); Floor(sum) != got {
+		t.Errorf("points and fixed floor to %d, and Score says %d", Floor(sum), got)
 	}
 	if points[2] != 0 {
 		t.Errorf("a zero-weight pair has %v points", points[2])

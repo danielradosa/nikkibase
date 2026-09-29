@@ -158,7 +158,7 @@ func PlaceFrom(points [pairs]float64, st Stage) Placement {
 }
 
 func Score(outfit []Item, st Stage, sk Skills) int {
-	return floor(unfloored(outfit, st, sk))
+	return Floor(unfloored(outfit, st, sk))
 }
 
 func unfloored(outfit []Item, st Stage, sk Skills) float64 {
@@ -180,10 +180,6 @@ func unfloored(outfit []Item, st Stage, sk Skills) float64 {
 }
 
 func Floor(x float64) int {
-	return floor(x)
-}
-
-func floor(x float64) int {
 	a := math.Abs(x)
 	ulp := math.Nextafter(a, math.Inf(1)) - a
 	return int(math.Floor(x + 64*ulp))
