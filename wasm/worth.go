@@ -411,13 +411,13 @@ func whole(v js.Value) (int, bool) {
 	return int(f), true
 }
 
-func writeInts(b *strings.Builder, ids []int) {
+func writeInts[T int | int32 | uint16](b *strings.Builder, ids []T) {
 	b.WriteByte('[')
 	for i, id := range ids {
 		if i > 0 {
 			b.WriteByte(',')
 		}
-		b.WriteString(strconv.Itoa(id))
+		b.WriteString(strconv.Itoa(int(id)))
 	}
 	b.WriteByte(']')
 }

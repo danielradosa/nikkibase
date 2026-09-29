@@ -64,21 +64,11 @@ func (e *engine) places(_ js.Value, _ []js.Value) any {
 		return fail("catalogue not loaded")
 	}
 	var b strings.Builder
-	b.WriteString(`{"ids":[`)
-	for i, id := range e.catalogue.IDs {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(strconv.Itoa(int(id)))
-	}
-	b.WriteString(`],"places":[`)
-	for i, place := range e.catalogue.Positions {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(strconv.Itoa(int(place)))
-	}
-	b.WriteString(`]}`)
+	b.WriteString(`{"ids":`)
+	writeInts(&b, e.catalogue.IDs)
+	b.WriteString(`,"places":`)
+	writeInts(&b, e.catalogue.Positions)
+	b.WriteByte('}')
 	return result(b.String())
 }
 
@@ -115,16 +105,11 @@ func (e *engine) adopt(w *wardrobe.Wardrobe) any {
 	delete(e.views, true)
 	e.worth = nil
 	var ids strings.Builder
-	for i, id := range w.Items {
-		if i > 0 {
-			ids.WriteByte(',')
-		}
-		ids.WriteString(strconv.Itoa(id))
-	}
+	writeInts(&ids, w.Items)
 	return result(`{"items":` + strconv.Itoa(len(w.Items)) +
 		`,"unresolved":` + strconv.Itoa(w.Unresolved) +
 		`,"known":` + strconv.Itoa(e.known()) +
-		`,"ids":[` + ids.String() + `]}`)
+		`,"ids":` + ids.String() + `}`)
 }
 
 func (e *engine) setWardrobe(_ js.Value, args []js.Value) any {
@@ -189,7 +174,7 @@ func (e *engine) best(_ js.Value, args []js.Value) any {
 	levels := scoring.MaxLevels
 	if chosen {
 		var ok bool
-		if levels, ok = skillLevels(args[2].Get("levels")); !ok {
+		if levels, ok = worthLevels(args[2].Get("levels")); !ok {
 			return fail("skill levels run from 0 to 9")
 		}
 	}
@@ -275,57 +260,20 @@ func (e *engine) best(_ js.Value, args []js.Value) any {
 		b.WriteString(strconv.FormatBool(more))
 		b.WriteByte('}')
 	}
-	b.WriteString(`],"ownedPlaces":[`)
-	for i, place := range v.places {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(strconv.Itoa(int(place)))
-	}
-	b.WriteByte(']')
+	b.WriteString(`],"ownedPlaces":`)
+	writeInts(&b, v.places)
 	if len(missing) > 0 {
 		b.WriteString(`,"missing":[`)
 		for i, set := range missing {
 			if i > 0 {
 				b.WriteByte(',')
 			}
-			b.WriteByte('[')
-			for j, id := range set {
-				if j > 0 {
-					b.WriteByte(',')
-				}
-				b.WriteString(strconv.Itoa(id))
-			}
-			b.WriteByte(']')
+			writeInts(&b, set)
 		}
 		b.WriteByte(']')
 	}
 	b.WriteByte('}')
 	return result(b.String())
-}
-
-func skillLevels(v js.Value) (scoring.Levels, bool) {
-	l := scoring.MaxLevels
-	if v.IsUndefined() || v.IsNull() {
-		return l, true
-	}
-	if v.Type() != js.TypeObject {
-		return l, false
-	}
-	for _, f := range []struct {
-		name string
-		to   *int
-	}{{"charming", &l.Charming}, {"smile", &l.Smile}} {
-		n := v.Get(f.name)
-		if n.IsUndefined() || n.IsNull() {
-			continue
-		}
-		if n.Type() != js.TypeNumber || n.Float() != float64(int(n.Float())) {
-			return l, false
-		}
-		*f.to = int(n.Float())
-	}
-	return l, l.Valid()
 }
 
 func attrCode(v js.Value) int {
@@ -339,13 +287,9 @@ func (e *engine) known() int {
 	if e.catalogue == nil {
 		return 0
 	}
-	have := make(map[int32]bool, len(e.owned))
-	for _, id := range e.owned {
-		have[int32(id)] = true
-	}
-	n := 0
+	owns, n := e.pool(true), 0
 	for _, id := range e.catalogue.IDs {
-		if have[id] {
+		if owns(id) {
 			n++
 		}
 	}
