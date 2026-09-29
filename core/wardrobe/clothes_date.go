@@ -16,7 +16,7 @@ const (
 func Decode(src []byte, ks *Keystream) (*Wardrobe, error) {
 	raw, err := base64.StdEncoding.DecodeString(strings.TrimSpace(string(src)))
 	if err != nil {
-		return nil, &base64Error{err}
+		return nil, errors.New("wardrobe: not valid base64: " + err.Error())
 	}
 	if len(raw) < 2 {
 		return nil, errors.New("wardrobe: file is " + strconv.Itoa(len(raw)) + " bytes, too short to hold a table")
@@ -41,11 +41,6 @@ func Decode(src []byte, ks *Keystream) (*Wardrobe, error) {
 	}
 	return w, nil
 }
-
-type base64Error struct{ err error }
-
-func (e *base64Error) Error() string { return "wardrobe: not valid base64: " + e.err.Error() }
-func (e *base64Error) Unwrap() error { return e.err }
 
 func (p plaintext) idLenAt(pos int) (int, error) {
 	five, six := p.chainFits(pos, 5, lookahead), p.chainFits(pos, 6, lookahead)
