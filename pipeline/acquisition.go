@@ -342,6 +342,14 @@ func CheckAcquisition(acq map[int][]Acquisition, cat AcquisitionCatalogue, want 
 
 func CheckAcquisitionFallbacks(stats AcquisitionStats, want Coverage) Violations {
 	var v Violations
+	if want.EventItems > 0 && stats.Events < want.EventItems {
+		v = append(v, fmt.Sprintf("%d items whose lines are all vague take the one event page that lists their suit, and the committed floor is %d, so the event pages may no longer be read",
+			stats.Events, want.EventItems))
+	}
+	if want.RerunItems > 0 && stats.Reruns < want.RerunItems {
+		v = append(v, fmt.Sprintf("%d items whose only lines are a plain recharge take the recharge channels the wiki's timeline reruns them on, and the committed floor is %d, so the timeline pages may no longer be read",
+			stats.Reruns, want.RerunItems))
+	}
 	if stats.Events > want.MaxEventItems {
 		v = append(v, fmt.Sprintf("%d items whose lines are all vague take the one event page that lists their suit; the committed ceiling is %d, so the event pages may have been misread",
 			stats.Events, want.MaxEventItems))

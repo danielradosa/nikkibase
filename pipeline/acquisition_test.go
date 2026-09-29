@@ -111,9 +111,16 @@ func TestMergeAcquisitionNamesPlainRechargeItemsFromTheirReruns(t *testing.T) {
 	}
 }
 
-func TestEventAndRerunLinesAreHeldUnderTheirCeilings(t *testing.T) {
-	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 2, Reruns: 3}, Coverage{MaxEventItems: 2, MaxRerunItems: 3}); len(v) != 0 {
-		t.Errorf("at the ceilings: %v", v)
+func TestEventAndRerunLinesAreHeldBetweenTheirFloorsAndCeilings(t *testing.T) {
+	at := Coverage{EventItems: 2, MaxEventItems: 2, RerunItems: 3, MaxRerunItems: 3}
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 2, Reruns: 3}, at); len(v) != 0 {
+		t.Errorf("at the floors and ceilings: %v", v)
+	}
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Reruns: 3}, at); len(v) != 1 || !strings.Contains(v[0], "0 items") || !strings.Contains(v[0], "floor is 2") {
+		t.Errorf("events below their floor: %v", v)
+	}
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 2, Reruns: 1}, at); len(v) != 1 || !strings.Contains(v[0], "1 items") || !strings.Contains(v[0], "floor is 3") {
+		t.Errorf("reruns below their floor: %v", v)
 	}
 	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 3}, Coverage{MaxEventItems: 2}); len(v) != 1 || !strings.Contains(v[0], "3 items") {
 		t.Errorf("events above their ceiling: %v", v)
