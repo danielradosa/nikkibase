@@ -77,8 +77,7 @@ h1,
 h2,
 h3,
 h4,
-h5,
-.nb-display {
+h5 {
   font-family: var(--display);
   letter-spacing: 0.01em;
 }
@@ -112,13 +111,6 @@ h5,
   color: var(--ink-soft) !important;
   font-size: 13px;
   letter-spacing: 0.02em;
-}
-
-.nb-card {
-  background: var(--card);
-  border: 1px solid var(--edge);
-  border-radius: 18px;
-  box-shadow: var(--shadow-soft);
 }
 
 .ant-tabs-content-holder {
@@ -1133,10 +1125,6 @@ h5,
 .ant-typography.nb-worth-skills {
   font-size: 13px;
   margin-bottom: 16px;
-}
-
-.ant-typography.nb-worth-note {
-  margin-bottom: 4px;
 }
 
 .nb-worth-list {
