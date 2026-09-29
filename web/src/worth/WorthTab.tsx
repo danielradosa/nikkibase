@@ -88,14 +88,6 @@ function AcquireWait({ acquire }: { acquire: Acquire }) {
   return <Typography.Text type="secondary">How to get items couldn't be loaded. Open this tab again to retry.</Typography.Text>
 }
 
-function OwnedKey() {
-  return (
-    <Typography.Text type="secondary" className="nb-worth-meta">
-      {OWNED_KEY}
-    </Typography.Text>
-  )
-}
-
 function Ways({
   id, acquire, owned, names, onOpen, showKey = true,
 }: {
@@ -150,7 +142,9 @@ function Ways({
       })}
       {showKey && ownsAnyPart(lines) && (
         <li>
-          <OwnedKey />
+          <Typography.Text type="secondary" className="nb-worth-meta">
+            {OWNED_KEY}
+          </Typography.Text>
         </li>
       )}
     </ul>
