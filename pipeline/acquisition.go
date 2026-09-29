@@ -213,15 +213,15 @@ func allVague(list []Acquisition) bool {
 	return len(list) > 0 && !slices.ContainsFunc(list, func(a Acquisition) bool { return !vague(a) })
 }
 
-func namedBySuit(packed, suit []Acquisition) ([]Acquisition, bool) {
-	if !allVague(packed) {
-		return packed, false
+func namedFrom(list, from []Acquisition) ([]Acquisition, bool) {
+	if !allVague(list) {
+		return list, false
 	}
 	var out []Acquisition
-	for _, a := range packed {
+	for _, a := range list {
 		kinds, _ := vagueKinds(a)
 		var named []Acquisition
-		for _, b := range suit {
+		for _, b := range from {
 			if !vague(b) && slices.Contains(kinds, b.Kind) {
 				named = append(named, b)
 			}
@@ -233,7 +233,7 @@ func namedBySuit(packed, suit []Acquisition) ([]Acquisition, bool) {
 			out = appendAcquisition(out, b)
 		}
 	}
-	return out, !slices.EqualFunc(out, packed, sameAcquisition)
+	return out, !slices.EqualFunc(out, list, sameAcquisition)
 }
 
 func basedByTable(wiki, packed []Acquisition) ([]Acquisition, bool) {
@@ -262,13 +262,6 @@ func basedByTable(wiki, packed []Acquisition) ([]Acquisition, bool) {
 	return out, changed
 }
 
-func namedByEvent(list, event []Acquisition) ([]Acquisition, bool) {
-	if len(event) == 0 || !allVague(list) {
-		return list, false
-	}
-	return event, true
-}
-
 func rerunOn(list, reruns []Acquisition) ([]Acquisition, bool) {
 	if len(reruns) == 0 || !allVague(list) || slices.ContainsFunc(list, func(a Acquisition) bool { return a.Kind != "recharge" }) {
 		return list, false
@@ -293,7 +286,7 @@ func MergeAcquisition(cat AcquisitionCatalogue, wiki WikiAcquisition, packed map
 				stats.Based++
 			}
 		case len(packed[id]) > 0:
-			list, named := namedBySuit(packed[id], wiki.Suits[id])
+			list, named := namedFrom(packed[id], wiki.Suits[id])
 			out[id] = list
 			stats.FromPacked++
 			if named {
@@ -305,7 +298,7 @@ func MergeAcquisition(cat AcquisitionCatalogue, wiki WikiAcquisition, packed map
 		default:
 			continue
 		}
-		if list, named := namedByEvent(out[id], wiki.Events[id]); named {
+		if list, named := namedFrom(out[id], wiki.Events[id]); named {
 			out[id] = list
 			stats.Events++
 		}

@@ -776,7 +776,7 @@ func TestSuitPartAliasesPlaceWhatTheLookupCannot(t *testing.T) {
 
 func TestEventPagesNameWhatOnlyVagueLinesDescribe(t *testing.T) {
 	pages := "<page>\n  <title>Honey-Soaked Song</title>\n  <ns>0</ns>\n  <revision><text>{{Clothing\n" +
-		"|type = Hair\n|wardrobe nr = 2\n|how to obtain = [[Recharge]]\n}}</text></revision>\n</page>\n" +
+		"|type = Hair\n|wardrobe nr = 2\n|how to obtain = Event\n}}</text></revision>\n</page>\n" +
 		"<page>\n  <title>Test Suit</title>\n  <ns>0</ns>\n  <revision><text>{{Suit Infobox\n" +
 		"|type = Collection Suit\n|how to obtain = [[Recharge]]\n}}\n==Wardrobe==\n" +
 		"{{Suit Part|Honey-Soaked Song|type=Hair}}</text></revision>\n</page>\n" +
