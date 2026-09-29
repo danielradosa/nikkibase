@@ -31,12 +31,7 @@ func ParseSpiritBonuses(r io.Reader, known map[int]bool) (map[int]int, SpiritBon
 		if page.NS != 0 || !strings.Contains(page.Text, "{{Clothing") {
 			return
 		}
-		fields := map[string]string{}
-		for _, m := range infoboxField.FindAllStringSubmatch(page.Text, -1) {
-			if _, seen := fields[m[1]]; !seen {
-				fields[m[1]] = strings.TrimSpace(m[2])
-			}
-		}
+		fields := infobox(page.Text)
 		if fields["type"] != "Spirit" {
 			return
 		}

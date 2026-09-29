@@ -63,7 +63,6 @@ type suitPart struct {
 }
 
 var (
-	acqInfoboxField  = regexp.MustCompile(`(?m)^[ \t]*\|[ \t]*([a-z0-9 ]+?)[ \t]*=[ \t]*(.*)$`)
 	wikiComment      = regexp.MustCompile(`(?s)<!--.*?-->`)
 	wikiLink         = regexp.MustCompile(`\[\[:?([^\]|]*)(?:\|([^\]]*))?\]\]`)
 	wikiTag          = regexp.MustCompile(`<[^>]*>`)
@@ -363,7 +362,7 @@ func acqSuitPage(page wikiPage) acqSuit {
 	if end := strings.Index(box, "\n}}"); end >= 0 {
 		box = box[:end]
 	}
-	for _, m := range acqInfoboxField.FindAllStringSubmatch(box, -1) {
+	for _, m := range infoboxField.FindAllStringSubmatch(box, -1) {
 		switch m[1] {
 		case "how to obtain":
 			if s.obtain == "" {
@@ -400,7 +399,7 @@ func acqSuitPage(page wikiPage) acqSuit {
 
 func infobox(box string) map[string]string {
 	fields := map[string]string{}
-	for _, m := range acqInfoboxField.FindAllStringSubmatch(box, -1) {
+	for _, m := range infoboxField.FindAllStringSubmatch(box, -1) {
 		if _, seen := fields[m[1]]; !seen {
 			fields[m[1]] = strings.TrimSpace(m[2])
 		}

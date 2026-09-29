@@ -105,12 +105,7 @@ func ParseFandomDump(r io.Reader, known map[int]bool) ([]Entry, FandomStats, err
 }
 
 func fandomEntry(page wikiPage, stats *FandomStats) (Entry, string) {
-	fields := map[string]string{}
-	for _, m := range infoboxField.FindAllStringSubmatch(page.Text, -1) {
-		if _, seen := fields[m[1]]; !seen {
-			fields[m[1]] = strings.TrimSpace(m[2])
-		}
-	}
+	fields := infobox(page.Text)
 	slot, position, ok := fandomSlot(fields["type"])
 	if !ok {
 		return Entry{}, "unknown type"
