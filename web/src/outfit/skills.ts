@@ -123,11 +123,7 @@ export function pickerDefault(
   return { charmSmile: first, smile: second }
 }
 
-export function worthSettings(s: SkillSettings): WorthSettings {
-  if (skillsOff(s)) return null
-  if (isMax(s.levels)) return { auto: true }
-  return { auto: true, levels: { charming: s.levels.charming, smile: s.levels.smile } }
-}
+export const worthSettings = (s: SkillSettings) => (skillRequest(s) ?? null) as WorthSettings
 
 export function worthSkillsText(s: SkillSettings): string {
   if (!s.on) return 'Scored without skills. Turn Skills on in Best outfit to include them.'
