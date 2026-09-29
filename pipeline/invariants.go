@@ -41,7 +41,7 @@ func (v Violations) Error() string {
 }
 
 func CheckInvariants(entries []Entry, stages []Stage, stats StageStats, want Coverage,
-	acknowledged map[string]Acknowledged, sub *SubgradeStats) error {
+	acknowledged map[string]Acknowledged, sub *SubgradeStats) Violations {
 	var v Violations
 	v = append(v, checkPositions(entries)...)
 	v = append(v, checkIdentity(entries)...)
@@ -50,11 +50,7 @@ func CheckInvariants(entries []Entry, stages []Stage, stats StageStats, want Cov
 	v = append(v, checkCoverage(entries, stages, want)...)
 	v = append(v, checkSubgrades(entries, sub, want)...)
 	v = append(v, checkOutliers(stages, acknowledged)...)
-	v = append(v, checkDisplayNames(stages)...)
-	if len(v) == 0 {
-		return nil
-	}
-	return v
+	return append(v, checkDisplayNames(stages)...)
 }
 
 func checkPositions(entries []Entry) Violations {

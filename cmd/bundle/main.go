@@ -809,13 +809,7 @@ func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 	if wikiStats != nil {
 		v = append(v, pipeline.CheckAcquisitionNames(*wikiStats, cov)...)
 	}
-	if err := pipeline.CheckInvariants(entries, stages, stats, cov, acknowledged, layers.sub); err != nil {
-		var found pipeline.Violations
-		if !errors.As(err, &found) {
-			return err
-		}
-		v = append(found, v...)
-	}
+	v = append(pipeline.CheckInvariants(entries, stages, stats, cov, acknowledged, layers.sub), v...)
 	if len(v) > 0 {
 		return v
 	}
