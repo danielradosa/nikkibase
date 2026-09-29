@@ -102,7 +102,7 @@ func (sc *scorer) placeWith(c *change) scoring.Placement {
 		}
 		fixed = e.nonAcc + torsoOf(d, has, top, bottom)
 	}
-	if _, chosen, worn := e.settle(fixed, a); chosen != pl.chosen || worn != pl.worn {
+	if _, chosen, worn := e.settle(fixed, a, nil); chosen != pl.chosen || worn != pl.worn {
 		return sc.exactPlace(c)
 	}
 	if a >= 0 && !sc.accessoryShift(e, a, c.item[0], &da) {

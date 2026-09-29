@@ -92,30 +92,9 @@ func (e *evaluator) withMany(ps []piece) (float64, int, int) {
 		t = torsoOf(d, has, top, bottom)
 	}
 	if !acc {
-		return e.settle(nonAcc+t, -1)
+		return e.settle(nonAcc+t, -1, nil)
 	}
-	return e.settleMany(nonAcc+t, ps)
-}
-
-func (e *evaluator) settleMany(fixed float64, ps []piece) (float64, int, int) {
-	if cap(e.sums) < len(e.choices) {
-		e.sums, e.worns = make([]float64, len(e.choices)), make([]int, len(e.choices))
-	}
-	sums, worns := e.sums[:len(e.choices)], e.worns[:len(e.choices)]
-	chosen := -1
-	for c := range e.choices {
-		t, w := e.choiceMany(&e.choices[c], ps)
-		sums[c], worns[c] = fixed+t, w
-		if chosen < 0 || sums[c] > sums[chosen] {
-			chosen = c
-		}
-	}
-	for c, sum := range sums {
-		if c != chosen && sum > sums[chosen]-2 {
-			return e.floored(sums, worns)
-		}
-	}
-	return sums[chosen], chosen, worns[chosen]
+	return e.settle(nonAcc+t, -1, ps)
 }
 
 func (e *evaluator) gather(ch *choice, ps []piece, tie bool) int {

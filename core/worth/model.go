@@ -199,12 +199,12 @@ func (e *evaluator) build(br *branch, sd *side) {
 	for c, members := range br.choices {
 		e.fillChoice(&e.choices[c], members)
 	}
-	e.total, e.accChoice, _ = e.settle(e.nonAcc+e.torso, -1)
+	e.total, e.accChoice, _ = e.settle(e.nonAcc+e.torso, -1, nil)
 	e.acc = e.choices[e.accChoice].total
 	e.score = scoring.Floor(e.total)
 }
 
-func (e *evaluator) settle(fixed float64, a int32) (total float64, chosen, worn int) {
+func (e *evaluator) settle(fixed float64, a int32, ps []piece) (total float64, chosen, worn int) {
 	if cap(e.sums) < len(e.choices) {
 		e.sums, e.worns = make([]float64, len(e.choices)), make([]int, len(e.choices))
 	}
@@ -213,7 +213,10 @@ func (e *evaluator) settle(fixed float64, a int32) (total float64, chosen, worn 
 	for c := range e.choices {
 		ch := &e.choices[c]
 		t, w := ch.total, ch.worn
-		if a >= 0 && ch.slot[a] >= 0 {
+		switch {
+		case ps != nil:
+			t, w = e.choiceMany(ch, ps)
+		case a >= 0 && ch.slot[a] >= 0:
 			t, w = e.choiceWith(ch, a)
 		}
 		sums[c], worns[c] = fixed+t, w
@@ -373,7 +376,7 @@ func (e *evaluator) with(c *change) float64 {
 	if !changed {
 		return e.total
 	}
-	t, _, _ := e.settle(e.nonAcc+torsoOf(d, has, top, bottom), -1)
+	t, _, _ := e.settle(e.nonAcc+torsoOf(d, has, top, bottom), -1, nil)
 	return t
 }
 
@@ -407,7 +410,7 @@ func (e *evaluator) withPlain(at int32, v float64) float64 {
 	if v <= e.sd.best[at] {
 		return e.total
 	}
-	t, _, _ := e.settle(e.plainWith(at, v)+e.torso, -1)
+	t, _, _ := e.settle(e.plainWith(at, v)+e.torso, -1, nil)
 	return t
 }
 
@@ -428,7 +431,7 @@ func (e *evaluator) withAccessory(at int32, s, f float64) (float64, int, int) {
 		return e.total, e.accChoice, e.choices[e.accChoice].worn
 	}
 	e.cs, e.cf = s, f
-	return e.settle(e.nonAcc+e.torso, e.l.accOf[at])
+	return e.settle(e.nonAcc+e.torso, e.l.accOf[at], nil)
 }
 
 func (e *evaluator) offered(k int) float64 {
@@ -603,7 +606,7 @@ func (e *evaluator) outfit(buf []scoring.Item, c *change) []scoring.Item {
 		a = l.accOf[accAt]
 		e.cs, e.cf = accS, accF
 	}
-	_, chosen, worn := e.settle(nonAcc+torsoOf(d, has, top, bottom), a)
+	_, chosen, worn := e.settle(nonAcc+torsoOf(d, has, top, bottom), a, nil)
 	ch := &e.choices[chosen]
 	nr := len(ratios)
 	k := ratioOf[worn]
