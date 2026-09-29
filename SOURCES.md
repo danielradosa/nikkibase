@@ -25,13 +25,13 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `2026-10-01` rebuilds byte-for-byte from the files below
+The bundle `2026-09-29b` rebuilds byte-for-byte from the files below
 (verified 2026-09-29, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/` and the
 wiki dump extracted to `/tmp/fandom`:
 
 ```sh
-SOURCE_DATE_EPOCH=1790812800 go run ./cmd/bundle \
+SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
   -fandom  /tmp/fandom/lovenikki673_pages_current.xml \
   -stages       .ai/research/sources/community/seal100x/levels.js \
   -stage-values .ai/research/sources/community/aojiao/levels.js \
@@ -43,10 +43,15 @@ SOURCE_DATE_EPOCH=1790812800 go run ./cmd/bundle \
   -calc-grades -calc-recipes \
   -calc-suits .ai/research/sources/nikkicalc/suits-v0.14.json \
   -out     web/public/data \
-  -version 2026-10-01
+  -version 2026-09-29b
 ```
 
-A version directory is served as immutable once deployed. `2026-10-01`
+A version directory is served as immutable once deployed. A version is named
+after the day it is built, and `SOURCE_DATE_EPOCH` is that day's midnight UTC;
+a further build on the same day takes a letter (`2026-09-29b`). `2026-09-29b`
+holds the same data as `2026-10-01`, which was named ahead of its build day;
+only `provenance.json` (version and build time) and the version in
+`acquire.json` differ. `2026-10-01`
 changes `items.json`, `items.bin` and `acquire.json` from `2026-09-30`; its
 `stages.json`, `tags.json` and `positions.json` are the same byte for byte.
 982 items no other source grades take their grades, sides, places and style
