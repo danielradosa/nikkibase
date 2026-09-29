@@ -760,6 +760,44 @@ func TestTimelinePagesNameTheRechargeChannelsItemsReturnedOn(t *testing.T) {
 	}
 }
 
+func TestAdditionalItemsTakeNoEventOrRerunFromTheirSuit(t *testing.T) {
+	box := "{{Suit Infobox\n|type = Collection Suit\n|how to obtain = [[Recharge]]\n}}"
+	dump := "<mediawiki>\n" +
+		dumpPage("Alpha Suit", box, "==Wardrobe==\n{{Suit Part|Alpha Gown|type=Dress}}\n{{Suit Part|Alpha Veil|type=Hair Ornament}}\n"+
+			"{{Version|posed=1|v=2}}\n{{Suit Part|Alpha Veil|type=Hair Ornament|v=2}}\n"+
+			"{{Version|other=Additional Items|v=3}}\n{{Suit Part|Alpha Fluff|type=Ground|v=3}}\n{{Suit Part|Alpha Veil|type=Hair Ornament|v=3}}") +
+		dumpPage("Beta Suit", box, "==Wardrobe==\n{{Suit Part|Beta Gown|type=Dress}}\n"+
+			"{{Version|other=Additional Item(s)|v=2}}\n{{Suit Part|Beta Tea|type=Foreground|v=2}}") +
+		timelinePage("2024",
+			"|month = January\n|events1 = {{*}}'''[[Abyssal Island]]:''' [[Alpha Suit]] {{!}} Jan 3 {{en}} Jan 9&lt;br&gt;\n"+
+				"{{*}}'''[[Cumulative Recharge]]:''' [[Beta Suit]], [[Beta Tea]] {{!}} Jan 10 {{en}} Jan 18") +
+		eventPage("$100 Recharge Event", "", "Recharge; Choice", "Alpha Suit; Beta Suit") +
+		"</mediawiki>"
+	cat := AcquisitionCatalogue{Names: map[int]string{20001: "Alpha Gown", 80001: "Alpha Veil", 90001: "Alpha Fluff", 20002: "Beta Gown", 90002: "Beta Tea"}}
+	got, _, err := ParseFandomAcquisition(strings.NewReader(dump), nil, nil, cat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SuitOf[90001] != "Alpha Suit" || got.SuitOf[90002] != "Beta Suit" {
+		t.Errorf("additional items in %q and %q, want them kept in the suit that lists them", got.SuitOf[90001], got.SuitOf[90002])
+	}
+	want := `{"version":"t","items":{` +
+		`"20001":[{"k":"recharge","t":"Abyssal Island (last Jan 2024)","past":1}],` +
+		`"20002":[{"k":"recharge","t":"Cumulative Recharge (last Jan 2024)","past":1}],` +
+		`"80001":[{"k":"recharge","t":"Abyssal Island (last Jan 2024)","past":1}],` +
+		`"90002":[{"k":"recharge","t":"Cumulative Recharge (last Jan 2024)","past":1}]}}`
+	if out := string(WriteAcquisition("t", got.Reruns)); out != want {
+		t.Errorf("reruns:\n got %s\nwant %s", out, want)
+	}
+	want = `{"version":"t","items":{` +
+		`"20001":[{"k":"recharge","t":"$100 Recharge event","past":1}],` +
+		`"20002":[{"k":"recharge","t":"$100 Recharge event","past":1}],` +
+		`"80001":[{"k":"recharge","t":"$100 Recharge event","past":1}]}}`
+	if out := string(WriteAcquisition("t", got.Events)); out != want {
+		t.Errorf("events:\n got %s\nwant %s", out, want)
+	}
+}
+
 func TestDayAndNightFormsBothJoinTheirSuit(t *testing.T) {
 	dump := "<mediawiki>\n" +
 		suitPage("Dawn Suit", "[[Recharge]]",

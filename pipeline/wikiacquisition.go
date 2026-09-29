@@ -67,6 +67,7 @@ type acqSuit struct {
 
 type suitPart struct {
 	name, kind string
+	extra      bool
 }
 
 type acqEvent struct {
@@ -116,6 +117,9 @@ var (
 	wikiPixels       = regexp.MustCompile(`^\d+(x\d+)?px$`)
 	wikiSuitPart     = regexp.MustCompile(`\{\{Suit Part\|([^|}]+)([^}]*)`)
 	wikiPartType     = regexp.MustCompile(`\|\s*type\s*=\s*([^|}]*)`)
+	wikiPartVersion  = regexp.MustCompile(`\|\s*v\s*=\s*(\d+)`)
+	wikiVersion      = regexp.MustCompile(`\{\{Version\|`)
+	wikiAdditional   = regexp.MustCompile(`(?i)^additional item(?:s|\(s\))?$`)
 	wikiEventWord    = regexp.MustCompile(`(?i)\bevents?\b`)
 	wikiCustomTarget = regexp.MustCompile(`(?m)^\*\s*\{\{IconItem\|([^}|]+)[^}]*\}\}\s*:?(.*)$`)
 	wikiCategory     = regexp.MustCompile(`\[\[Category:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]`)
@@ -307,7 +311,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 
 	out := WikiAcquisition{Items: map[int][]Acquisition{}, Suits: map[int][]Acquisition{}, SuitOf: ctx.suits,
 		ChineseSuits: chineseSuits(suits), Packs: packTitles(suits), Unplaced: ctx.unplaced(suits)}
-	members := ctx.members()
+	members := ctx.members(suits)
 	out.Events = ctx.eventLines(events, members)
 	out.Reruns = ctx.rerunLines(reruns, members)
 	stats.EventPages, stats.TimelineEntries = len(events), len(reruns)
@@ -435,10 +439,19 @@ func acqSuitPage(page wikiPage) acqSuit {
 			}
 		}
 	}
+	extra := map[string]bool{}
+	for _, at := range wikiVersion.FindAllStringIndex(text, -1) {
+		if args := namedArgs(templateArgs(text, at[0])); wikiAdditional.MatchString(args["other"]) {
+			extra[args["v"]] = true
+		}
+	}
 	for _, m := range wikiSuitPart.FindAllStringSubmatch(text, -1) {
 		part := suitPart{name: strings.TrimSpace(m[1])}
 		if t := wikiPartType.FindStringSubmatch(m[2]); t != nil {
 			part.kind = strings.TrimSpace(t[1])
+		}
+		if v := wikiPartVersion.FindStringSubmatch(m[2]); v != nil {
+			part.extra = extra[v[1]]
 		}
 		s.parts = append(s.parts, part)
 	}
@@ -786,15 +799,34 @@ func chineseSuits(suits []acqSuit) map[string]string {
 	return out
 }
 
-func (c *acqContext) members() map[string][]int {
+func (c *acqContext) members(suits []acqSuit) map[string][]int {
+	aside := map[string]map[int]bool{}
+	for _, s := range suits {
+		key := strings.ToLower(suitName(s.title))
+		if aside[key] == nil {
+			aside[key] = map[int]bool{}
+		}
+		maps.Copy(aside[key], c.aside(s))
+	}
 	out := map[string][]int{}
 	for id, s := range c.suits {
-		if s != "" {
-			key := strings.ToLower(suitName(s))
+		if key := strings.ToLower(suitName(s)); s != "" && !aside[key][id] {
 			out[key] = append(out[key], id)
 		}
 	}
 	return out
+}
+
+func (c *acqContext) aside(s acqSuit) map[int]bool {
+	extra := map[int]bool{}
+	for _, part := range s.parts {
+		if id := c.resolvePart(part.name, s.title); id != 0 {
+			only, seen := extra[id]
+			extra[id] = part.extra && (only || !seen)
+		}
+	}
+	maps.DeleteFunc(extra, func(_ int, only bool) bool { return !only })
+	return extra
 }
 
 func (c *acqContext) suitKey(name string) string {
