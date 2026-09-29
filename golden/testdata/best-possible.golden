@@ -18,7 +18,7 @@ Arena	A Growing Lady	69509	31
 Arena	Cloud Lady	135319	31
 Arena	Intern Translator	126542	31
 Co-op	Orlando - Unisex	151823	32
-Co-op	Orlando - Evening Gown	164017	31
+Co-op	Orlando - Evening Gown	164004	31
 Co-op	Ace - European	171733	31
 Co-op	Ace - Traditional Style	212328	31
 Co-op	Ace - Assassins Union	145262	31
@@ -66,7 +66,7 @@ Commission	4-6	84107	31
 Commission	4-7	78074	32
 Commission	5-1	94458	32
 Commission	5-2	82887	32
-Commission	5-3	101665	32
+Commission	5-3	101707	32
 Commission	5-4	98831	31
 Commission	5-5	107622	32
 Commission	5-6	79214	32
@@ -77,7 +77,7 @@ Commission	6-3	100629	32
 Commission	6-4	95735	31
 Commission	6-5	86846	31
 Commission	6-6	92460	31
-Commission	6-7	111468	31
+Commission	6-7	111291	31
 Commission	7-1	80092	31
 Commission	7-2	90130	32
 Commission	7-3	86177	31
@@ -91,14 +91,14 @@ Commission	8-3	100984	31
 Commission	8-4	89000	31
 Commission	8-5	88889	32
 Commission	8-6	81328	31
-Commission	8-7	101665	32
+Commission	8-7	101707	32
 Commission	9-1	95542	31
 Commission	9-2	95729	31
 Commission	9-3	79439	32
 Commission	9-4	102315	31
 Commission	9-5	74682	32
 Commission	9-6	97484	32
-Commission	9-7	95491	31
+Commission	9-7	95479	31
 Commission	10-1	97554	31
 Commission	10-2	95147	31
 Commission	10-3	87146	32
@@ -109,7 +109,7 @@ Commission	10-7	79856	31
 Commission	11-1	85102	31
 Commission	11-2	85726	31
 Commission	11-3	91902	31
-Commission	11-4	92443	31
+Commission	11-4	92381	31
 Commission	11-5	80659	31
 Commission	11-6	74262	32
 Commission	11-7	90287	31
@@ -123,14 +123,14 @@ Commission	12-7	91638	31
 Commission	13-1	71062	32
 Commission	13-2	73475	32
 Commission	13-3	84530	31
-Commission	13-4	93647	31
+Commission	13-4	93616	31
 Commission	13-5	95619	31
 Commission	13-6	83080	31
 Commission	13-7	86683	32
 Commission	14-1	93262	32
 Commission	14-2	107622	32
 Commission	14-3	82887	32
-Commission	14-4	92443	31
+Commission	14-4	92381	31
 Commission	14-5	79895	31
 Commission	14-6	87495	31
 Commission	14-7	95390	31
@@ -160,10 +160,10 @@ Commission	18-2	79205	31
 Commission	18-3	69660	32
 Commission	18-4	77188	32
 Commission	18-5	83590	31
-Commission	18-6	91291	31
+Commission	18-6	91239	31
 Commission	18-7	80649	32
 Commission	19-1	74262	32
-Commission	19-2	111468	31
+Commission	19-2	111291	31
 Commission	19-3	83262	31
 Commission	19-4	116777	31
 Commission	19-5	88819	31
@@ -174,7 +174,7 @@ Commission	20-2	91560	31
 Commission	20-3	84107	31
 Commission	20-4	85351	32
 Commission	20-5	95729	31
-Commission	20-6	92443	31
+Commission	20-6	92381	31
 Commission	20-7	74262	32
 Story	1-1	119118	32
 Story	1-2	139269	31
@@ -309,7 +309,7 @@ Story	10-1	158529	31
 Story	10-2	150375	31
 Story	10-3	182712	32
 Story	10-4	177261	32
-Story	10-5	157695	31
+Story	10-5	157593	31
 Story	10-6	232112	32
 Story	10-7	156286	32
 Story	10-8	179514	31
@@ -398,11 +398,11 @@ Story	17-5	153498	31
 Story	17-6	166600	31
 Story	17-7	124009	32
 Story	17-8	127982	31
-Story	17-9	153695	31
+Story	17-9	153741	31
 Story	17-Side 1	161182	32
 Story	17-Side 2	155704	32
 Story	17-Side 3	136564	31
-Story	18-1	156046	31
+Story	18-1	155834	31
 Story	18-2	150870	32
 Story	18-3	137086	31
 Story	18-4	146791	32

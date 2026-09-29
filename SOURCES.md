@@ -59,11 +59,11 @@ in `acquire.json`), after a check in the game. Crisis in the Mist (91095) takes
 the grades the game shows, Gorgeous S, Elegant SS, Mature SS, Sexy A and
 Cool A, which Nikki Calc also gives, in place of the packed table's Simple S,
 Elegant SS, Mature A, Pure S and Cool SS (`gradeOverrides`, whose
-`wasAttribute` moves a grade to the other side of its pair). The 13 Nightfall
-Menace pieces the packed table tags Evening Gown take Chic, the tag the game
-shows on Crisis in the Mist and Nikki Calc gives them all (`tagOverrides`,
-both in `data/id-corrections.json`). The best possible score changes on 22 of
-605 stage versions, from −0.6% to +2.0%.
+`wasAttribute` moves a grade to the other side of its pair). All 19 Nightfall
+Menace pieces, which the packed table tags Evening Gown, take Chic, the tag
+the game shows on Crisis in the Mist and Nikki Calc gives them all
+(`tagOverrides`, both in `data/id-corrections.json`). The best possible score
+changes on 22 of 605 stage versions, from −0.7% to +2.1%.
 
 `lilith` changes only `acquire.json` from `apple`: the 789 rerun lines on
 760 items give the month of their latest rerun in a field of their own
