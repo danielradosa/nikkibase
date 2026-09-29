@@ -25,7 +25,7 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `apple` rebuilds byte-for-byte from the files below
+The bundle `lilith` rebuilds byte-for-byte from the files below
 (verified 2026-09-29, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/`, and the
 wiki dump extracted to `/tmp/fandom` and brought up to date by
@@ -44,7 +44,7 @@ SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
   -calc-grades -calc-recipes \
   -calc-suits .ai/research/sources/nikkicalc/suits-v0.14.json \
   -out     web/public/data \
-  -version apple
+  -version lilith
 ```
 
 A version directory is served as immutable once deployed. Versions are named
@@ -53,6 +53,12 @@ lists them: `apple`, `lilith`, `cloud`, `pigeon`, `north`, `wasteland`,
 `ruin`; after `ruin` the list starts again with a number (`apple-2`,
 `lilith-2`, …). `SOURCE_DATE_EPOCH` is the build day's midnight UTC. Versions
 built before `apple` are named after their build day (`2026-09-29b`).
+
+`lilith` changes only `acquire.json` from `apple`: the 789 rerun lines on
+760 items give the month of their latest rerun in a field of their own
+(`"last":"2023-06"`) instead of in their text ("Abyssal Island (last Jun
+2023)"), so the site lists the pieces rerun on one channel together and
+shows each one's month beside it.
 
 `apple` changes `items.json`, `items.bin` and `acquire.json` from
 `2026-09-29b`; its `stages.json`, `tags.json` and `positions.json` are the same

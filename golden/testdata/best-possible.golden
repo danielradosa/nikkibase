@@ -1,4 +1,4 @@
-# Whole-catalogue best score and outfit size for every stage in bundle apple.
+# Whole-catalogue best score and outfit size for every stage in bundle lilith.
 # Regenerate after a deliberate change: go test -tags dataset ./golden/ -run Pinned -update
 Arena	Beach Party	67355	32
 Arena	Where Is Spring	74129	32
