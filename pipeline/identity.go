@@ -22,6 +22,7 @@ type Duplicate struct {
 type SlotOverride struct {
 	ID            int    `json:"id"`
 	Slot          string `json:"slot"`
+	IDSlot        string `json:"idSlot"`
 	Position      string `json:"position"`
 	PositionBasis string `json:"positionBasis"`
 	Basis         string `json:"basis"`
@@ -199,7 +200,12 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 		if o.Basis == "" {
 			return nil, fmt.Errorf("id corrections: %d gives no basis", o.ID)
 		}
-		if want := SlotOfID(o.ID); slot != want {
+		want := SlotOfID(o.ID)
+		idSlot, named := slotByName(o.IDSlot)
+		switch {
+		case o.IDSlot != "" && slot == want:
+			return nil, fmt.Errorf("id corrections: %d gives idSlot %s, and its slot already agrees with its ID", o.ID, o.IDSlot)
+		case slot != want && (!named || idSlot != want):
 			return nil, fmt.Errorf("id corrections: %d is put in %s, and its ID says %s",
 				o.ID, o.Slot, SlotName(want))
 		}
@@ -361,6 +367,15 @@ func (c *IDCorrections) DropDuplicates(entries []Entry) []Entry {
 	return out
 }
 
+func (c *IDCorrections) slotOf(id int) scoring.Slot {
+	if c != nil {
+		if slot, ok := c.Slot[id]; ok {
+			return slot
+		}
+	}
+	return SlotOfID(id)
+}
+
 func (c *IDCorrections) misnumbered(id int, name string) bool {
 	drop, listed := c.Drop[id]
 	return listed && sameGarment(name, drop) && !sameGarment(name, c.Owner[id])
@@ -382,7 +397,7 @@ func (c *IDCorrections) dropDuplicates(entries []Entry, strict bool) ([]Entry, e
 		}
 		if c.misnumbered(e.Item.ID, e.Name) {
 			to := c.RealID[e.Item.ID]
-			if _, gone := c.Excluded[to]; gone || to == 0 || staying[to] || SlotOfID(to) != e.Item.Slot {
+			if _, gone := c.Excluded[to]; gone || to == 0 || staying[to] || c.slotOf(to) != e.Item.Slot {
 				continue
 			}
 			staying[to] = true

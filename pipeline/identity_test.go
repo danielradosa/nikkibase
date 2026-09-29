@@ -110,6 +110,9 @@ func TestReadIDCorrectionsRefusesBadEntries(t *testing.T) {
 		"tag replacing no tag":            `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Shiny", "basis": "b"}]}`,
 		"tag unchanged":                   `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Chic", "basis": "b"}]}`,
 		"tag replaced twice":              `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "b"}, {"id": 91095, "tag": "Lady", "was": "Evening Gown", "basis": "b"}]}`,
+		"slot against its ID, unsaid":     `{"slotOverrides": [{"id": 81327, "slot": "coat", "basis": "b", "position": "coat", "positionBasis": "p"}]}`,
+		"slot against its ID, wrong ID":   `{"slotOverrides": [{"id": 81327, "slot": "coat", "idSlot": "top", "basis": "b", "position": "coat", "positionBasis": "p"}]}`,
+		"ID slot where they agree":        `{"slotOverrides": [{"id": 30001, "slot": "coat", "idSlot": "coat", "basis": "b", "position": "coat", "positionBasis": "p"}]}`,
 		"tag by a retired name":           `{"tagOverrides": [{"id": 91095, "tag": "Office", "was": "Evening Gown", "basis": "b"}]}`,
 		"tag replacing a retired name":    `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Office", "basis": "b"}]}`,
 		"tags that chain":                 `{"tagOverrides": [{"id": 91095, "tag": "Chic", "was": "Evening Gown", "basis": "b"}, {"id": 91095, "tag": "Wedding", "was": "Chic", "basis": "b"}]}`,
@@ -147,7 +150,7 @@ func TestMisnumberedPageMovesToItsOwnID(t *testing.T) {
 	if e := byID[51204]; e.Name != "Guardian of Time - Glow" || e.Grades != guardian.Grades {
 		t.Errorf("51204 is %q %v, want the table's Guardian of Time - Glow", e.Name, e.Grades)
 	}
-	if v := checkIdentity(got); v != nil {
+	if v := checkIdentity(got, nil); v != nil {
 		t.Errorf("the moved row fails the identity invariant: %v", v)
 	}
 }
@@ -192,6 +195,31 @@ func TestMisnumberedPageStaysOutWhereItCannotMove(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestMisnumberedPageMovesToAnIDTheGameShowsInItsSlot(t *testing.T) {
+	c := corrections(t, `{
+		"duplicates": [{"id": 31327, "keep": "Keep", "drop": "Page", "correctIdForDropped": 81327, "basis": "b"}],
+		"slotOverrides": [{"id": 81327, "slot": "coat", "idSlot": "accessory", "basis": "checked in game", "position": "coat", "positionBasis": "the page"}]}`)
+	grades := [5]string{"S", "S", "A", "B", "A"}
+	rows := []Entry{graded(31327, scoring.Coat, "Keep", "coat", grades), graded(31327, scoring.Coat, "Page", "coat", grades)}
+	got, err := c.Apply(c.DropDuplicates(slices.Clone(rows)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	byID := map[int]Entry{}
+	for _, e := range got {
+		byID[e.Item.ID] = e
+	}
+	if e, ok := byID[81327]; !ok || e.Name != "Page" || e.Item.Slot != scoring.Coat || e.Position != "coat" || e.Grades != grades {
+		t.Fatalf("81327 = %+v, want the page's coat row", e)
+	}
+	if v := checkIdentity(got, c); v != nil {
+		t.Errorf("the moved coat fails the identity invariant: %v", v)
+	}
+	if v := checkIdentity(got, nil); v == nil {
+		t.Error("without the slot correction the identity invariant accepts a coat at an accessory ID")
 	}
 }
 

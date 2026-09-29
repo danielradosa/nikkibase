@@ -45,10 +45,10 @@ func (v Violations) Error() string {
 }
 
 func CheckInvariants(entries []Entry, stages []Stage, stats StageStats, want Coverage,
-	acknowledged map[string]Acknowledged, sub *SubgradeStats) Violations {
+	acknowledged map[string]Acknowledged, sub *SubgradeStats, corrections *IDCorrections) Violations {
 	var v Violations
 	v = append(v, checkPositions(entries)...)
-	v = append(v, checkIdentity(entries)...)
+	v = append(v, checkIdentity(entries, corrections)...)
 	v = append(v, checkStats(entries)...)
 	v = append(v, checkTags(entries, stages, stats, want)...)
 	v = append(v, checkCoverage(entries, stages, want)...)
@@ -81,7 +81,7 @@ func checkPositions(entries []Entry) Violations {
 	return v
 }
 
-func checkIdentity(entries []Entry) Violations {
+func checkIdentity(entries []Entry, corrections *IDCorrections) Violations {
 	seen := make(map[int]string, len(entries))
 	var dup, mis []string
 	for _, e := range entries {
@@ -91,7 +91,7 @@ func checkIdentity(entries []Entry) Violations {
 		} else {
 			seen[id] = e.Name
 		}
-		if want := SlotOfID(id); e.Item.Slot != want {
+		if want := corrections.slotOf(id); e.Item.Slot != want {
 			mis = append(mis, fmt.Sprintf("%d (%s) is scored as %s, and its ID says %s",
 				id, e.Name, SlotName(e.Item.Slot), SlotName(want)))
 		}

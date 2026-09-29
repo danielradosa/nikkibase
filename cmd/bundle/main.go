@@ -222,7 +222,7 @@ func run(c config) error {
 				len(wrong), c.idCorrectionsPath, strings.Join(wrong, "; "))}
 		}
 	}
-	var layers layerStats
+	layers := layerStats{corrections: corrections}
 	if c.subgradesPath != "" {
 		items, stats, err := readCalcItems(c.subgradesPath, c.keysPath)
 		if err != nil {
@@ -257,10 +257,11 @@ func run(c config) error {
 }
 
 type layerStats struct {
-	sub    *pipeline.SubgradeStats
-	calc   *pipeline.CalcStats
-	agreed *pipeline.AgreementStats
-	items  map[int]pipeline.CalcItem
+	sub         *pipeline.SubgradeStats
+	calc        *pipeline.CalcStats
+	agreed      *pipeline.AgreementStats
+	items       map[int]pipeline.CalcItem
+	corrections *pipeline.IDCorrections
 }
 
 func agree(entries []pipeline.Entry, given map[int][5]string, packed map[int]pipeline.Entry,
@@ -786,7 +787,7 @@ func checkBundle(c config, entries []pipeline.Entry, stages []pipeline.Stage,
 	if wikiStats != nil {
 		v = append(v, pipeline.CheckAcquisitionNames(*wikiStats, cov)...)
 	}
-	v = append(pipeline.CheckInvariants(entries, stages, stats, cov, acknowledged, layers.sub), v...)
+	v = append(pipeline.CheckInvariants(entries, stages, stats, cov, acknowledged, layers.sub, layers.corrections), v...)
 	if len(v) > 0 {
 		return v
 	}

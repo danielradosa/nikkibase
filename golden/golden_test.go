@@ -177,6 +177,14 @@ func (b *bundle) find(t *testing.T, mode, name string) stage {
 func TestShippedCatalogueIsWearable(t *testing.T) {
 	b := load(t)
 	c := b.catalogue
+	raw, err := os.ReadFile("../data/id-corrections.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fixes, err := pipeline.ReadIDCorrections(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
 	places := map[scoring.Slot]map[uint16]bool{}
 	ids := make(map[int32]bool, len(c.IDs))
 	placeSlot := map[uint16]scoring.Slot{}
@@ -187,7 +195,11 @@ func TestShippedCatalogueIsWearable(t *testing.T) {
 			t.Errorf("item %d appears twice", id)
 		}
 		ids[id] = true
-		if want := pipeline.SlotOfID(int(id)); slot != want {
+		want, kept := fixes.Slot[int(id)]
+		if !kept {
+			want = pipeline.SlotOfID(int(id))
+		}
+		if slot != want {
 			t.Errorf("item %d is scored as %s, and its ID says %s", id, pipeline.SlotName(slot), pipeline.SlotName(want))
 		}
 		place := c.Positions[i]
