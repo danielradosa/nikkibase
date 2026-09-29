@@ -1,7 +1,6 @@
 package catalogue
 
 import (
-	"bytes"
 	"encoding/binary"
 	"errors"
 )
@@ -20,55 +19,48 @@ type Item struct {
 }
 
 func Write(items []Item) []byte {
-	var buf bytes.Buffer
-	buf.WriteString(magic)
-	put(&buf, uint32(len(items)))
+	le := binary.LittleEndian
+	b := le.AppendUint32([]byte(magic), uint32(len(items)))
 
 	for _, it := range items {
-		put(&buf, it.ID)
+		b = le.AppendUint32(b, uint32(it.ID))
 	}
 	for _, it := range items {
-		buf.WriteByte(it.Slot)
+		b = append(b, it.Slot)
 	}
 	for _, it := range items {
-		put(&buf, it.Position)
+		b = le.AppendUint16(b, it.Position)
 	}
 	for _, it := range items {
-		buf.WriteByte(it.Group)
+		b = append(b, it.Group)
 	}
 	for _, it := range items {
 		for _, a := range it.Attrs {
-			buf.WriteByte(byte(a))
+			b = append(b, byte(a))
 		}
 	}
 	for _, it := range items {
 		for _, s := range it.Stats {
-			put(&buf, s)
+			b = le.AppendUint32(b, uint32(s))
 		}
 	}
 
 	for _, it := range items {
-		put(&buf, it.FlatBonus)
+		b = le.AppendUint32(b, uint32(it.FlatBonus))
 	}
 
 	offset := uint32(0)
 	for _, it := range items {
-		put(&buf, offset)
+		b = le.AppendUint32(b, offset)
 		offset += uint32(len(it.Tags))
 	}
-	put(&buf, offset)
+	b = le.AppendUint32(b, offset)
 	for _, it := range items {
 		for _, t := range it.Tags {
-			put(&buf, t)
+			b = le.AppendUint32(b, uint32(t))
 		}
 	}
-	return buf.Bytes()
-}
-
-func put(buf *bytes.Buffer, v any) {
-	if err := binary.Write(buf, binary.LittleEndian, v); err != nil {
-		panic(err)
-	}
+	return b
 }
 
 type Catalogue struct {
