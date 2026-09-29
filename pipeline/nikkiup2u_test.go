@@ -113,25 +113,6 @@ func TestStatCalibration(t *testing.T) {
 	}
 }
 
-func TestPositionsKeepsOnlyOwned(t *testing.T) {
-	entries := []Entry{
-		{Item: scoring.Item{ID: 1, Slot: scoring.Hair}, Position: "hair"},
-		{Item: scoring.Item{ID: 2, Slot: scoring.Hair}, Position: "hair"},
-		{Item: scoring.Item{ID: 3, Slot: scoring.Shoes}, Position: "shoes"},
-	}
-	positions, unplaced := Positions(entries, []int{1, 3, 999})
-	if unplaced != 0 {
-		t.Errorf("unplaced = %d, want 0", unplaced)
-	}
-
-	if len(positions) != 2 {
-		t.Fatalf("got %d positions, want 2", len(positions))
-	}
-	if len(positions[0].Items) != 1 || positions[0].Items[0].ID != 1 {
-		t.Errorf("hair position = %v, want only the owned item 1", positions[0].Items)
-	}
-}
-
 func TestEveryNikkiup2uCategoryIsPlaced(t *testing.T) {
 	categories := []string{"发型", "连衣裙", "上装", "下装", "外套", "袜子-袜套", "袜子-袜子", "鞋子", "妆容", "萤光之灵",
 		"饰品-头饰·发饰", "饰品-头饰·头纱", "饰品-头饰·发卡", "饰品-头饰·耳朵", "饰品-耳饰", "饰品-颈饰·围巾",
@@ -151,35 +132,9 @@ func TestEveryNikkiup2uCategoryIsPlaced(t *testing.T) {
 	if skipped != 1 || len(entries) != len(categories)-1 {
 		t.Fatalf("parsed %d of %d categories, %d skipped; want every one but the spirit", len(entries), len(categories), skipped)
 	}
-	owned := make([]int, 0, len(entries))
 	for _, e := range entries {
-		owned = append(owned, e.Item.ID)
-	}
-	positions, unplaced := Positions(entries, owned)
-	if unplaced != 0 {
-		for _, e := range entries {
-			if _, err := ResolvePosition(e.Position, e.Item.Slot); err != nil {
-				t.Errorf("%s: %v", e.Position, err)
-			}
+		if _, err := ResolvePosition(e.Position, e.Item.Slot); err != nil {
+			t.Errorf("%s: %v", e.Position, err)
 		}
-	}
-	placed := 0
-	for _, p := range positions {
-		placed += len(p.Items)
-	}
-	if placed != len(entries) {
-		t.Errorf("placed %d of %d items", placed, len(entries))
-	}
-}
-
-func TestPositionsPlacesEachIDOnce(t *testing.T) {
-	scarf := Entry{Item: scoring.Item{ID: 82786, Slot: scoring.Accessory}, Name: "Soul Collectio Bead", Position: "accessory_scarf"}
-	skin := Entry{Item: scoring.Item{ID: 82786, Slot: scoring.Accessory}, Name: "Warm Ray", Position: "accessory_skin"}
-	positions, left := Positions([]Entry{scarf, skin, scarf}, []int{82786})
-	if len(positions) != 1 || len(positions[0].Items) != 1 || positions[0].Items[0].ID != 82786 {
-		t.Fatalf("positions = %+v, want the scarf alone", positions)
-	}
-	if left != 2 {
-		t.Errorf("left out %d rows, want 2", left)
 	}
 }

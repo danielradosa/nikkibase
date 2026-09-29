@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/danielradosa/nikkibase/core/optimizer"
 	"github.com/danielradosa/nikkibase/core/scoring"
 )
 
@@ -140,46 +139,4 @@ func Stat(grade string, slot scoring.Slot) int {
 		return 0
 	}
 	return int(math.Round(base * scoring.SlotSize(slot)))
-}
-
-func Positions(entries []Entry, owned []int) ([]optimizer.Position, int) {
-	have := make(map[int]bool, len(owned))
-	for _, id := range owned {
-		have[id] = true
-	}
-	byPlace := map[string][]scoring.Item{}
-	places := map[string]SubSlot{}
-	unplaced := 0
-	placed := map[int]bool{}
-	var order []string
-	for _, e := range entries {
-		if !have[e.Item.ID] {
-			continue
-		}
-		if placed[e.Item.ID] {
-			unplaced++
-			continue
-		}
-		place, err := ResolvePosition(e.Position, e.Item.Slot)
-		if err != nil {
-			unplaced++
-			continue
-		}
-		if _, seen := byPlace[place.Name]; !seen {
-			order = append(order, place.Name)
-			places[place.Name] = place
-		}
-		byPlace[place.Name] = append(byPlace[place.Name], e.Item)
-		placed[e.Item.ID] = true
-	}
-	positions := make([]optimizer.Position, 0, len(order))
-	for _, name := range order {
-		place := places[name]
-		positions = append(positions, optimizer.Position{
-			Items:     byPlace[name],
-			Group:     uint8(GroupIndex(place.Group)),
-			Exclusive: place.Exclusive(),
-		})
-	}
-	return positions, unplaced
 }
