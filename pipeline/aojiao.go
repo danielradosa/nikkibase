@@ -131,10 +131,9 @@ func packedEntry(row string, category, tagNames []string, stats *PackedStats) (E
 	for p := range 5 {
 		s := num2stat[num%12]
 		num /= 12
-		first, second := packedCodes(p)
-		attr := first
+		attr := gradeColumns[p].first
 		if s.second {
-			attr = second
+			attr = gradeColumns[p].second
 		}
 		it.Attrs[p], it.Stats[p], letters[p] = int8(attr), Stat(s.grade, slot), s.grade
 	}
@@ -317,11 +316,4 @@ func packedIsCode(s string) bool {
 		}
 	}
 	return true
-}
-
-func packedCodes(p int) (first, second int) {
-	if p == 4 {
-		return scoring.Cool, scoring.Warm
-	}
-	return p * 2, p*2 + 1
 }

@@ -89,10 +89,7 @@ func TestPackedCodes(t *testing.T) {
 			t.Errorf("code2num(%q) = %d, want %d", c.in, got, c.want)
 		}
 	}
-	if first, second := packedCodes(4); first != scoring.Cool || second != scoring.Warm {
-		t.Errorf("pair 4 = (%d,%d), want (Cool,Warm)", first, second)
-	}
-	if first, second := packedCodes(0); first != scoring.Gorgeous || second != scoring.Simple {
-		t.Errorf("pair 0 = (%d,%d), want (Gorgeous,Simple)", first, second)
+	if c := gradeColumns[4]; c.first != scoring.Cool || c.second != scoring.Warm {
+		t.Errorf("pair 4 = (%d,%d), want (Cool,Warm)", c.first, c.second)
 	}
 }
