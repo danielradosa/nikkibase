@@ -224,40 +224,39 @@ func readStageTables(src []byte, corrections map[string]StageCorrection, stats *
 
 func applyBonuses(src []byte, stages []Stage, index map[string]int,
 	corrections map[string]StageCorrection, stats *StageStats) {
-	start := bytes.Index(src, []byte("var levelBonus"))
-	if start < 0 {
-		return
+	for at, calls := range bonusCalls(src, index, len(stages), stats) {
+		divisor := 1.0
+		if fixed, ok := corrections[stages[at].Name]; ok {
+			divisor = fixed.BonusDivisor
+		}
+		pay(&stages[at].Stage, calls, weightSum(stages[at]), divisor, stats)
 	}
-	end := bytes.Index(src[start:], []byte("\n};"))
-	if end < 0 {
-		return
-	}
-	coop := coopIndex(stages, index)
-	region := src[start : start+end]
-	stats.BonusCalls = len(bonusAny.FindAll(region, -1))
-	stats.Dropped = stats.BonusCalls
+}
+
+func bonusCalls(src []byte, index map[string]int, n int, stats *StageStats) [][][][]byte {
+	calls := make([][][][]byte, n)
+	coop := coopIndex(index)
+	region := table(src, "levelBonus")
+	found := len(bonusAny.FindAll(region, -1))
+	stats.BonusCalls += found
+	stats.Dropped += found
 	for _, m := range bonusEntry.FindAllSubmatch(region, -1) {
-		name := string(m[1])
-		calls := bonusCall.FindAllSubmatch(m[2], -1)
-		if len(calls) == 0 {
+		c := bonusCall.FindAllSubmatch(m[2], -1)
+		if len(c) == 0 {
 			continue
 		}
-		stats.Dropped -= len(calls)
-		at, ok := index[name]
+		stats.Dropped -= len(c)
+		at, ok := index[string(m[1])]
 		if !ok {
-			at, ok = coop[coopKey(name)]
+			at, ok = coop[coopKey(string(m[1]))]
 		}
 		if !ok {
 			stats.OrphanBonus++
 			continue
 		}
-		divisor := 1.0
-		if fixed, ok := corrections[stages[at].Name]; ok {
-			divisor = fixed.BonusDivisor
-		}
-		st := &stages[at].Stage
-		pay(st, calls, weightSum(stages[at]), divisor, stats)
+		calls[at] = append(calls[at], c...)
 	}
+	return calls
 }
 
 const factorGrade = "F"
@@ -305,28 +304,7 @@ func ApplyStageValues(stages []Stage, src []byte, corrections map[string]StageCo
 		return err
 	}
 	ours := joinIndex(stages)
-	calls := make([][][][]byte, len(theirs))
-	coop := coopIndex(theirs, index)
-	region := table(src, "levelBonus")
-	n := len(bonusAny.FindAll(region, -1))
-	stats.BonusCalls += n
-	stats.Dropped += n
-	for _, m := range bonusEntry.FindAllSubmatch(region, -1) {
-		c := bonusCall.FindAllSubmatch(m[2], -1)
-		if len(c) == 0 {
-			continue
-		}
-		stats.Dropped -= len(c)
-		at, ok := index[string(m[1])]
-		if !ok {
-			at, ok = coop[coopKey(string(m[1]))]
-		}
-		if !ok {
-			stats.OrphanBonus++
-			continue
-		}
-		calls[at] = append(calls[at], c...)
-	}
+	calls := bonusCalls(src, index, len(theirs), stats)
 	for at, t := range theirs {
 		mine, ok := ours[joinKey(t.Name)]
 		if !ok {
@@ -525,7 +503,7 @@ func coopKey(name string) string {
 	return strings.ReplaceAll(inside, "的", "")
 }
 
-func coopIndex(stages []Stage, index map[string]int) map[string]int {
+func coopIndex(index map[string]int) map[string]int {
 	out := map[string]int{}
 	clash := map[string]bool{}
 	for name, at := range index {
@@ -554,7 +532,7 @@ var (
 )
 
 func applyRules(src []byte, stages []Stage, index map[string]int, stats *StageStats) {
-	coop := coopIndex(stages, index)
+	coop := coopIndex(index)
 	find := func(name string) (int, bool) {
 		if at, ok := index[name]; ok {
 			return at, true
