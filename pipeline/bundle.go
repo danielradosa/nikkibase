@@ -1,6 +1,8 @@
 package pipeline
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"maps"
 	"slices"
@@ -45,71 +47,41 @@ type ItemNames struct {
 	Shown map[int]string
 }
 
+func marshal(v any) []byte {
+	var b bytes.Buffer
+	enc := json.NewEncoder(&b)
+	enc.SetEscapeHTML(false)
+	enc.Encode(v)
+	return bytes.TrimSuffix(b.Bytes(), []byte("\n"))
+}
+
 func WriteItems(entries []Entry, names ItemNames, rarity map[int]int, suits map[int]string) []byte {
-	extra := names.Calc
+	rows := make([][]any, 0, len(entries))
 	seen := make(map[int]bool, len(entries))
 	for _, e := range entries {
 		seen[e.Item.ID] = true
-	}
-	var b strings.Builder
-	b.WriteString(`{"items":[`)
-	for i, e := range entries {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteByte('[')
-		b.WriteString(strconv.Itoa(e.Item.ID))
-		b.WriteByte(',')
-		b.WriteString(quote(displayName(e, names)))
-		b.WriteByte(',')
-		b.WriteString(strconv.Itoa(int(e.Item.Slot)))
+		row := []any{e.Item.ID, displayName(e, names), e.Item.Slot}
 		for _, a := range e.Item.Attrs {
-			b.WriteByte(',')
-			b.WriteString(strconv.Itoa(int(a)))
+			row = append(row, a)
 		}
 		for _, g := range e.Grades {
-			b.WriteByte(',')
-			b.WriteString(quote(strings.ToUpper(g)))
+			row = append(row, strings.ToUpper(g))
 		}
-		b.WriteByte(',')
-		b.WriteString(strconv.Itoa(e.Rarity))
-		b.WriteByte(',')
-		b.WriteString(quote(e.Suit))
-		b.WriteByte(']')
+		rows = append(rows, append(row, e.Rarity, e.Suit))
 	}
-	ids := make([]int, 0, len(extra))
-	for id := range extra {
-		if !seen[id] {
-			ids = append(ids, id)
+	for _, id := range slices.Sorted(maps.Keys(names.Calc)) {
+		if seen[id] {
+			continue
 		}
-	}
-	sort.Ints(ids)
-	for _, id := range ids {
-		b.WriteByte(',')
-		b.WriteByte('[')
-		b.WriteString(strconv.Itoa(id))
-		b.WriteByte(',')
-		name := gameSpelling(extra[id])
+		name := gameSpelling(names.Calc[id])
 		if shown, ok := names.Shown[id]; ok {
 			name = gameSpelling(shown)
 		}
-		b.WriteString(quote(name))
-		b.WriteByte(',')
-		b.WriteString(strconv.Itoa(int(SlotOfID(id))))
-		for range 5 {
-			b.WriteString(",0")
-		}
-		for range 5 {
-			b.WriteString(`,""`)
-		}
-		b.WriteByte(',')
-		b.WriteString(strconv.Itoa(rarity[id]))
-		b.WriteByte(',')
-		b.WriteString(quote(suits[id]))
-		b.WriteByte(']')
+		rows = append(rows, []any{id, name, SlotOfID(id), 0, 0, 0, 0, 0, "", "", "", "", "", rarity[id], suits[id]})
 	}
-	b.WriteString("]}")
-	return []byte(b.String())
+	return marshal(struct {
+		Items [][]any `json:"items"`
+	}{rows})
 }
 
 func WriteStages(stages []Stage) []byte {
@@ -217,16 +189,7 @@ func writeScoring(b *strings.Builder, st scoring.Stage) {
 }
 
 func WriteTags() []byte {
-	var b strings.Builder
-	b.WriteByte('[')
-	for i, name := range TagNames() {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(quote(name))
-	}
-	b.WriteByte(']')
-	return []byte(b.String())
+	return marshal(TagNames())
 }
 
 func displayName(e Entry, names ItemNames) string {
@@ -364,20 +327,15 @@ func writeAcquisition(b *strings.Builder, a Acquisition) {
 }
 
 func WritePositions() []byte {
-	var b strings.Builder
-	b.WriteByte('[')
-	for i, s := range SubSlots() {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteString(`{"name":`)
-		b.WriteString(quote(s.Display))
-		b.WriteString(`,"slot":`)
-		b.WriteString(strconv.Itoa(int(s.Slot)))
-		b.WriteByte('}')
+	type position struct {
+		Name string       `json:"name"`
+		Slot scoring.Slot `json:"slot"`
 	}
-	b.WriteByte(']')
-	return []byte(b.String())
+	out := make([]position, 0, len(subSlots))
+	for _, s := range subSlots {
+		out = append(out, position{s.Display, s.Slot})
+	}
+	return marshal(out)
 }
 
 func groupByte(s SubSlot) uint8 {
