@@ -818,15 +818,20 @@ func (c *acqContext) members(suits []acqSuit) map[string][]int {
 }
 
 func (c *acqContext) aside(s acqSuit) map[int]bool {
-	extra := map[int]bool{}
+	out := map[int]bool{}
 	for _, part := range s.parts {
 		if id := c.resolvePart(part.name, s.title); id != 0 {
-			only, seen := extra[id]
-			extra[id] = part.extra && (only || !seen)
+			only, seen := out[id]
+			out[id] = part.extra && (only || !seen)
 		}
 	}
-	maps.DeleteFunc(extra, func(_ int, only bool) bool { return !only })
-	return extra
+	maps.DeleteFunc(out, func(_ int, only bool) bool { return !only })
+	for _, name := range s.reward {
+		if id := c.resolvePart(name, s.title); id != 0 {
+			out[id] = true
+		}
+	}
+	return out
 }
 
 func (c *acqContext) suitKey(name string) string {

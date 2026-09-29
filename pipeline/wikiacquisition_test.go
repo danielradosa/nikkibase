@@ -798,6 +798,30 @@ func TestAdditionalItemsTakeNoEventOrRerunFromTheirSuit(t *testing.T) {
 	}
 }
 
+func TestGiftBoxItemsTakeNoEventOrRerunFromTheirSuit(t *testing.T) {
+	dump := "<mediawiki>\n" +
+		dumpPage("Grace Suit", "{{Suit Infobox\n|type = Collection Suit\n|how to obtain = [[Recharge]]\n|reward = {{Gift Box|Grace Glow;20 {{Currency|D}}}}\n}}",
+			"==Wardrobe==\n{{Suit Part|Grace Gown|type=Dress}}\n{{Suit Part|Grace Gloves|type=Gloves}}\n"+
+				"{{Version|posed=1|v=2}}\n{{Suit Part|Grace Gown|type=Dress|v=2}}\n{{Suit Part|Grace Glow|type=Gloves|v=2}}") +
+		timelinePage("2024", "|month = January\n|events1 = {{*}}'''[[Abyssal Island]]:''' [[Grace Suit]] {{!}} Jan 3 {{en}} Jan 9") +
+		eventPage("Starlight Echo Event/Fateful Dusk", "Fateful Dusk", "Rebate; Recharge", "Grace Suit") +
+		"</mediawiki>"
+	cat := AcquisitionCatalogue{Names: map[int]string{20001: "Grace Gown", 80001: "Grace Gloves", 80002: "Grace Glow"}}
+	got, _, err := ParseFandomAcquisition(strings.NewReader(dump), nil, nil, cat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.SuitOf[80002] != "Grace Suit" {
+		t.Errorf("the gift box item in %q, want Grace Suit", got.SuitOf[80002])
+	}
+	if _, ok := got.Reruns[80002]; ok || len(got.Reruns) != 2 {
+		t.Errorf("reruns %v, want the gown and gloves only", got.Reruns)
+	}
+	if _, ok := got.Events[80002]; ok || len(got.Events) != 2 {
+		t.Errorf("events %v, want the gown and gloves only", got.Events)
+	}
+}
+
 func TestDayAndNightFormsBothJoinTheirSuit(t *testing.T) {
 	dump := "<mediawiki>\n" +
 		suitPage("Dawn Suit", "[[Recharge]]",
