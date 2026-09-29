@@ -16,32 +16,21 @@ export function useWardrobe(version: string) {
   const ticks = useRef(tickState())
   const before = useRef<WardrobeSource | null>(null)
 
-  const adopt = useCallback(
-    async (ids: number[], stats: { items: number; unresolved: number; known: number }, src: WardrobeSource) => {
-      set({ owned: ids, source: src, decoded: stats, importing: false, outfit: null, ideal: null })
-      if (version) noteSave(await saveWardrobe({ version, ids, source: src, savedAt: Date.now() }), true)
-    },
-    [set, version],
-  )
-
   const ingest = useCallback(
     async (text: string) => {
       if (useStore.getState().importing) return
       set({ importing: true, error: null, notice: null })
       try {
-        if (!text.trimStart().startsWith('@SEL')) {
-          const result = await engine.decode(text)
-          await adopt(result.ids, result, 'clothes_date')
-          return
-        }
-        const result = await engine.selections(text)
-        await adopt(result.ids, result, 'sel')
+        const source: WardrobeSource = text.trimStart().startsWith('@SEL') ? 'sel' : 'clothes_date'
+        const result = await (source === 'sel' ? engine.selections(text) : engine.decode(text))
+        set({ owned: result.ids, source, decoded: result, importing: false, outfit: null, ideal: null })
+        if (version) noteSave(await saveWardrobe({ version, ids: result.ids, source, savedAt: Date.now() }), true)
       } catch (e) {
         console.warn(e)
         set({ error: importError(e), importing: false })
       }
     },
-    [adopt, set],
+    [set, version],
   )
 
   const toggleOwned = useCallback(
