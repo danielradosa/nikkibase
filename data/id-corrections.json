@@ -376,8 +376,20 @@
   ],
   "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where one source swaps the names of two items, and where a night form's name would be the wiki's page address ('/Night'): it shows the plain name, as the game does. 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling. A trailing bracket the wiki adds to tell items apart ('(Coat)', '(Hair)', '(Night)') is dropped from every shown name unless Nikki Calc's name carries the same bracket, since the game shows the plain name.",
   "excluded": [
-    {"id": 85647, "name": "Magic Bubble", "slot": "accessory", "reason": "Never released: the wiki's suit page says the right handheld accessory Magic Bubble goes along with the suit but is not included in any version.", "effect": "Listed by name only, so no best outfit wears an item nobody can own."},
-    {"id": 181794, "name": "Hymn of Dawn", "slot": "accessory", "reason": "Never released: the wiki's suit page calls Hymn of Dawn an unused item with no image.", "effect": "Listed by name only, so no best outfit wears an item nobody can own."}
+    {
+      "id": 85647,
+      "name": "Magic Bubble",
+      "slot": "accessory",
+      "reason": "Never released: the wiki's suit page says the right handheld accessory Magic Bubble goes along with the suit but is not included in any version.",
+      "effect": "Listed by name only, so no best outfit wears an item nobody can own."
+    },
+    {
+      "id": 181794,
+      "name": "Hymn of Dawn",
+      "slot": "accessory",
+      "reason": "Never released: the wiki's suit page calls Hymn of Dawn an unused item with no image.",
+      "effect": "Listed by name only, so no best outfit wears an item nobody can own."
+    }
   ],
   "excludedNote": "Items the game lists but never released. They stay in the catalogue by name only and are never graded, whichever source grades them.",
   "gradeOverrides": [
@@ -401,7 +413,118 @@
       "grade": "S",
       "was": "A",
       "basis": "The wiki's item page 'Bloody Flame (Foreground)' gives Warm A. The packed table (wardrobe.js) gives Warm S, and Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives S-, in the S band. The two agree on S."
+    },
+    {
+      "id": 91095,
+      "attribute": "Gorgeous",
+      "grade": "S",
+      "was": "S",
+      "wasAttribute": "Simple",
+      "basis": "Checked in the Global game on 2026-09-29: Gorgeous S, Elegant SS, Mature SS, Sexy A, Cool A. The packed table (wardrobe.js) gives Simple S, Elegant SS, Mature A, Pure S, Cool SS; Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives Gorgeous S-, Elegant SS-, Mature SS, Sexy A+, Cool A-, as the game does. No wiki page."
+    },
+    {
+      "id": 91095,
+      "attribute": "Mature",
+      "grade": "SS",
+      "was": "A",
+      "basis": "Checked in the Global game on 2026-09-29: Gorgeous S, Elegant SS, Mature SS, Sexy A, Cool A. The packed table (wardrobe.js) gives Simple S, Elegant SS, Mature A, Pure S, Cool SS; Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives Gorgeous S-, Elegant SS-, Mature SS, Sexy A+, Cool A-, as the game does. No wiki page."
+    },
+    {
+      "id": 91095,
+      "attribute": "Sexy",
+      "grade": "A",
+      "was": "S",
+      "wasAttribute": "Pure",
+      "basis": "Checked in the Global game on 2026-09-29: Gorgeous S, Elegant SS, Mature SS, Sexy A, Cool A. The packed table (wardrobe.js) gives Simple S, Elegant SS, Mature A, Pure S, Cool SS; Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives Gorgeous S-, Elegant SS-, Mature SS, Sexy A+, Cool A-, as the game does. No wiki page."
+    },
+    {
+      "id": 91095,
+      "attribute": "Cool",
+      "grade": "A",
+      "was": "SS",
+      "basis": "Checked in the Global game on 2026-09-29: Gorgeous S, Elegant SS, Mature SS, Sexy A, Cool A. The packed table (wardrobe.js) gives Simple S, Elegant SS, Mature A, Pure S, Cool SS; Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives Gorgeous S-, Elegant SS-, Mature SS, Sexy A+, Cool A-, as the game does. No wiki page."
     }
   ],
-  "gradeOverridesNote": "Grades kept against the wiki's item page where the packed table and Nikki Calc's sub-grade agree on another letter for the same attribute. 'grade' is the letter kept, 'was' the one the wiki gives; the build fails if the sources no longer give 'was' on that attribute. The stat is worked out from the kept letter, and Nikki Calc's sub-grade then sets it as for any other stat."
+  "gradeOverridesNote": "Grades kept against the sources' own row: against the wiki's item page where the packed table and Nikki Calc's sub-grade agree on another letter for the same attribute, or against the packed table where the game itself shows another grade. 'grade' is the letter kept, 'was' the one the sources give; 'wasAttribute', when given, is the other side of the same pair the sources put that letter on, and the kept grade moves the pair to 'attribute'. The build fails if the sources no longer give 'was' on that attribute. The stat is worked out from the kept letter, and Nikki Calc's sub-grade then sets it as for any other stat.",
+  "tagOverrides": [
+    {
+      "id": 14527,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 73806,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 91095,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188187,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188188,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188189,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188190,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188191,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 23965,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188192,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 23967,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 188198,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    },
+    {
+      "id": 23966,
+      "tag": "Chic",
+      "was": "Evening Gown",
+      "basis": "The packed table (wardrobe.js) tags the Nightfall Menace suit Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags these pieces Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."
+    }
+  ],
+  "tagOverridesNote": "Style tags kept against the sources: 'tag' replaces 'was' on the item. The build fails if the sources no longer give the item 'was', or already give it 'tag'."
 }
