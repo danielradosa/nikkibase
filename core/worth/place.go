@@ -134,20 +134,8 @@ func (sc *scorer) setupPlacer() {
 	pl.dress = e.hasDress && e.dress >= e.top+e.bottom
 	items := e.outfit(sc.s.buf, &change{})
 	sc.s.buf = items
-	st := sc.v.Stage
-	pl.main, pl.acc = [5]float64{}, [5]float64{}
-	for _, it := range items {
-		sum := &pl.main
-		if it.Slot == scoring.Accessory {
-			sum = &pl.acc
-		}
-		for p := range 5 {
-			if it.Attrs[p] == st.Attrs[p] {
-				sum[p] += st.Weights[p] * float64(it.Stats[p])
-			}
-		}
-	}
-	pl.place = sc.s.effective(scoring.Place(items, st))
+	pl.main, pl.acc, _ = scoring.Sums(items, sc.v.Stage)
+	pl.place = sc.s.effective(scoring.Place(items, sc.v.Stage))
 }
 
 func (sc *scorer) shift(sum *[5]float64, i int32, sign float64) {

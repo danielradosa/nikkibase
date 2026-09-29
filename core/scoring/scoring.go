@@ -105,14 +105,12 @@ func (p Placement) SkillsAt(l Levels) Skills {
 	return sk
 }
 
-func Points(outfit []Item, st Stage) [pairs]float64 {
-	var main, accessory [pairs]float64
-	accessories := 0
+func Sums(outfit []Item, st Stage) (main, accessory [pairs]float64, worn int) {
 	for _, it := range outfit {
 		sum := &main
 		if it.Slot == Accessory {
 			sum = &accessory
-			accessories++
+			worn++
 		}
 		for p := range pairs {
 			if it.Attrs[p] != st.Attrs[p] {
@@ -121,7 +119,12 @@ func Points(outfit []Item, st Stage) [pairs]float64 {
 			sum[p] += st.Weights[p] * float64(it.Stats[p])
 		}
 	}
-	ratio := AccessoryPenalty(accessories)
+	return main, accessory, worn
+}
+
+func Points(outfit []Item, st Stage) [pairs]float64 {
+	main, accessory, worn := Sums(outfit, st)
+	ratio := AccessoryPenalty(worn)
 	var points [pairs]float64
 	for p := range pairs {
 		points[p] = main[p] + ratio*accessory[p]
@@ -130,10 +133,7 @@ func Points(outfit []Item, st Stage) [pairs]float64 {
 }
 
 func Place(outfit []Item, st Stage) Placement {
-	return PlaceFrom(Points(outfit, st), st)
-}
-
-func PlaceFrom(points [pairs]float64, st Stage) Placement {
+	points := Points(outfit, st)
 	var weighted [pairs]int
 	order := weighted[:0]
 	for p := range pairs {
