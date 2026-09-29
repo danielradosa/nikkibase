@@ -320,17 +320,7 @@ func (f Filter) key() string {
 }
 
 func (r *suitRanker) set(j int, u int32, old, now int32) {
-	if old == now {
-		return
-	}
-	if old > 0 {
-		r.worth[u] -= pct(old, r.ideal(j))
-		r.count[u]--
-	}
-	if now > 0 {
-		r.worth[u] += pct(now, r.ideal(j))
-		r.count[u]++
-	}
+	r.move(&r.worth[u], &r.count[u], j, old, now)
 }
 
 func (r *suitRanker) remaining(u int32) []int32 {

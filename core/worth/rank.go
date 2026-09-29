@@ -140,34 +140,27 @@ func (t *tracker) ideal(j int) int {
 	return t.s.versions[t.vs[j]].Ideal
 }
 
-func (r *ranker) setSingle(j int, i int32, old, now int32) {
+func (t *tracker) move(worth *float64, count *int32, j int, old, now int32) {
 	if old == now {
 		return
 	}
 	if old > 0 {
-		r.worth[i] -= pct(old, r.ideal(j))
-		r.count[i]--
+		*worth -= pct(old, t.ideal(j))
+		*count--
 	}
 	if now > 0 {
-		r.worth[i] += pct(now, r.ideal(j))
-		r.count[i]++
+		*worth += pct(now, t.ideal(j))
+		*count++
 	}
+}
+
+func (r *ranker) setSingle(j int, i int32, old, now int32) {
+	r.move(&r.worth[i], &r.count[i], j, old, now)
 }
 
 func (r *ranker) setPair(j, k int, now int32) {
 	b := &r.pairs[k]
-	old := b.pts[j]
-	if old == now {
-		return
-	}
-	if old > 0 {
-		b.worth -= pct(old, r.ideal(j))
-		b.count--
-	}
-	if now > 0 {
-		b.worth += pct(now, r.ideal(j))
-		b.count++
-	}
+	r.move(&b.worth, &b.count, j, b.pts[j], now)
 	b.pts[j] = now
 }
 
