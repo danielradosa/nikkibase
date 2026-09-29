@@ -39,9 +39,9 @@ const DIFFICULTY_KEY = 'nikkibase.difficulty'
 const SKILLS_KEY = 'nikkibase.skillSettings'
 const LEGACY_SKILLS_KEY = 'nikkibase.skills'
 
-function saveDifficulty(difficulty: Difficulty) {
+function keep(key: string, value: string) {
   try {
-    localStorage.setItem(DIFFICULTY_KEY, difficulty)
+    localStorage.setItem(key, value)
   } catch {
   }
 }
@@ -80,15 +80,12 @@ export const useStore = create<State>((set) => ({
   error: null,
   difficulty: savedDifficulty(),
   setDifficulty: (difficulty) => {
-    saveDifficulty(difficulty)
+    keep(DIFFICULTY_KEY, difficulty)
     set({ difficulty })
   },
   skills: savedSkills(),
   setSkills: (skills) => {
-    try {
-      localStorage.setItem(SKILLS_KEY, JSON.stringify(skills))
-    } catch {
-    }
+    keep(SKILLS_KEY, JSON.stringify(skills))
     set({ skills })
   },
   placements: {},
@@ -105,7 +102,7 @@ export const useStore = create<State>((set) => ({
   worthY: null,
   openStage: ({ mode, stage, difficulty }, worthY) =>
     set((state) => {
-      if (difficulty && difficulty !== state.difficulty) saveDifficulty(difficulty)
+      if (difficulty && difficulty !== state.difficulty) keep(DIFFICULTY_KEY, difficulty)
       return { tab: 'outfit', mode, stage, difficulty: difficulty ?? state.difficulty, jump: true, worthY }
     }),
   set: (patch) => set(patch),
