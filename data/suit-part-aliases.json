@@ -1,0 +1,17 @@
+{
+  "note": "Hand-checked spellings of suit parts that match no catalogue item by name: the wiki's suit page writes the part one way and the item another. Each entry names the suit page, the part as that page writes it and the item it is. The build refuses an entry once the item leaves the catalogue, the suit page no longer lists the part, or the part matches an item without the alias, so the list stays short and current.",
+  "aliases": [
+    {
+      "suit": "Goldfish Girl",
+      "part": "Goldfish's Summer Fantasy",
+      "id": 21093,
+      "basis": "The suit page lists it as the v=2 dress; the wiki's list page Dresses gives No. 1093 as 'Goldfish's Summer Fanstasy', the catalogue's spelling."
+    },
+    {
+      "suit": "Carrots & Sweet Dew",
+      "part": "Innocence Chip",
+      "id": 61627,
+      "basis": "The suit page lists it as the hosiery of both versions; the wiki's list page Hosiery gives No. 1627 as 'Innocent Chip', the catalogue's spelling."
+    }
+  ]
+}

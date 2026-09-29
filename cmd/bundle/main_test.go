@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -742,6 +743,34 @@ func TestSuitsTakeTheChineseNameOfTheWikisZhLink(t *testing.T) {
 		if got := rows[id][14]; got != want {
 			t.Errorf("%d: suit %q, want %q", id, got, want)
 		}
+	}
+}
+
+func TestSuitPartAliasesPlaceWhatTheLookupCannot(t *testing.T) {
+	page := "<page>\n  <title>Test Suit</title>\n  <ns>0</ns>\n  <revision><text>{{Suit Infobox\n" +
+		"|type = Collection Suit\n|how to obtain = [[Recharge]]\n}}\n==Wardrobe==\n" +
+		"{{Suit Part|Test Ribbon Hair|type=Hair}}\n{{Suit Part|Honey Soaked Sung|type=Hair|v=2}}</text></revision>\n</page>\n"
+	c := packedConfig(t, page)
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "1 suit parts and rewards") {
+		t.Fatalf("err = %v, want the misspelt part refused as unmatched", err)
+	}
+	c.suitPartAliasesPath = filepath.Join(t.TempDir(), "suit-part-aliases.json")
+	alias := `{"aliases": [{"suit": "Test Suit", "part": "%s", "id": 10002, "basis": "b"}]}`
+	if err := os.WriteFile(c.suitPartAliasesPath, fmt.Appendf(nil, alias, "Honey Soaked Sung"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(c); err != nil {
+		t.Fatal(err)
+	}
+	if got := itemRows(t, c)[10002][14]; got != "Test Suit" {
+		t.Errorf("10002 with the alias: suit %q, want Test Suit", got)
+	}
+	c.outDir = t.TempDir()
+	if err := os.WriteFile(c.suitPartAliasesPath, fmt.Appendf(nil, alias, "Honey Soaked Song"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := run(c); err == nil || !strings.Contains(err.Error(), "suit part aliases") {
+		t.Errorf("err = %v, want an alias the suit page does not list refused", err)
 	}
 }
 

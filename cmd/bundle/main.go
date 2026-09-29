@@ -28,6 +28,7 @@ type config struct {
 	sourcesPath, exceptionsPath                           string
 	idCorrectionsPath, stageCorrectionsPath, coveragePath string
 	acquisitionMapPath, acquisitionExtraPath              string
+	suitPartAliasesPath                                   string
 	allowUnlicensed, calcGrades, calcRecipes              bool
 	builtAt                                               time.Time
 }
@@ -57,6 +58,7 @@ func main() {
 	flag.StringVar(&c.stageCorrectionsPath, "stage-corrections", "data/stage-corrections.json", "stage weight vectors the source states in the wrong unit")
 	flag.StringVar(&c.coveragePath, "coverage", "data/coverage.json", "the coverage floor a bundle must clear")
 	flag.StringVar(&c.acquisitionExtraPath, "acquisition-extra", "data/acquisition-extra.json", "hand-checked ways to get items the sources give none for; empty for none")
+	flag.StringVar(&c.suitPartAliasesPath, "suit-part-aliases", "data/suit-part-aliases.json", "hand-checked items for suit parts the wiki spells unlike any item; empty for none")
 	flag.StringVar(&c.exceptionsPath, "exceptions", "data/production-exceptions.json", "recorded exceptions for sources without a licence; empty for none")
 	flag.BoolVar(&c.allowUnlicensed, "allow-unlicensed", false, "admit any source, marking the bundle research-only; deploy.sh refuses such a bundle")
 	check := flag.String("check", "", "verify a built bundle's provenance.json may be deployed, then exit")
@@ -646,6 +648,9 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 			return nil, nil, nil, err
 		}
 		defer f.Close()
+		if cat.PartAliases, err = readOptional(c.suitPartAliasesPath, pipeline.ReadSuitPartAliases); err != nil {
+			return nil, nil, nil, err
+		}
 		var stats pipeline.WikiAcquisitionStats
 		if wiki, stats, err = pipeline.ParseFandomAcquisition(f, known, corrections, cat); err != nil {
 			return nil, nil, nil, err

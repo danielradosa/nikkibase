@@ -16,7 +16,7 @@
   "maxSubgradeFallbacks": 35,
   "maxCalcGradedItems": 982,
   "maxAgreedGrades": 406,
-  "acquisitionItems": 33998,
-  "maxUnmatchedNames": 203,
-  "suitItems": 30193
+  "acquisitionItems": 34000,
+  "maxUnmatchedNames": 200,
+  "suitItems": 30194
 }

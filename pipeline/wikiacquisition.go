@@ -247,6 +247,9 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 	ctx.indexCatalogue()
 	sort.Slice(suits, func(i, j int) bool { return suits[i].title < suits[j].title })
 	ctx.suits = ctx.knownSuits(pages, suits)
+	if err := ctx.checkPartAliases(suits); err != nil {
+		return WikiAcquisition{}, stats, err
+	}
 	ctx.customs = map[string]map[string][]Cost{}
 	ctx.customizers = map[string][]string{}
 	for _, p := range pages {
@@ -562,7 +565,10 @@ func (c *acqContext) resolve(name, suit string) int {
 }
 
 func (c *acqContext) resolvePart(name, suit string) int {
-	return c.lookup(name, suit, true)
+	if id := c.lookup(name, suit, true); id != 0 {
+		return id
+	}
+	return c.partAlias(name, suit)
 }
 
 func (c *acqContext) lookup(name, suit string, part bool) int {
