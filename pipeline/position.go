@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 
@@ -162,29 +163,12 @@ func PositionIndex(name string) (int, bool) {
 }
 
 func GroupIndex(group string) int {
-	if group == "" {
-		return 0
+	groups := make([]string, len(subSlots))
+	for i, s := range subSlots {
+		groups[i] = s.Group
 	}
-	groups := groupNames()
-	for i, g := range groups {
-		if g == group {
-			return i + 1
-		}
-	}
-	return 0
-}
-
-func groupNames() []string {
-	seen := map[string]bool{}
-	var out []string
-	for _, s := range subSlots {
-		if s.Group != "" && !seen[s.Group] {
-			seen[s.Group] = true
-			out = append(out, s.Group)
-		}
-	}
-	sort.Strings(out)
-	return out
+	slices.Sort(groups)
+	return slices.Index(slices.Compact(groups), group)
 }
 
 func Canonicalise(entries []Entry) error {
