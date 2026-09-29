@@ -657,9 +657,9 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 		}
 		wikiStats = &stats
 		cat.Suits = wiki.SuitOf
-		fmt.Printf("acquisition: %d wiki item pages, %d say how to get the item, %d misnumbered read at their own ID, %d misnumbered or repeated left out; %d suit pages cover %d items; %d items in a suit the wiki names; %d event pages that do not recur name the event of %d items; %d names and %d suit parts unmatched, %d currencies unmatched, %d sources unread\n",
+		fmt.Printf("acquisition: %d wiki item pages, %d say how to get the item, %d misnumbered read at their own ID, %d misnumbered or repeated left out; %d suit pages cover %d items; %d items in a suit the wiki names; %d event pages that do not recur name the event of %d items; %d timeline entries rerun %d items on a recharge channel; %d names and %d suit parts unmatched, %d currencies unmatched, %d sources unread\n",
 			stats.Pages, stats.WithEntries, stats.Moved, stats.Dropped, stats.SuitPages, stats.SuitItems,
-			len(wiki.SuitOf), stats.EventPages, len(wiki.Events), stats.Unresolved, stats.UnknownParts, stats.UnknownUnits, stats.Unclassified)
+			len(wiki.SuitOf), stats.EventPages, len(wiki.Events), stats.TimelineEntries, len(wiki.Reruns), stats.Unresolved, stats.UnknownParts, stats.UnknownUnits, stats.Unclassified)
 	}
 	var packed map[int][]pipeline.Acquisition
 	var packedSuits map[int]pipeline.PackedSuit
@@ -691,8 +691,8 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 		}
 	}
 	acq, stats := pipeline.MergeAcquisition(cat, wiki, packed)
-	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page; %d whose lines are all vague take the one event page that lists their suit\n",
-		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits, stats.Events)
+	fmt.Printf("acquisition: %d of %d items say how to get them: %d from their wiki page (%d with a customization or evolution base from the packed table), %d from the packed table (%d of them named by their suit's wiki page), %d from their suit's wiki page; %d whose lines are all vague take the one event page that lists their suit, %d whose only lines are a plain recharge take the recharge channels the timeline reruns them on\n",
+		stats.Covered, stats.Catalogue, stats.FromWiki, stats.Based, stats.FromPacked, stats.Named, stats.FromSuits, stats.Events, stats.Reruns)
 	if recipes != nil {
 		fmt.Printf("acquisition: %d items the sources say are crafted, without naming what from, take Nikki Calc's recipe\n",
 			pipeline.ApplyCalcRecipes(acq, cat, recipes))

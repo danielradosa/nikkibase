@@ -79,12 +79,44 @@ func TestMergeAcquisitionNamesAllVagueItemsFromTheirEventPage(t *testing.T) {
 	}
 }
 
-func TestEventLinesAreHeldUnderTheirCeiling(t *testing.T) {
-	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 2}, Coverage{MaxEventItems: 2}); len(v) != 0 {
-		t.Errorf("at the ceiling: %v", v)
+func TestMergeAcquisitionNamesPlainRechargeItemsFromTheirReruns(t *testing.T) {
+	cat := AcquisitionCatalogue{Names: map[int]string{1: "A", 2: "B", 3: "C", 4: "D", 5: "E"}}
+	reruns := []Acquisition{{Kind: "recharge", Text: "Abyssal Island (last Mar 2024)", Past: true}, {Kind: "recharge", Text: "One-Dollar Sale", Past: true}}
+	wiki := WikiAcquisition{
+		Items:  map[int][]Acquisition{5: {{Kind: "recharge", Text: "Abyssal Island", Past: true}}},
+		Events: map[int][]Acquisition{4: {{Kind: "event", Text: "Starry Gala event", Past: true}}},
+		Reruns: map[int][]Acquisition{1: reruns, 2: reruns, 3: reruns, 4: reruns, 5: reruns},
+	}
+	packed := map[int][]Acquisition{
+		1: {{Kind: "recharge", Text: "Recharge", CN: true}},
+		2: {{Kind: "recharge", Text: "Event recharge", CN: true}, {Kind: "recharge", Text: "Recharge", CN: true}},
+		3: {{Kind: "recharge", Text: "Recharge", CN: true}, {Kind: "event", Text: "Limited event", CN: true}},
+		4: {{Kind: "recharge", Text: "Recharge", CN: true}},
+	}
+	got, stats := MergeAcquisition(cat, wiki, packed)
+	want := `{"version":"v","items":{` +
+		`"1":[{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
+		`"2":[{"k":"recharge","t":"Event recharge","cn":1},{"k":"recharge","t":"Abyssal Island (last Mar 2024)","past":1},{"k":"recharge","t":"One-Dollar Sale","past":1}],` +
+		`"3":[{"k":"recharge","t":"Recharge","cn":1},{"k":"event","t":"Limited event","cn":1}],` +
+		`"4":[{"k":"event","t":"Starry Gala event","past":1}],` +
+		`"5":[{"k":"recharge","t":"Abyssal Island","past":1}]}}`
+	if out := string(WriteAcquisition("v", got)); out != want {
+		t.Errorf("\n got %s\nwant %s", out, want)
+	}
+	if stats.Reruns != 2 || stats.Events != 1 {
+		t.Errorf("stats = %+v, want 2 named by their reruns after 1 named by its event page", stats)
+	}
+}
+
+func TestEventAndRerunLinesAreHeldUnderTheirCeilings(t *testing.T) {
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 2, Reruns: 3}, Coverage{MaxEventItems: 2, MaxRerunItems: 3}); len(v) != 0 {
+		t.Errorf("at the ceilings: %v", v)
 	}
 	if v := CheckAcquisitionFallbacks(AcquisitionStats{Events: 3}, Coverage{MaxEventItems: 2}); len(v) != 1 || !strings.Contains(v[0], "3 items") {
-		t.Errorf("above the ceiling: %v", v)
+		t.Errorf("events above their ceiling: %v", v)
+	}
+	if v := CheckAcquisitionFallbacks(AcquisitionStats{Reruns: 4}, Coverage{MaxRerunItems: 3}); len(v) != 1 || !strings.Contains(v[0], "4 items") {
+		t.Errorf("reruns above their ceiling: %v", v)
 	}
 }
 

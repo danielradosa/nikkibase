@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/danielradosa/nikkibase/core/scoring"
 )
@@ -16,6 +17,7 @@ type WikiAcquisition struct {
 	Items        map[int][]Acquisition
 	Suits        map[int][]Acquisition
 	Events       map[int][]Acquisition
+	Reruns       map[int][]Acquisition
 	SuitOf       map[int]string
 	ChineseSuits map[string]string
 	Packs        map[string]bool
@@ -28,18 +30,19 @@ type SuitPart struct {
 }
 
 type WikiAcquisitionStats struct {
-	Pages        int
-	WithEntries  int
-	Moved        int
-	Dropped      int
-	SuitPages    int
-	SuitItems    int
-	EventPages   int
-	SharedParts  int
-	Unresolved   int
-	UnknownParts int
-	UnknownUnits int
-	Unclassified int
+	Pages           int
+	WithEntries     int
+	Moved           int
+	Dropped         int
+	SuitPages       int
+	SuitItems       int
+	EventPages      int
+	TimelineEntries int
+	SharedParts     int
+	Unresolved      int
+	UnknownParts    int
+	UnknownUnits    int
+	Unclassified    int
 }
 
 type acqPage struct {
@@ -69,6 +72,17 @@ type suitPart struct {
 type acqEvent struct {
 	line  Acquisition
 	suits []string
+}
+
+type acqRerun struct {
+	channel string
+	when    time.Time
+	names   []rerunName
+}
+
+type rerunName struct {
+	name string
+	item bool
 }
 
 var (
@@ -106,7 +120,22 @@ var (
 	wikiCustomTarget = regexp.MustCompile(`(?m)^\*\s*\{\{IconItem\|([^}|]+)[^}]*\}\}\s*:?(.*)$`)
 	wikiCategory     = regexp.MustCompile(`\[\[Category:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]`)
 	wikiZh           = regexp.MustCompile(`\[\[zh:([^\]|]+)`)
+	wikiTimelinePage = regexp.MustCompile(`^Events/(\d{4})$`)
+	wikiTimelineTab  = regexp.MustCompile(`(?m)^\|\s*month\s*=\s*([A-Za-z]+)`)
+	wikiTimelineLine = regexp.MustCompile(`\{\{\*\}\}\s*'''\s*(?:\[\[([^\]|]+)(?:\|[^\]]*)?\]\]|([^':\[]+))\s*:?\s*'''\s*:?\s*(.*?)\s*\{\{!\}\}\s*([^<\n|]*)`)
+	wikiTimelineDate = regexp.MustCompile(`^([A-Za-z]{3})[A-Za-z]*\.?\s*(\d{1,2})(?:,\s*(\d{4}))?`)
+	wikiTimelineLink = regexp.MustCompile(`\[\[([^\]|]+)(?:\|[^\]]*)?\]\](\s*item\b)?`)
 )
+
+var timelineChannels = map[string]string{
+	"abyssal island":         "Abyssal Island",
+	"1 usd sale":             "One-Dollar Sale",
+	"one-dollar sale":        "One-Dollar Sale",
+	"one dollar sale":        "One-Dollar Sale",
+	"lucky bags":             "Lucky Bags",
+	"anniversary lucky bags": "Lucky Bags",
+	"cumulative recharge":    "Cumulative Recharge",
+}
 
 var rechargeCategories = []string{"Abyssal Island", "Lucky Bags", "Zodiac Lucky Pack", "Time-limited Pack", "First Recharge Giftpack"}
 
@@ -210,6 +239,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 	var pages []acqPage
 	var suits []acqSuit
 	var events []acqEvent
+	var reruns []acqRerun
 	err := eachPage(r, func(page wikiPage) {
 		switch {
 		case page.Redirect.Title != "":
@@ -219,6 +249,8 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 		case page.NS != 0:
 		case listSlotOK(page.Title):
 			ctx.readList(page)
+		case wikiTimelinePage.MatchString(page.Title):
+			reruns = append(reruns, timelineReruns(page)...)
 		case strings.Contains(page.Text, "{{Clothing"):
 			if p, ok := acqItemPage(page, known, corrections, cat, &stats); ok {
 				pages = append(pages, p)
@@ -275,8 +307,10 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 
 	out := WikiAcquisition{Items: map[int][]Acquisition{}, Suits: map[int][]Acquisition{}, SuitOf: ctx.suits,
 		ChineseSuits: chineseSuits(suits), Packs: packTitles(suits), Unplaced: ctx.unplaced(suits)}
-	out.Events = ctx.eventLines(events)
-	stats.EventPages = len(events)
+	members := ctx.members()
+	out.Events = ctx.eventLines(events, members)
+	out.Reruns = ctx.rerunLines(reruns, members)
+	stats.EventPages, stats.TimelineEntries = len(events), len(reruns)
 	stats.Pages = len(pages)
 	for _, p := range pages {
 		if list := categoryRecharge(ctx.pageAcquisition(p), p.categories); len(list) > 0 {
@@ -770,8 +804,7 @@ func (c *acqContext) suitKey(name string) string {
 	return strings.ToLower(suitName(name))
 }
 
-func (c *acqContext) eventLines(events []acqEvent) map[int][]Acquisition {
-	members := c.members()
+func (c *acqContext) eventLines(events []acqEvent, members map[string][]int) map[int][]Acquisition {
 	named := map[int][]Acquisition{}
 	for _, e := range events {
 		for _, s := range e.suits {
@@ -784,6 +817,98 @@ func (c *acqContext) eventLines(events []acqEvent) map[int][]Acquisition {
 	for id, lines := range named {
 		if len(lines) == 1 {
 			out[id] = lines
+		}
+	}
+	return out
+}
+
+func timelineReruns(page wikiPage) []acqRerun {
+	year, _ := strconv.Atoi(wikiTimelinePage.FindStringSubmatch(page.Title)[1])
+	tabs := wikiTimelineTab.FindAllStringSubmatchIndex(page.Text, -1)
+	var out []acqRerun
+	for i, t := range tabs {
+		end := len(page.Text)
+		if i+1 < len(tabs) {
+			end = tabs[i+1][0]
+		}
+		tab := monthOf(page.Text[t[2]:t[3]])
+		for _, m := range wikiTimelineLine.FindAllStringSubmatch(page.Text[t[1]:end], -1) {
+			channel, _, _ := strings.Cut(m[1]+m[2], "#")
+			text, ok := timelineChannels[strings.ToLower(strings.TrimSpace(channel))]
+			if !ok {
+				continue
+			}
+			r := acqRerun{channel: text, when: rerunDate(m[4], year, tab)}
+			for _, l := range wikiTimelineLink.FindAllStringSubmatch(m[3], -1) {
+				name, _, _ := strings.Cut(l[1], "#")
+				r.names = append(r.names, rerunName{name: strings.TrimSpace(name), item: l[2] != ""})
+			}
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+func monthOf(word string) time.Month {
+	if len(word) < 3 {
+		return 0
+	}
+	t, err := time.Parse("Jan", word[:3])
+	if err != nil {
+		return 0
+	}
+	return t.Month()
+}
+
+func rerunDate(s string, year int, tab time.Month) time.Time {
+	m := wikiTimelineDate.FindStringSubmatch(s)
+	if m == nil {
+		return time.Time{}
+	}
+	month := monthOf(m[1])
+	if month == 0 {
+		return time.Time{}
+	}
+	day, _ := strconv.Atoi(m[2])
+	if m[3] != "" {
+		year, _ = strconv.Atoi(m[3])
+	} else if tab != 0 && month > tab {
+		year--
+	}
+	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+}
+
+func (c *acqContext) rerunLines(reruns []acqRerun, members map[string][]int) map[int][]Acquisition {
+	latest := map[int]map[string]time.Time{}
+	for _, r := range reruns {
+		for _, n := range r.names {
+			var ids []int
+			if !n.item {
+				ids = members[c.suitKey(n.name)]
+			}
+			if len(ids) == 0 {
+				if id := c.resolve(n.name, ""); id != 0 {
+					ids = []int{id}
+				}
+			}
+			for _, id := range ids {
+				if latest[id] == nil {
+					latest[id] = map[string]time.Time{}
+				}
+				if when, seen := latest[id][r.channel]; !seen || r.when.After(when) {
+					latest[id][r.channel] = r.when
+				}
+			}
+		}
+	}
+	out := make(map[int][]Acquisition, len(latest))
+	for id, channels := range latest {
+		for _, channel := range slices.Sorted(maps.Keys(channels)) {
+			text := channel
+			if when := channels[channel]; !when.IsZero() {
+				text += " (last " + when.Format("Jan 2006") + ")"
+			}
+			out[id] = append(out[id], Acquisition{Kind: "recharge", Text: text, Past: pastSource("recharge", text)})
 		}
 	}
 	return out

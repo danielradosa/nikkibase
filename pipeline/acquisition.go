@@ -183,6 +183,7 @@ type AcquisitionStats struct {
 	Named      int
 	Based      int
 	Events     int
+	Reruns     int
 }
 
 func vagueKinds(a Acquisition) ([]string, bool) {
@@ -268,6 +269,17 @@ func namedByEvent(list, event []Acquisition) ([]Acquisition, bool) {
 	return event, true
 }
 
+func rerunOn(list, reruns []Acquisition) ([]Acquisition, bool) {
+	if len(reruns) == 0 || !allVague(list) || slices.ContainsFunc(list, func(a Acquisition) bool { return a.Kind != "recharge" }) {
+		return list, false
+	}
+	out := slices.DeleteFunc(slices.Clone(list), func(a Acquisition) bool { return a.Text == "Recharge" })
+	for _, a := range reruns {
+		out = appendAcquisition(out, a)
+	}
+	return out, true
+}
+
 func MergeAcquisition(cat AcquisitionCatalogue, wiki WikiAcquisition, packed map[int][]Acquisition) (map[int][]Acquisition, AcquisitionStats) {
 	stats := AcquisitionStats{Catalogue: len(cat.Names)}
 	out := make(map[int][]Acquisition, len(cat.Names))
@@ -296,6 +308,10 @@ func MergeAcquisition(cat AcquisitionCatalogue, wiki WikiAcquisition, packed map
 		if list, named := namedByEvent(out[id], wiki.Events[id]); named {
 			out[id] = list
 			stats.Events++
+		}
+		if list, rerun := rerunOn(out[id], wiki.Reruns[id]); rerun {
+			out[id] = list
+			stats.Reruns++
 		}
 		stats.Covered++
 	}
@@ -331,11 +347,16 @@ func CheckAcquisition(acq map[int][]Acquisition, cat AcquisitionCatalogue, want 
 }
 
 func CheckAcquisitionFallbacks(stats AcquisitionStats, want Coverage) Violations {
+	var v Violations
 	if stats.Events > want.MaxEventItems {
-		return Violations{fmt.Sprintf("%d items whose lines are all vague take the one event page that lists their suit; the committed ceiling is %d, so the event pages may have been misread",
-			stats.Events, want.MaxEventItems)}
+		v = append(v, fmt.Sprintf("%d items whose lines are all vague take the one event page that lists their suit; the committed ceiling is %d, so the event pages may have been misread",
+			stats.Events, want.MaxEventItems))
 	}
-	return nil
+	if stats.Reruns > want.MaxRerunItems {
+		v = append(v, fmt.Sprintf("%d items whose only lines are a plain recharge take the recharge channels the wiki's timeline reruns them on; the committed ceiling is %d, so the timeline pages may have been misread",
+			stats.Reruns, want.MaxRerunItems))
+	}
+	return v
 }
 
 func CheckAcquisitionNames(stats WikiAcquisitionStats, want Coverage) Violations {

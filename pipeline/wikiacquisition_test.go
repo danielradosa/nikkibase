@@ -712,6 +712,54 @@ func TestEventPagesNameTheEventOfTheSuitsTheyList(t *testing.T) {
 	}
 }
 
+func timelinePage(year string, months ...string) string {
+	body := "Events that occurred in " + year + ".\n&lt;tabber&gt;"
+	for _, m := range months {
+		body += "\n{{Planner\n|year = " + year + "\n" + m + "\n}}"
+	}
+	return "<page>\n  <title>Events/" + year + "</title>\n  <ns>0</ns>\n  <revision><text>" + body + "</text></revision>\n</page>\n"
+}
+
+func TestTimelinePagesNameTheRechargeChannelsItemsReturnedOn(t *testing.T) {
+	dump := "<mediawiki>\n" +
+		suitPage("Alpha Suit", "[[Recharge]]", "Alpha Gown") +
+		suitPage("Beta Suit", "[[Recharge]]", "Beta Gown") +
+		suitPage("Gamma Suit", "[[Recharge]]", "Gamma Gown") +
+		suitPage("Delta Suit", "[[Recharge]]", "Delta Gown") +
+		suitPage("Epsilon Suit", "[[Recharge]]", "Epsilon Gown") +
+		"<page>\n  <title>Old Beta</title>\n  <ns>0</ns>\n  <redirect title=\"Beta Suit\" />\n  <revision><text>#REDIRECT [[Beta Suit]]</text></revision>\n</page>\n" +
+		timelinePage("2024",
+			"|month = January\n|events1 =\n"+
+				"{{*}}'''[[Abyssal Island]]:''' [[Alpha Suit]], [[Beta Suit]] {{!}} Dec 31, 2023 {{en}} Jan 7, 2024&lt;br&gt;\n"+
+				"{{*}}'''[[1 USD Sale]]:''' [[Alpha Suit]] item {{!}} Jan 3 {{en}} Jan 9&lt;br&gt;\n"+
+				"{{*}}'''[[Wish Court]]:''' [[Gamma Suit]] {{!}} Jan 3 {{en}} Jan 9\n"+
+				"|events10 = {{*}}'''[[Abyssal Island]]:''' [[Old Beta]] {{!}} Jan 10 {{en}} Jan 18",
+			"|month = March\n|events1 = {{*}}'''[[Lucky Bags#Season 4|Lucky Bags]]:''' [[Alpha Suit]] {{!}} Feb 28 {{en}} Mar 5&lt;br&gt;\n"+
+				"{{*}}'''[[Abyssal Island]]:''' [[Epsilon Suit]] {{!}} to be announced") +
+		timelinePage("2018",
+			"|month = January\n|events1 = {{*}}'''[[Cumulative Recharge]]:''' [[Delta Suit]] and [[Beta Suit]] {{!}} Dec 30 {{en}} Jan 5") +
+		"</mediawiki>"
+	cat := AcquisitionCatalogue{Names: map[int]string{
+		20001: "Alpha Gown", 20002: "Beta Gown", 20003: "Gamma Gown", 20004: "Delta Gown", 20005: "Epsilon Gown", 80009: "Alpha Suit",
+	}}
+	got, stats, err := ParseFandomAcquisition(strings.NewReader(dump), nil, nil, cat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"version":"t","items":{` +
+		`"20001":[{"k":"recharge","t":"Abyssal Island (last Dec 2023)","past":1},{"k":"recharge","t":"Lucky Bags (last Feb 2024)","past":1}],` +
+		`"20002":[{"k":"recharge","t":"Abyssal Island (last Jan 2024)","past":1},{"k":"recharge","t":"Cumulative Recharge (last Dec 2017)","past":1}],` +
+		`"20004":[{"k":"recharge","t":"Cumulative Recharge (last Dec 2017)","past":1}],` +
+		`"20005":[{"k":"recharge","t":"Abyssal Island","past":1}],` +
+		`"80009":[{"k":"recharge","t":"One-Dollar Sale (last Jan 2024)","past":1}]}}`
+	if out := string(WriteAcquisition("t", got.Reruns)); out != want {
+		t.Errorf("reruns:\n got %s\nwant %s", out, want)
+	}
+	if stats.TimelineEntries != 6 {
+		t.Errorf("%d timeline entries on a recharge channel, want 6", stats.TimelineEntries)
+	}
+}
+
 func TestDayAndNightFormsBothJoinTheirSuit(t *testing.T) {
 	dump := "<mediawiki>\n" +
 		suitPage("Dawn Suit", "[[Recharge]]",
