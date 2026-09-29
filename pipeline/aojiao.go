@@ -181,8 +181,7 @@ func packedRowID(code string) (int, scoring.Slot, bool) {
 		}
 		slot = scoring.Accessory
 	}
-	id, ok := packedID(slot, code2num(code[1:]))
-	return id, slot, ok
+	return gameID(slot, code2num(code[1:])), slot, true
 }
 
 type PackedSource struct {
@@ -232,15 +231,11 @@ func ParsePackedSources(src []byte, known map[int]bool) (map[int][]PackedSource,
 				}
 				s = PackedSource{Kind: "suit", Value: suits[n]}
 			case t[0] == '@' || t[0] == '!':
-				from, ok := packedID(slot, code2num(t[1:]))
-				if !ok {
-					continue
-				}
-				s = PackedSource{Kind: "customize", ID: from}
+				s = PackedSource{Kind: "customize", ID: gameID(slot, code2num(t[1:]))}
 				if t[0] == '!' {
 					s.Kind = "evolve"
 				}
-				if rows.crossWired(id, from) {
+				if rows.crossWired(id, s.ID) {
 					s.ID = 0
 				}
 			case t[0] == '~':
@@ -329,21 +324,4 @@ func packedCodes(p int) (first, second int) {
 		return scoring.Cool, scoring.Warm
 	}
 	return p * 2, p*2 + 1
-}
-
-func packedID(slot scoring.Slot, n int) (int, bool) {
-	switch slot {
-	case scoring.Spirit:
-		return 880000 + n, true
-	case scoring.Accessory:
-		if n >= 10000 {
-			return 170000 + n, true
-		}
-		return idPrefix[scoring.Accessory]*10000 + n, true
-	}
-	p, ok := idPrefix[slot]
-	if !ok {
-		return 0, false
-	}
-	return p*10000 + n, true
 }

@@ -92,12 +92,8 @@ func entry(fields [][]string, tags map[string]int) (Entry, bool) {
 	if err != nil {
 		return Entry{}, false
 	}
-	id := idPrefix[slot]*10000 + n
-	if slot == scoring.Accessory && n >= 10000 {
-		id = 170000 + n
-	}
 
-	it := scoring.Item{ID: id, Slot: slot}
+	it := scoring.Item{ID: gameID(slot, n), Slot: slot}
 	var grades [5]string
 	for p, col := range gradeColumns {
 		first, second := strings.TrimSpace(fields[4+p*2][1]), strings.TrimSpace(fields[5+p*2][1])

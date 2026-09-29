@@ -42,7 +42,7 @@ func ParseSpiritBonuses(r io.Reader, known map[int]bool) (map[int]int, SpiritBon
 			stats.Rejected++
 			return
 		}
-		id := fandomID(scoring.Spirit, n)
+		id := gameID(scoring.Spirit, n)
 		if len(known) > 0 && !known[id] {
 			stats.Rejected++
 			return

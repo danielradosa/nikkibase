@@ -123,7 +123,7 @@ func fandomEntry(page wikiPage, stats *FandomStats) (Entry, string) {
 		return Entry{}, "short attributes"
 	}
 
-	it := scoring.Item{ID: fandomID(slot, n), Slot: slot}
+	it := scoring.Item{ID: gameID(slot, n), Slot: slot}
 	var letters [5]string
 	for p := range 5 {
 		side, grade := strings.TrimSpace(parts[p*2]), strings.TrimSpace(parts[p*2+1])
@@ -167,7 +167,7 @@ func fandomSlot(kind string) (scoring.Slot, string, bool) {
 	return 0, "", false
 }
 
-func fandomID(slot scoring.Slot, n int) int {
+func gameID(slot scoring.Slot, n int) int {
 	switch {
 	case slot == scoring.Spirit:
 		return 880000 + n

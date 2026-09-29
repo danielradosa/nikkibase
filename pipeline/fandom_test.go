@@ -124,7 +124,7 @@ func TestAttributeSidesResolvePerPair(t *testing.T) {
 	}
 }
 
-func TestFandomIDs(t *testing.T) {
+func TestGameIDs(t *testing.T) {
 	for _, tc := range []struct {
 		slot scoring.Slot
 		n    int
@@ -135,8 +135,8 @@ func TestFandomIDs(t *testing.T) {
 		{scoring.Accessory, 13015, 183015},
 		{scoring.Spirit, 106, 880106},
 	} {
-		if got := fandomID(tc.slot, tc.n); got != tc.want {
-			t.Errorf("fandomID(%v, %d) = %d, want %d", tc.slot, tc.n, got, tc.want)
+		if got := gameID(tc.slot, tc.n); got != tc.want {
+			t.Errorf("gameID(%v, %d) = %d, want %d", tc.slot, tc.n, got, tc.want)
 		}
 	}
 }

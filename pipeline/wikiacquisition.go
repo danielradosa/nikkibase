@@ -295,7 +295,7 @@ func acqItemPage(page wikiPage, known map[int]bool, corrections *IDCorrections, 
 	if err != nil {
 		return acqPage{}, false
 	}
-	id := fandomID(slot, n)
+	id := gameID(slot, n)
 	if len(known) > 0 && !known[id] {
 		return acqPage{}, false
 	}
@@ -634,7 +634,7 @@ func (c *acqContext) readList(page wikiPage) {
 		if err != nil {
 			continue
 		}
-		id, title := fandomID(slot, n), strings.TrimSpace(m[2])
+		id, title := gameID(slot, n), strings.TrimSpace(m[2])
 		if _, ok := c.cat.Names[id]; !ok {
 			continue
 		}
