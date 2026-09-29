@@ -211,69 +211,55 @@ func Versions(ideals []Ideal) int {
 	return n
 }
 
+type scored struct {
+	Score int      `json:"score"`
+	Items [][2]int `json:"items"`
+}
+
+type outfitJSON struct {
+	scored
+	Auto struct {
+		CharmSmile int `json:"charmSmile"`
+		Smile      int `json:"smile"`
+		scored
+	} `json:"auto"`
+	Variants map[string]outfitJSON `json:"variants,omitempty"`
+}
+
 func Encode(version string, ideals []Ideal) []byte {
 	var b bytes.Buffer
 	b.WriteString(`{"version":`)
-	writeString(&b, version)
+	writeJSON(&b, version)
 	b.WriteString(`,"stages":{`)
 	for i, id := range ideals {
 		if i > 0 {
 			b.WriteByte(',')
 		}
-		writeString(&b, id.Key)
+		writeJSON(&b, id.Key)
 		b.WriteByte(':')
-		writeOutfit(&b, id.Outfit, id.Variants)
+		o := toJSON(id.Outfit)
+		o.Variants = make(map[string]outfitJSON, len(id.Variants))
+		for name, v := range id.Variants {
+			o.Variants[name] = toJSON(v)
+		}
+		writeJSON(&b, o)
 	}
 	b.WriteString("}}")
 	return b.Bytes()
 }
 
-func writeOutfit(b *bytes.Buffer, o Outfit, variants map[string]Outfit) {
-	b.WriteByte('{')
-	writeScored(b, o.Score, o.Items)
-	b.WriteString(`,"auto":{"charmSmile":`)
-	b.WriteString(strconv.Itoa(o.Auto.Placement.CharmSmile))
-	b.WriteString(`,"smile":`)
-	b.WriteString(strconv.Itoa(o.Auto.Placement.Smile))
-	b.WriteByte(',')
-	writeScored(b, o.Auto.Score, o.Auto.Items)
-	b.WriteByte('}')
-	if len(variants) > 0 {
-		b.WriteString(`,"variants":{`)
-		for i, name := range slices.Sorted(maps.Keys(variants)) {
-			if i > 0 {
-				b.WriteByte(',')
-			}
-			writeString(b, name)
-			b.WriteByte(':')
-			writeOutfit(b, variants[name], nil)
-		}
-		b.WriteByte('}')
-	}
-	b.WriteByte('}')
+func toJSON(o Outfit) outfitJSON {
+	var j outfitJSON
+	j.scored = scored{o.Score, append([][2]int{}, o.Items...)}
+	j.Auto.CharmSmile, j.Auto.Smile = o.Auto.Placement.CharmSmile, o.Auto.Placement.Smile
+	j.Auto.scored = scored{o.Auto.Score, append([][2]int{}, o.Auto.Items...)}
+	return j
 }
 
-func writeScored(b *bytes.Buffer, score int, items [][2]int) {
-	b.WriteString(`"score":`)
-	b.WriteString(strconv.Itoa(score))
-	b.WriteString(`,"items":[`)
-	for i, it := range items {
-		if i > 0 {
-			b.WriteByte(',')
-		}
-		b.WriteByte('[')
-		b.WriteString(strconv.Itoa(it[0]))
-		b.WriteByte(',')
-		b.WriteString(strconv.Itoa(it[1]))
-		b.WriteByte(']')
-	}
-	b.WriteByte(']')
-}
-
-func writeString(b *bytes.Buffer, s string) {
+func writeJSON(b *bytes.Buffer, v any) {
 	e := json.NewEncoder(b)
 	e.SetEscapeHTML(false)
-	if err := e.Encode(s); err != nil {
+	if err := e.Encode(v); err != nil {
 		panic(err)
 	}
 	b.Truncate(b.Len() - 1)
