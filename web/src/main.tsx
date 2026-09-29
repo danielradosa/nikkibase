@@ -12,15 +12,12 @@ import './styles.css'
 import { themeFor } from './theme'
 import { usePhone } from './hooks/usePhone'
 import App from './App'
-import Petals from './components/Petals'
-
-const SPIN = { indicator: <Petals /> }
 
 function Root() {
   const phone = usePhone()
   const theme = useMemo(() => themeFor(phone), [phone])
   return (
-    <ConfigProvider theme={theme} spin={SPIN}>
+    <ConfigProvider theme={theme}>
       <App />
     </ConfigProvider>
   )
