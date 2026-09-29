@@ -145,9 +145,9 @@ func ParseStagesWith(src []byte, corrections map[string]StageCorrection) ([]Stag
 	if err != nil {
 		return nil, stats, err
 	}
-	stats.Stages = len(stages)
 	applyBonuses(src, stages, index, corrections, &stats)
 	applyRules(src, stages, index, &stats)
+	stats.Recount(stages)
 	return stages, stats, nil
 }
 
@@ -289,10 +289,8 @@ func pay(st *scoring.Stage, calls [][][]byte, weightSum, divisor float64, stats 
 		mult /= divisor
 		if st.Tags == nil {
 			st.Tags = map[int]int{}
-			stats.WithBonus++
 		}
 		st.Tags[id] = int(math.Round(weightSum * base * mult))
-		stats.Awards++
 	}
 }
 
@@ -319,14 +317,11 @@ func ApplyStageValues(stages []Stage, src []byte, corrections map[string]StageCo
 			stats.SideConflicts++
 			continue
 		}
-		if len(s.Stage.Tags) > 0 {
-			stats.Awards -= len(s.Stage.Tags)
-			stats.WithBonus--
-		}
 		s.Stage.Weights, s.Stage.Tags = t.Stage.Weights, nil
 		pay(&s.Stage, calls[at], weightSum(*s), 1, stats)
 		stats.Valued++
 	}
+	stats.Recount(stages)
 	return nil
 }
 
