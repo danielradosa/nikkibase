@@ -62,7 +62,7 @@
       "drop": "Moonlight Serenade",
       "dropWikiPage": "Moonlight Serenade",
       "correctIdForDropped": 81327,
-      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 31327 = 'Star and Moon Gift - Epic', and the packed table's 31327 (星月赠礼·珍稀, Star and Moon Gift · Epic) has the kept page's grades. The wiki's own Coats list cannot settle it: it gives 1327 both to Star and Moon Gift - Epic and to Moonlight Serenade, repeating the dropped page's wrong type. Fandom page 'Moonlight Serenade' carries '|wardrobe nr = 1327' and resolves to 31327 as well; here the mistyped infobox field is 'type' (Coat) rather than the number: nikkicalc A1327 names 81327 'Moonlight Serenade' (accessory), so the page should read type = Accessory with the same nr 1327.",
+      "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives 31327 = 'Star and Moon Gift - Epic', and the packed table's 31327 (星月赠礼·珍稀, Star and Moon Gift · Epic) has the kept page's grades. The wiki's own Coats list cannot settle it: it gives 1327 both to Star and Moon Gift - Epic and to Moonlight Serenade, repeating the dropped page's wrong type. Fandom page 'Moonlight Serenade' carries '|wardrobe nr = 1327' and resolves to 31327 as well; nikkicalc A1327 names 81327 'Moonlight Serenade', an accessory ID. The game shows Moonlight Serenade in the Coat tab (checked 2026-09-29), so the page's type is right and 81327 is a coat whose ID names another slot (see slotOverrides).",
       "confidence": "proven"
     },
     {
@@ -432,6 +432,17 @@
     {"id": 91095, "attribute": "Cool", "grade": "A", "was": "SS", "basis": "Checked in the Global game on 2026-09-29: Gorgeous S, Elegant SS, Mature SS, Sexy A, Cool A. The packed table (wardrobe.js) gives Simple S, Elegant SS, Mature A, Pure S, Cool SS; Nikki Calc v0.14 (ni-ids-v0.14.json key -> item-batch sub-grade) gives Gorgeous S-, Elegant SS-, Mature SS, Sexy A+, Cool A-, as the game does. No wiki item page."}
   ],
   "gradeOverridesNote": "Grades kept against the sources' own row: against the wiki's item page where the packed table and Nikki Calc's sub-grade agree on another letter for the same attribute, or against the packed table where the game itself shows another grade. 'grade' is the letter kept and 'was' the one the sources give. 'wasAttribute', when given, is the other side of the same pair, where the sources put 'was'; the kept grade then moves the pair to 'attribute'. The build fails if the sources no longer give 'was' on 'wasAttribute' when it is given, otherwise on 'attribute'. The stat is worked out from the kept letter, and Nikki Calc's sub-grade then sets it as for any other stat.",
+  "slotOverrides": [
+    {
+      "id": 81327,
+      "slot": "coat",
+      "idSlot": "accessory",
+      "position": "coat",
+      "positionBasis": "The wiki's item page and Nikki Calc's slot code both file it as a coat, and a coat has one wearable place.",
+      "basis": "Checked in the Global game on 2026-09-29: Moonlight Serenade sits in the Coat tab, with Simple S, Elegant S, Cute A, Pure B and Warm A, as the wiki's item page (wardrobe nr 1327, type Coat) gives it. Nikki Calc v0.14 numbers it 81327 (key A1327), which names an accessory, and files it in a coat slot as well."
+    }
+  ],
+  "slotOverridesNote": "Slots kept against the item's ID. 'slot' and 'position' are where the item is scored and worn; 'idSlot', given only when the game shows the item in another slot than its ID names, is that ID's slot, so the build fails if the ID ever names another. A page the wiki misnumbers may move to an ID given here when its own slot is the one kept.",
   "tagOverrides": [
     {"id": 14527, "tag": "Chic", "was": "Evening Gown", "basis": "The packed table (wardrobe.js) tags every Nightfall Menace piece Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags them all Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."},
     {"id": 14528, "tag": "Chic", "was": "Evening Gown", "basis": "The packed table (wardrobe.js) tags every Nightfall Menace piece Evening Gown (its code for 晚礼服). Nikki Calc v0.14 tags them all Chic, and the Global game shows Chic on Crisis in the Mist (91095; checked 2026-09-29)."},
