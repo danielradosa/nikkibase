@@ -7,7 +7,7 @@ import { NO_SKILLS, worthSettings, worthSkillsText, type SkillSettings } from '.
 import { variantStages, worthSkip, worthVersions, type IdealTable, type Stage } from '../../src/outfit/stages.ts'
 import {
   ALL_MODES, NO_SOURCE, OWNED_KEY, PAST_NOTE, RESTARTED, SCORE_F, UNLOCK_NOTE, chipText, detailsLabel, hideLabel, ownsAnyPart,
-  exampleGain, filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, itemMeta,
+  exampleGain, filterMode, filterSuits, gainText, groupPieces, groupTail, hashIds, hardToGet, howToGet, improvesParts, itemMeta, pastNote,
   neededLine, noSession, nothingText, openRows, openTarget, pctText, pieceList, piecesText, rankedName, rankingNote,
   recipeText, rowKey, rowName, scoreFNote, stageLabel, suitName, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthRunner,
   worthSuits, type AcquireTable, type WorthApi,
@@ -291,10 +291,10 @@ test('how to get: each way, its recipe, which ingredients you own, and whether i
       { id: 60285, name: 'Fluttering - Purple', qty: 5, owned: true },
       { id: 80148, name: '#80148', qty: 3, owned: false },
     ],
-    past: false,
+    note: null,
     stage: null,
   })
-  assert.deepEqual(lines[1], { text: 'Circus Night event', recipe: null, from: [], past: true, stage: null })
+  assert.deepEqual(lines[1], { text: 'Circus Night event', recipe: null, from: [], note: 'may have ended', stage: null })
   assert.deepEqual(lines[2].stage, { mode: 'Story', stage: 'Story/3-12', difficulty: 'Maiden' })
   assert.deepEqual(lines[3].stage, { mode: 'Story', stage: 'Story/4-1', difficulty: null })
   assert.deepEqual(howToGet(undefined, new Set(), names), [])
@@ -1015,4 +1015,29 @@ test('a suit row shows the plain suit name but keeps the full name as its key', 
   assert.equal(rowName(gallery, new Map()), 'Night Rose')
   assert.equal(rowName(pigeon, new Map()), 'Night Rose')
   assert.notEqual(rowKey(gallery), rowKey(pigeon))
+})
+
+test('a rerun line says the month it was last seen instead of that it may have ended', () => {
+  assert.equal(pastNote({ past: 1, last: '2023-06' }), 'last seen Jun 2023')
+  assert.equal(pastNote({ past: 1, last: '2017-12' }), 'last seen Dec 2017')
+  assert.equal(pastNote({ past: 1 }), 'may have ended')
+  assert.equal(pastNote({ past: 1, last: '2023-13' }), 'may have ended')
+  assert.equal(pastNote({ past: 1, last: 'June' }), 'may have ended')
+  assert.equal(pastNote({}), null)
+  assert.equal(pastNote({ last: '2023-06' }), null)
+  const [line] = howToGet([{ k: 'recharge', t: 'Abyssal Island', last: '2023-06', past: 1 }], new Set(), new Map())
+  assert.deepEqual(line, { text: 'Abyssal Island', recipe: null, from: [], note: 'last seen Jun 2023', stage: null })
+})
+
+test('pieces rerun on one channel in different months are listed together under the channel', () => {
+  const piece = (id: number, name: string) => ({ id, name, place: 'Hair', meta: 'Hair' })
+  const a = piece(1, 'Tide Locks')
+  const b = piece(2, 'Tide Pins')
+  const table: AcquireTable = {
+    '1': [{ k: 'recharge', t: 'Abyssal Island', last: '2023-06', past: 1 }],
+    '2': [{ k: 'recharge', t: 'Abyssal Island', last: '2025-03', past: 1 }],
+  }
+  assert.deepEqual(groupPieces([a, b], table), [
+    { key: '1|Abyssal Island', text: 'Abyssal Island', past: true, pieces: [a, b] },
+  ])
 })

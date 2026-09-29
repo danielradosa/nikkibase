@@ -12,6 +12,7 @@ export type AcquireEntry = {
   recipe?: string
   stage?: string
   level?: string
+  last?: string
   past?: number
 }
 export type AcquireTable = Record<string, AcquireEntry[]>
@@ -377,9 +378,18 @@ export function unlockText(row: UnlockRow, variants?: ReadonlySet<string>): stri
 }
 
 export type Ingredient = { id: number; name: string; qty: number; owned: boolean }
-export type HowLine = { text: string; recipe: string | null; from: Ingredient[]; past: boolean; stage: OpenTarget | null }
+export type HowLine = { text: string; recipe: string | null; from: Ingredient[]; note: string | null; stage: OpenTarget | null }
 
 export const PAST_NOTE = 'may have ended'
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+export function pastNote(e: Pick<AcquireEntry, 'past' | 'last'>): string | null {
+  if (e.past !== 1) return null
+  const m = /^(\d{4})-(\d{2})$/.exec(e.last ?? '')
+  const month = m ? MONTHS[Number(m[2]) - 1] : undefined
+  return m && month ? `last seen ${month} ${m[1]}` : PAST_NOTE
+}
 
 export const NO_SOURCE = 'Source unknown'
 
@@ -425,7 +435,7 @@ export function howToGet(
       text: e.from?.length ? verbLine(e) : e.t,
       recipe: e.recipe ?? null,
       from: ingredients(e.from ?? [], owned, names),
-      past: e.past === 1,
+      note: pastNote(e),
       stage: stage ? { mode: stage.mode, stage: stage.base, difficulty: levelOf(e.level) } : null,
     }
   })

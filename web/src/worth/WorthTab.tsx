@@ -18,9 +18,9 @@ import { runner, useAcquire, useIdeals, useWorthRanking, useWorthRun, type Acqui
 import WaitLine from '../components/WaitLine'
 import { ENGINE_DOWN, LIST_FAILED, LIST_WAIT, SCORES_WAIT } from '../wardrobe/wardrobeText'
 import {
-  ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, PAST_NOTE, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
+  ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
   detailsLabel, exampleGain, filterMode, filterSuits, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
-  neededLine, nothingText, openRows, openTarget, ownsAnyPart, pieceList, piecesText, rankedName, rankingNote, recipeText,
+  neededLine, nothingText, openRows, openTarget, ownsAnyPart, pastNote, pieceList, piecesText, rankedName, rankingNote, recipeText,
   rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthSuits,
   type AcquireTable, type OpenTarget, type UnlockRow, type WorthRequest,
   checkingText, handedOver, keptRows, moreText, rankingText, waitPercent, worthWait,
@@ -107,7 +107,7 @@ function Ways({
       {lines.map((line, i) => {
         const stage = line.stage
         const recipe = line.recipe ? recipeText(line.recipe) : null
-        const past = line.past ? PAST_NOTE : undefined
+        const past = line.note ?? undefined
         return (
           <li key={i}>
             {stage && !recipe ? (
@@ -173,10 +173,11 @@ function FirstWays({ ids, acquire }: { ids: number[]; acquire: Acquire }) {
     <div className="nb-worth-item">
       {ids.map((id) => {
         const first = acquire.table?.[String(id)]?.[0]
+        const note = first ? pastNote(first) : null
         return first ? (
           <span key={id}>
             {first.t}
-            {first.past === 1 && <Typography.Text type="secondary"> · {PAST_NOTE}</Typography.Text>}
+            {note && <Typography.Text type="secondary"> · {note}</Typography.Text>}
           </span>
         ) : (
           <Typography.Text key={id} type="secondary">
