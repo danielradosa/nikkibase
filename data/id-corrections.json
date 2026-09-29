@@ -372,6 +372,30 @@
       "name": "Miss Bone",
       "was": "Miss Bone (Dress)/Night",
       "basis": "Nikki Calc v0.14 (ni-ids-v0.14.json key D1117 -> items-v0.14.json name) gives 21117 and its day form 21115 the same name, 'Miss Bone'; the packed table names 21117 白骨夫人[夜] and 21115 白骨夫人[昼], marking night (夜) and day (昼). Fandom page 'Miss Bone (Dress)/Night' carries '|wardrobe nr = 1117', and the wiki's list reads '{{WIL|1117|Miss Bone (Dress)/Night|Miss Bone}}', so '/Night' is only the address that keeps the night form's page apart from the day form's. The game shows the plain name, the same as the day form's."
+    },
+    {
+      "id": 40861,
+      "name": "Army of Discipline",
+      "was": "Discipline Army",
+      "basis": "Checked in the Global game on 2026-09-29: the game shows 'Army of Discipline'. Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives it too; the wiki's item page, its Tops list and Nikki Calc's first list (v0.01) give 'Discipline Army'."
+    },
+    {
+      "id": 40862,
+      "name": "Dawn of Independence",
+      "was": "Independent Light",
+      "basis": "Checked in the Global game on 2026-09-29: the game shows 'Dawn of Independence'. Nikki Calc v0.14 (ni-ids-v0.14.json key -> items-v0.14.json name) gives it too; the wiki's item page, its Tops list, the Decisive Duel page and Nikki Calc's first list (v0.01) give 'Independent Light'."
+    },
+    {
+      "id": 72014,
+      "name": "Colorful Illusion",
+      "was": "Colorful Illusions",
+      "basis": "Checked in the Global game on 2026-09-29: the game shows 'Colorful Illusion', as the wiki's Shoes list, its Colorful Illusion disambiguation page and Nikki Calc's first list (v0.01) give it; Nikki Calc v0.14 gives 'Colorful Illusions'. The hair 12106 has the same name, as shared names are in the Global game."
+    },
+    {
+      "id": 30638,
+      "name": "the Moon Leaning on High Mountain",
+      "was": "The Moon Leaning on High Mountain",
+      "basis": "Checked in the Global game on 2026-09-29: the game shows 'the Moon Leaning on High Mountain', with a lower-case first word, as the other sources write it; only the wiki's page title, whose first letter the wiki always capitalises, gives 'The'."
     }
   ],
   "displayNamesNote": "Names shown in place of the one the sources give: where one source misspells a name or words it differently from the others, where the name is Nikki Calc's and the others give another (the entry's basis says why), where one source swaps the names of two items, and where a night form's name would be the wiki's page address ('/Night'): it shows the plain name, as the game does. 'was' is the name the build would show otherwise, after respacing; the build fails if the sources no longer give it. Only items.json and the acquire.json lines that print the name change: wiki pages, ingredients and suit parts are still matched by the sources' own spelling. A trailing bracket the wiki adds to tell items apart ('(Coat)', '(Hair)', '(Night)') is dropped from every shown name unless Nikki Calc's name carries the same bracket, since the game shows the plain name.",
