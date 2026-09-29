@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -171,12 +170,7 @@ func writeScoring(b *strings.Builder, st scoring.Stage) {
 	b.WriteByte(']')
 	if len(st.Tags) > 0 {
 		b.WriteString(`,"tags":{`)
-		ids := make([]int, 0, len(st.Tags))
-		for id := range st.Tags {
-			ids = append(ids, id)
-		}
-		sort.Ints(ids)
-		for j, id := range ids {
+		for j, id := range slices.Sorted(maps.Keys(st.Tags)) {
 			if j > 0 {
 				b.WriteByte(',')
 			}
