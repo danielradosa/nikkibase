@@ -48,14 +48,16 @@ obtained (shop and price, crafting recipe, evolution, customization, stage,
 event or pack) and writes it as short lines of its own in `acquire.json`, and
 from its event pages and its Events timeline it takes the event or recharge
 channel behind lines that say only that an item came from an event or a
-recharge; the entries there not marked `"cn":1` all come from the wiki. From
-its suit pages, and the suit field of its item pages, it takes the suit each
-item belongs to, named as the suit's page is titled, for the suit column of
-`items.json`, and each suit page's Chinese name, which gives the English name
-of the suits nikkiup2u3 names in Chinese. It also uses the style codes of
-Template:S; from the stage pages of Story 5-12, 6-7 and 6-9, which tags Maiden
-pays; and, from the quest field of 57 story stage pages, the items those stages
-require. All of this is offered under the same licence, CC BY-SA 3.0.
+recharge; the entries there not marked `"cn":1` come from the wiki, except the
+ingredients of the craft lines that Nikki Calc's recipes give (`-calc-recipes`,
+see [SOURCES.md](SOURCES.md)). From its suit pages, and the suit field of its
+item pages, it takes the suit each item belongs to, named as the suit's page is
+titled, for the suit column of `items.json`, and each suit page's Chinese name,
+which gives the English name of the suits nikkiup2u3 names in Chinese. It also
+uses the style codes of Template:S; from the stage pages of Story 5-12, 6-7 and
+6-9, which tags Maiden pays; and, from the quest field of 57 story stage pages,
+the items those stages require. All of this is offered under the same licence,
+CC BY-SA 3.0.
 Attribution: the Love Nikki Wiki and its editors, who are listed on the site
 under *Credits & licences*; each item's page is
 lovenikki.fandom.com/wiki/<item name>.
