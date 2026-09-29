@@ -100,7 +100,7 @@ func (s *Session) examine(vi int, extras []int32) *stage {
 	switch {
 	case len(v.Require) > 0:
 		space := optimizer.Require(l.positionsWith(extras), l.posOf, v.Require)
-		base := l.poolWith(extras)
+		base := l.withExtras(l.fillIn, extras)
 		for _, b := range space.Branches() {
 			st.branches = append(st.branches, l.branchOf(b, base))
 		}
@@ -108,7 +108,7 @@ func (s *Session) examine(vi int, extras []int32) *stage {
 	case len(extras) == 0:
 		st.branches = []*branch{l.plain}
 	default:
-		st.branches = []*branch{l.newBranch(l.poolWith(extras), nil)}
+		st.branches = []*branch{l.newBranch(l.withExtras(l.fillIn, extras), nil)}
 	}
 
 	st.cU = l.coefOf(v.Stage, nil)
@@ -374,11 +374,6 @@ func (sc *scorer) changeOf(items []int32) (cu, ck change, liveU, live bool) {
 	return cu, ck, liveU, live
 }
 
-func (sc *scorer) engineGain(items ...int32) int32 {
-	gain, _ := sc.enginePlaced(items...)
-	return gain
-}
-
 func (sc *scorer) memberGain(m int32) int32 {
 	gain, p := sc.enginePlaced(m)
 	sc.reachFor(p)
@@ -406,7 +401,7 @@ func (sc *scorer) reachFor(p scoring.Placement) {
 	}
 	c := l.coefOf(sc.v.Stage, p.SkillsAt(s.levels))
 	sd := l.newSide()
-	l.fill(sd, l.poolWith(st.extras), c)
+	l.fill(sd, l.withExtras(l.fillIn, st.extras), c)
 	for _, i := range st.added {
 		v, f := l.value(c, i)
 		l.put(sd, i, v, f)

@@ -493,7 +493,8 @@ func (sc *scorer) bundleGain(items []int32) int32 {
 	st := sc.st
 	for _, i := range items {
 		if st.isMember(i) {
-			return sc.engineGain(items...)
+			gain, _ := sc.enginePlaced(items...)
+			return gain
 		}
 	}
 	cu, ck, liveU, live := sc.changeOf(items)

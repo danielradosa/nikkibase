@@ -58,7 +58,7 @@ func (sc *scorer) placeWith(c *change) scoring.Placement {
 			return pl.place
 		}
 		a = l.accOf[at]
-		e.offer(c.s[0], c.f[0])
+		e.cs, e.cf = c.s[0], c.f[0]
 	default:
 		d, has, top, bottom := e.dress, e.hasDress, e.top, e.bottom
 		dressItem, topItem, bottomItem := e.dressItem, e.topItem, e.bottomItem

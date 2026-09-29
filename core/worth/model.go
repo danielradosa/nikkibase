@@ -448,12 +448,8 @@ func (e *evaluator) withAccessory(at int32, s, f float64) (float64, int, int) {
 	if !e.beats(at, s, f) {
 		return e.total, e.accChoice, e.choices[e.accChoice].worn
 	}
-	e.offer(s, f)
-	return e.settle(e.nonAcc+e.torso, e.l.accOf[at])
-}
-
-func (e *evaluator) offer(s, f float64) {
 	e.cs, e.cf = s, f
+	return e.settle(e.nonAcc+e.torso, e.l.accOf[at])
 }
 
 func (e *evaluator) offered(k int) float64 {
@@ -626,7 +622,7 @@ func (e *evaluator) outfit(buf []scoring.Item, c *change) []scoring.Item {
 	var a int32 = -1
 	if accAt >= 0 {
 		a = l.accOf[accAt]
-		e.offer(accS, accF)
+		e.cs, e.cf = accS, accF
 	}
 	_, chosen, worn := e.settle(nonAcc+torsoOf(d, has, top, bottom), a)
 	ch := &e.choices[chosen]

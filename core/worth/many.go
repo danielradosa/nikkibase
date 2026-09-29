@@ -199,7 +199,7 @@ func (e *evaluator) mergedChoice(ch *choice, absent int) (float64, int) {
 		return ch.total, ch.worn
 	case 1:
 		p := mg.offs[0]
-		e.offer(p.s, p.f)
+		e.cs, e.cf = p.s, p.f
 		return e.choiceWith(ch, e.l.accOf[p.at])
 	}
 	nr, stride := len(ratios), len(ch.members)

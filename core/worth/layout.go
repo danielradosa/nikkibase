@@ -370,10 +370,6 @@ func (l *layout) branchOf(positions []optimizer.Position, base [][]int32) *branc
 	return l.newBranch(pool, narrowed)
 }
 
-func (l *layout) poolWith(extras []int32) [][]int32 {
-	return l.withExtras(l.fillIn, extras)
-}
-
 func (l *layout) withExtras(base [][]int32, extras []int32) [][]int32 {
 	if len(extras) == 0 {
 		return base
