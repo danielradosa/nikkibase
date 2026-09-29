@@ -1,4 +1,4 @@
-# Whole-catalogue best score and outfit size for every stage in bundle lilith.
+# Whole-catalogue best score and outfit size for every stage in bundle cloud.
 # Regenerate after a deliberate change: go test -tags dataset ./golden/ -run Pinned -update
 Arena	Beach Party	67355	32
 Arena	Where Is Spring	74129	32
@@ -18,7 +18,7 @@ Arena	A Growing Lady	69509	31
 Arena	Cloud Lady	135319	31
 Arena	Intern Translator	126542	31
 Co-op	Orlando - Unisex	151823	32
-Co-op	Orlando - Evening Gown	164107	31
+Co-op	Orlando - Evening Gown	164017	31
 Co-op	Ace - European	171733	31
 Co-op	Ace - Traditional Style	212328	31
 Co-op	Ace - Assassins Union	145262	31
@@ -32,7 +32,7 @@ Co-op	Kimi - Harajuku Style	160315	32
 Co-op	Kimi - Modern China Style	153338	31
 Co-op	Kimi - Apple Federation	192930	31
 Co-op	Yvette - Army Uniform	161574	32
-Co-op	Yvette - Office Lady	142836	32
+Co-op	Yvette - Office Lady	143985	32
 Co-op	Bobo - Swimming Suit	130970	32
 Co-op	Bobo - Pet	140666	31
 Co-op	Bobo - Winter Outfit	145916	31
@@ -66,7 +66,7 @@ Commission	4-6	84107	31
 Commission	4-7	78074	32
 Commission	5-1	94458	32
 Commission	5-2	82887	32
-Commission	5-3	100094	32
+Commission	5-3	101665	32
 Commission	5-4	98831	31
 Commission	5-5	107622	32
 Commission	5-6	79214	32
@@ -77,7 +77,7 @@ Commission	6-3	100629	32
 Commission	6-4	95735	31
 Commission	6-5	86846	31
 Commission	6-6	92460	31
-Commission	6-7	112111	31
+Commission	6-7	111468	31
 Commission	7-1	80092	31
 Commission	7-2	90130	32
 Commission	7-3	86177	31
@@ -91,14 +91,14 @@ Commission	8-3	100984	31
 Commission	8-4	89000	31
 Commission	8-5	88889	32
 Commission	8-6	81328	31
-Commission	8-7	100094	32
+Commission	8-7	101665	32
 Commission	9-1	95542	31
 Commission	9-2	95729	31
 Commission	9-3	79439	32
 Commission	9-4	102315	31
 Commission	9-5	74682	32
 Commission	9-6	97484	32
-Commission	9-7	95560	31
+Commission	9-7	95491	31
 Commission	10-1	97554	31
 Commission	10-2	95147	31
 Commission	10-3	87146	32
@@ -109,7 +109,7 @@ Commission	10-7	79856	31
 Commission	11-1	85102	31
 Commission	11-2	85726	31
 Commission	11-3	91902	31
-Commission	11-4	92583	31
+Commission	11-4	92443	31
 Commission	11-5	80659	31
 Commission	11-6	74262	32
 Commission	11-7	90287	31
@@ -123,14 +123,14 @@ Commission	12-7	91638	31
 Commission	13-1	71062	32
 Commission	13-2	73475	32
 Commission	13-3	84530	31
-Commission	13-4	93733	31
+Commission	13-4	93647	31
 Commission	13-5	95619	31
 Commission	13-6	83080	31
 Commission	13-7	86683	32
 Commission	14-1	93262	32
 Commission	14-2	107622	32
 Commission	14-3	82887	32
-Commission	14-4	92583	31
+Commission	14-4	92443	31
 Commission	14-5	79895	31
 Commission	14-6	87495	31
 Commission	14-7	95390	31
@@ -153,17 +153,17 @@ Commission	17-2	71559	31
 Commission	17-3	82427	31
 Commission	17-4	86866	31
 Commission	17-5	92338	31
-Commission	17-6	97074	32
+Commission	17-6	98496	32
 Commission	17-7	85351	32
-Commission	18-1	83802	32
+Commission	18-1	84511	32
 Commission	18-2	79205	31
 Commission	18-3	69660	32
 Commission	18-4	77188	32
 Commission	18-5	83590	31
-Commission	18-6	91416	31
+Commission	18-6	91291	31
 Commission	18-7	80649	32
 Commission	19-1	74262	32
-Commission	19-2	112111	31
+Commission	19-2	111468	31
 Commission	19-3	83262	31
 Commission	19-4	116777	31
 Commission	19-5	88819	31
@@ -174,7 +174,7 @@ Commission	20-2	91560	31
 Commission	20-3	84107	31
 Commission	20-4	85351	32
 Commission	20-5	95729	31
-Commission	20-6	92583	31
+Commission	20-6	92443	31
 Commission	20-7	74262	32
 Story	1-1	119118	32
 Story	1-2	139269	31
@@ -309,7 +309,7 @@ Story	10-1	158529	31
 Story	10-2	150375	31
 Story	10-3	182712	32
 Story	10-4	177261	32
-Story	10-5	158237	31
+Story	10-5	157695	31
 Story	10-6	232112	32
 Story	10-7	156286	32
 Story	10-8	179514	31
@@ -395,15 +395,15 @@ Story	17-2	149434	31
 Story	17-3	156744	31
 Story	17-4	139262	32
 Story	17-5	153498	31
-Story	17-6	167146	31
+Story	17-6	166600	31
 Story	17-7	124009	32
 Story	17-8	127982	31
-Story	17-9	150633	31
+Story	17-9	153695	31
 Story	17-Side 1	161182	32
 Story	17-Side 2	155704	32
 Story	17-Side 3	136564	31
-Story	18-1	156806	31
-Story	18-2	149065	32
+Story	18-1	156046	31
+Story	18-2	150870	32
 Story	18-3	137086	31
 Story	18-4	146791	32
 Story	18-5	172767	32
@@ -500,7 +500,7 @@ Story	II-7-Side 2	156177	32
 Story	II-7-Side 3	157422	32
 Story	II-8-1	134157	31
 Story	II-8-2	148692	32
-Story	II-8-3	166992	31
+Story	II-8-3	166946	31
 Story	II-8-4	169835	31
 Story	II-8-5	135480	31
 Story	II-8-6	146224	32
@@ -517,7 +517,7 @@ Story	II-9-6	159020	31
 Story	II-9-7	132745	32
 Story	II-9-Side 1	148790	31
 Story	II-9-Side 2	156060	31
-Story	II-9-Side 3	167146	31
+Story	II-9-Side 3	166600	31
 Story	II-10-1	140431	32
 Story	II-10-2	145073	31
 Story	II-10-3	149845	31
@@ -577,7 +577,7 @@ Story	II-15-6	139201	32
 Story	II-15-7	128749	31
 Story	II-15-Side 1	119698	31
 Story	II-15-Side 2	131188	32
-Story	II-15-Side 3	122543	32
+Story	II-15-Side 3	122647	32
 Story	III-1-1	128469	32
 Story	III-1-2	151181	31
 Story	III-1-3	130531	31
