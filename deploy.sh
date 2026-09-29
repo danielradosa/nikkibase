@@ -2,9 +2,6 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-echo "==> engine"
-GOOS=js GOARCH=wasm go build -ldflags="-s -w" -o web/src/generated/nikkibase.wasm ./wasm
-
 echo "==> checks"
 go vet ./...
 go test ./... >/dev/null
