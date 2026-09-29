@@ -32,9 +32,34 @@ var (
 )
 
 type wikiPage struct {
-	Title string `xml:"title"`
-	NS    int    `xml:"ns"`
-	Text  string `xml:"revision>text"`
+	Title    string `xml:"title"`
+	NS       int    `xml:"ns"`
+	Redirect struct {
+		Title string `xml:"title,attr"`
+	} `xml:"redirect"`
+	Text string `xml:"revision>text"`
+}
+
+func eachPage(r io.Reader, fn func(wikiPage)) error {
+	dec := xml.NewDecoder(r)
+	for {
+		tok, err := dec.Token()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return fmt.Errorf("pipeline: reading dump: %w", err)
+		}
+		start, ok := tok.(xml.StartElement)
+		if !ok || start.Name.Local != "page" {
+			continue
+		}
+		var page wikiPage
+		if err := dec.DecodeElement(&page, &start); err != nil {
+			return fmt.Errorf("pipeline: reading page: %w", err)
+		}
+		fn(page)
+	}
 }
 
 type FandomStats struct {
@@ -50,25 +75,9 @@ func ParseFandomDump(r io.Reader, known map[int]bool) ([]Entry, FandomStats, err
 		entries []Entry
 		stats   FandomStats
 	)
-	dec := xml.NewDecoder(r)
-	for {
-		tok, err := dec.Token()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, stats, fmt.Errorf("pipeline: reading dump: %w", err)
-		}
-		start, ok := tok.(xml.StartElement)
-		if !ok || start.Name.Local != "page" {
-			continue
-		}
-		var page wikiPage
-		if err := dec.DecodeElement(&page, &start); err != nil {
-			return nil, stats, fmt.Errorf("pipeline: reading page: %w", err)
-		}
+	err := eachPage(r, func(page wikiPage) {
 		if page.NS != 0 || !strings.Contains(page.Text, "{{Clothing") {
-			continue
+			return
 		}
 		stats.Pages++
 
@@ -77,17 +86,20 @@ func ParseFandomDump(r io.Reader, known map[int]bool) ([]Entry, FandomStats, err
 		case "":
 		case "no grades":
 			stats.NoGrades++
-			continue
+			return
 		default:
 			stats.UnknownAny++
-			continue
+			return
 		}
 		if len(known) > 0 && !known[entry.Item.ID] {
 			stats.UnknownAny++
-			continue
+			return
 		}
 		stats.Parsed++
 		entries = append(entries, entry)
+	})
+	if err != nil {
+		return nil, stats, err
 	}
 	return entries, stats, nil
 }

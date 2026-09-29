@@ -1,8 +1,6 @@
 package pipeline
 
 import (
-	"encoding/xml"
-	"fmt"
 	"io"
 	"regexp"
 	"slices"
@@ -39,15 +37,6 @@ type WikiAcquisitionStats struct {
 	UnknownParts int
 	UnknownUnits int
 	Unclassified int
-}
-
-type acqRawPage struct {
-	Title    string `xml:"title"`
-	NS       int    `xml:"ns"`
-	Redirect struct {
-		Title string `xml:"title,attr"`
-	} `xml:"redirect"`
-	Text string `xml:"revision>text"`
 }
 
 type acqPage struct {
@@ -217,23 +206,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 	}
 	var pages []acqPage
 	var suits []acqSuit
-	dec := xml.NewDecoder(r)
-	for {
-		tok, err := dec.Token()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return WikiAcquisition{}, stats, fmt.Errorf("pipeline: reading dump: %w", err)
-		}
-		start, ok := tok.(xml.StartElement)
-		if !ok || start.Name.Local != "page" {
-			continue
-		}
-		var page acqRawPage
-		if err := dec.DecodeElement(&page, &start); err != nil {
-			return WikiAcquisition{}, stats, fmt.Errorf("pipeline: reading page: %w", err)
-		}
+	err := eachPage(r, func(page wikiPage) {
 		switch {
 		case page.Redirect.Title != "":
 			ctx.redirects[page.Title] = page.Redirect.Title
@@ -249,6 +222,9 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 		case strings.Contains(page.Text, "{{Suit Infobox"):
 			suits = append(suits, acqSuitPage(page))
 		}
+	})
+	if err != nil {
+		return WikiAcquisition{}, stats, err
 	}
 
 	byID := map[int]int{}
@@ -303,7 +279,7 @@ func ParseFandomAcquisition(r io.Reader, known map[int]bool, corrections *IDCorr
 	return out, stats, nil
 }
 
-func acqItemPage(page acqRawPage, known map[int]bool, corrections *IDCorrections, cat AcquisitionCatalogue, stats *WikiAcquisitionStats) (acqPage, bool) {
+func acqItemPage(page wikiPage, known map[int]bool, corrections *IDCorrections, cat AcquisitionCatalogue, stats *WikiAcquisitionStats) (acqPage, bool) {
 	text := page.Text
 	begin := strings.Index(text, "{{Clothing")
 	end := strings.Index(text[begin:], "\n}}")
@@ -379,7 +355,7 @@ func categoryRecharge(list []Acquisition, categories []string) []Acquisition {
 	return out
 }
 
-func acqSuitPage(page acqRawPage) acqSuit {
+func acqSuitPage(page wikiPage) acqSuit {
 	s := acqSuit{title: page.Title}
 	text := page.Text
 	begin := strings.Index(text, "{{Suit Infobox")
@@ -652,7 +628,7 @@ func listSlotOK(title string) bool {
 	return ok
 }
 
-func (c *acqContext) readList(page acqRawPage) {
+func (c *acqContext) readList(page wikiPage) {
 	slot, _ := listSlot(page.Title)
 	for _, m := range wikiListEntry.FindAllStringSubmatch(page.Text, -1) {
 		n, err := strconv.Atoi(m[1])

@@ -1,8 +1,6 @@
 package pipeline
 
 import (
-	"encoding/xml"
-	"fmt"
 	"io"
 	"regexp"
 	"slices"
@@ -29,25 +27,9 @@ type SpiritBonusStats struct {
 func ParseSpiritBonuses(r io.Reader, known map[int]bool) (map[int]int, SpiritBonusStats, error) {
 	var stats SpiritBonusStats
 	bonuses := map[int]int{}
-	dec := xml.NewDecoder(r)
-	for {
-		tok, err := dec.Token()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, stats, fmt.Errorf("pipeline: reading dump: %w", err)
-		}
-		start, ok := tok.(xml.StartElement)
-		if !ok || start.Name.Local != "page" {
-			continue
-		}
-		var page wikiPage
-		if err := dec.DecodeElement(&page, &start); err != nil {
-			return nil, stats, fmt.Errorf("pipeline: reading page: %w", err)
-		}
+	err := eachPage(r, func(page wikiPage) {
 		if page.NS != 0 || !strings.Contains(page.Text, "{{Clothing") {
-			continue
+			return
 		}
 		fields := map[string]string{}
 		for _, m := range infoboxField.FindAllStringSubmatch(page.Text, -1) {
@@ -56,19 +38,19 @@ func ParseSpiritBonuses(r io.Reader, known map[int]bool) (map[int]int, SpiritBon
 			}
 		}
 		if fields["type"] != "Spirit" {
-			continue
+			return
 		}
 		stats.Pages++
 
 		n, err := strconv.Atoi(strings.TrimSpace(fields["wardrobe nr"]))
 		if err != nil {
 			stats.Rejected++
-			continue
+			return
 		}
 		id := fandomID(scoring.Spirit, n)
 		if len(known) > 0 && !known[id] {
 			stats.Rejected++
-			continue
+			return
 		}
 		bonus, ok := spiritBonus(page.Text)
 		switch {
@@ -80,6 +62,9 @@ func ParseSpiritBonuses(r io.Reader, known map[int]bool) (map[int]int, SpiritBon
 		default:
 			stats.NoLevels++
 		}
+	})
+	if err != nil {
+		return nil, stats, err
 	}
 	return bonuses, stats, nil
 }
