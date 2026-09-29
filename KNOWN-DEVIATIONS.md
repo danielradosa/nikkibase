@@ -102,17 +102,20 @@ in either direction).
 
 ## Items listed by name only
 
-7 items the game lists are listed by name only. 5 carry an ID of one slot
+6 items the game lists are listed by name only. 4 carry an ID of one slot
 while Nikki Calc and the wiki's suit pages file them under another: 30961
-Vanity Fair, a coat filed as a top, and the accessories 81327 Moonlight
-Serenade, 82599 Bamboo Leaf Bracelet, 83221 Maple Viewing and 85735 Glistening
-Aqua, filed as a coat, leglets, shoes and leglets. How the game sizes such an
-item's stats is unknown. 2 were never released: 85647 Magic Bubble and 181794
-Hymn of Dawn, both called unused by the wiki (`data/id-corrections.json`).
-`items.json` lists each under Nikki Calc's name with its rarity and no stats.
+Vanity Fair, a coat filed as a top, and the accessories 82599 Bamboo Leaf
+Bracelet, 83221 Maple Viewing and 85735 Glistening Aqua, filed as leglets,
+shoes and leglets. How the game sizes such an item's stats is unknown. 2 were
+never released: 85647 Magic Bubble and 181794 Hymn of Dawn, both called unused
+by the wiki (`data/id-corrections.json`). `items.json` lists each under Nikki
+Calc's name with its rarity and no stats. A fifth item with such an ID, 81327
+Moonlight Serenade, is scored as the coat the game shows it as (checked in
+game), with the grades the game and the wiki's item page give it
+(`slotOverrides` in `data/id-corrections.json`).
 
 **Cost:** these items are never recommended and score nothing. A player who
-owns one of the five gets no credit for it.
+owns one of the four gets no credit for it.
 
 ## Items graded by Nikki Calc alone
 
