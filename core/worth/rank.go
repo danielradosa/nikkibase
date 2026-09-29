@@ -278,10 +278,11 @@ func (r *ranker) touches(j int, items []int32) bool {
 		if _, ok := slices.BinarySearch(st.live, i); ok {
 			return true
 		}
+		at := l.at[i]
 		for _, pl := range st.placed {
 			s, f := l.value(pl.c, i)
 			for b, br := range st.branches {
-				if !br.blocked[l.at[i]] && l.improves(pl.sides[b], i, s, f) {
+				if !br.blocked[at] && l.improves(pl.sides[b], at, s, f) {
 					return true
 				}
 			}
@@ -376,8 +377,7 @@ func (r *ranker) pairsWithMembers(st *stage) bool {
 	return false
 }
 
-func (l *layout) improves(sd *side, i int32, s, f float64) bool {
-	at := l.at[i]
+func (l *layout) improves(sd *side, at int32, s, f float64) bool {
 	a := l.accOf[at]
 	if a < 0 {
 		return s+f > sd.best[at]

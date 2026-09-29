@@ -339,41 +339,20 @@ func (e *evaluator) beats(at int32, s, f float64) bool {
 	if e.br.blocked[at] {
 		return false
 	}
-	a := e.l.accOf[at]
-	if a < 0 {
-		return s+f > e.sd.best[at]
-	}
-	if s >= 0 && s+f <= e.minPick[a] {
+	if a := e.l.accOf[at]; a >= 0 && s >= 0 && s+f <= e.minPick[a] {
 		return false
 	}
-	from := int(a) * len(ratios)
-	row := e.sd.pick[from : from+len(ratios)]
-	for k, r := range ratios {
-		if r*s+f > row[k] {
-			return true
-		}
-	}
-	return false
+	return e.l.improves(e.sd, at, s, f)
 }
 
 func (e *evaluator) displaces(at, i int32, s, f float64) bool {
 	if e.br.blocked[at] {
 		return false
 	}
-	a := e.l.accOf[at]
-	if a < 0 {
-		return first(s+f, i, e.sd.best[at], e.sd.item[at])
-	}
-	if s >= 0 && s+f < e.minPick[a] {
+	if a := e.l.accOf[at]; a >= 0 && s >= 0 && s+f < e.minPick[a] {
 		return false
 	}
-	from := int(a) * len(ratios)
-	for k, r := range ratios {
-		if first(r*s+f, i, e.sd.pick[from+k], e.sd.pickItem[from+k]) {
-			return true
-		}
-	}
-	return false
+	return e.l.displacesIn(e.sd, at, i, s, f)
 }
 
 func (e *evaluator) with(c *change) float64 {

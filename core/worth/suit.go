@@ -212,8 +212,7 @@ func (sc *scorer) placeMany(moved []piece) scoring.Placement {
 	return s.effective(scoring.Place(s.buf, sc.v.Stage))
 }
 
-func (l *layout) displacesIn(sd *side, i int32, s, f float64) bool {
-	at := l.at[i]
+func (l *layout) displacesIn(sd *side, at, i int32, s, f float64) bool {
 	a := l.accOf[at]
 	if a < 0 {
 		return first(s+f, i, sd.best[at], sd.item[at])
@@ -410,17 +409,17 @@ func (r *suitRanker) changes(j int, picks []int32) bool {
 			if br.blocked[at] {
 				continue
 			}
-			if s.skills && l.displacesIn(st.u[b], i, sU, fU) || !s.skills && l.improves(st.u[b], i, sU, fU) {
+			if s.skills && l.displacesIn(st.u[b], at, i, sU, fU) || !s.skills && l.improves(st.u[b], at, sU, fU) {
 				return true
 			}
-			if st.k != nil && l.improves(st.k[b], i, sK, fK) {
+			if st.k != nil && l.improves(st.k[b], at, sK, fK) {
 				return true
 			}
 		}
 		for _, pl := range st.placed {
 			v, f := l.value(pl.c, i)
 			for b, br := range st.branches {
-				if !br.blocked[at] && l.improves(pl.sides[b], i, v, f) {
+				if !br.blocked[at] && l.improves(pl.sides[b], at, v, f) {
 					return true
 				}
 			}
