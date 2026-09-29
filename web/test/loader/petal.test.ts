@@ -19,7 +19,6 @@ import {
   dotOpacity,
   fadeFrame,
   frameStep,
-  lerpOutline,
   markBloomed,
   morphOutline,
   petalOutline,
@@ -58,11 +57,6 @@ test('the petal is symmetric, notched at its tip, and grows outward from the cen
   assert.equal(notch[0], 0)
   assert.ok(lobe[1] < notch[1], 'the lobes reach further out than the notch between them')
   assert.ok(petal.every(([, y]) => y < 0))
-})
-
-test('interpolation starts at the dot and ends at the petal', () => {
-  assert.deepEqual(lerpOutline(dot, petal, 0), dot)
-  assert.deepEqual(lerpOutline(dot, petal, 1), petal)
 })
 
 test('the bloom passes near the bud and lands exactly on the dot and the petal', () => {

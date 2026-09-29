@@ -77,13 +77,6 @@ export function morphOutline(dot: Outline, bud: Outline, petal: Outline, t: numb
   })
 }
 
-export function lerpOutline(a: Outline, b: Outline, t: number): Outline {
-  return a.map(([ax, ay], i) => {
-    const [bx, by] = b[i]
-    return [ax * (1 - t) + bx * t, ay * (1 - t) + by * t] as Point
-  })
-}
-
 export function toPath(o: Outline): string {
   const f = (n: number) => n.toFixed(2)
   let d = `M${f(o[0][0])} ${f(o[0][1])}`
