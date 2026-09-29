@@ -34,7 +34,6 @@ func (r StageRule) label() string {
 
 func ReadStageRules(b []byte) ([]StageRule, error) {
 	var f struct {
-		Note  string      `json:"note"`
 		Rules []StageRule `json:"rules"`
 	}
 	if err := json.Unmarshal(b, &f); err != nil {

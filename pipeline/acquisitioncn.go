@@ -17,7 +17,6 @@ type MappedSource struct {
 }
 
 type AcquisitionMap struct {
-	Note         string                  `json:"note"`
 	Codes        map[string]MappedSource `json:"codes"`
 	SignIn       MappedSource            `json:"signIn"`
 	Texts        map[string]MappedSource `json:"texts"`

@@ -73,8 +73,6 @@ const (
 )
 
 type StageCorrections struct {
-	Note         string            `json:"note"`
-	DerivedOn    string            `json:"derivedOn"`
 	Corrections  []StageCorrection `json:"corrections"`
 	Acknowledged []Acknowledged    `json:"acknowledged"`
 }

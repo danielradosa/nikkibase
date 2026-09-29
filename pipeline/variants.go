@@ -33,7 +33,6 @@ const Maiden = "maiden"
 
 func ReadStageVariants(b []byte) ([]StageVariant, error) {
 	var f struct {
-		Note     string         `json:"note"`
 		Variants []StageVariant `json:"variants"`
 	}
 	if err := json.Unmarshal(b, &f); err != nil {

@@ -10,8 +10,6 @@ import (
 )
 
 type StageScope struct {
-	Note           string         `json:"note"`
-	AsOf           string         `json:"asOf"`
 	Story          []StoryScope   `json:"story"`
 	CommissionActs [2]int         `json:"commissionActs"`
 	Whole          []string       `json:"whole"`
