@@ -40,8 +40,6 @@ type StageStats struct {
 	UnknownTag                    int
 	UnknownGrade                  int
 	OrphanBonus                   int
-	Ruled, RuleEntries            int
-	Corrected                     int
 	Dropped                       int
 	BonusCalls                    int
 	Valued, SideConflicts, Beyond int
@@ -141,17 +139,17 @@ func ParseStages(src []byte) ([]Stage, StageStats, error) {
 func ParseStagesWith(src []byte, corrections map[string]StageCorrection) ([]Stage, StageStats, error) {
 	src = uncomment(src)
 	var stats StageStats
-	stages, index, err := readStageTables(src, corrections, &stats)
+	stages, index, err := readStageTables(src, corrections)
 	if err != nil {
 		return nil, stats, err
 	}
 	applyBonuses(src, stages, index, corrections, &stats)
-	applyRules(src, stages, index, &stats)
+	applyRules(src, stages, index)
 	stats.Recount(stages)
 	return stages, stats, nil
 }
 
-func readStageTables(src []byte, corrections map[string]StageCorrection, stats *StageStats) ([]Stage, map[string]int, error) {
+func readStageTables(src []byte, corrections map[string]StageCorrection) ([]Stage, map[string]int, error) {
 	var (
 		stages []Stage
 		table  string
@@ -196,7 +194,6 @@ func readStageTables(src []byte, corrections map[string]StageCorrection, stats *
 		}
 		if fixed, ok := corrections[m[1]]; ok {
 			raw = fixed.Weights
-			stats.Corrected++
 		}
 		for i, v := range raw {
 			p := stagePairs[i]
@@ -296,8 +293,7 @@ func pay(st *scoring.Stage, calls [][][]byte, weightSum, divisor float64, stats 
 
 func ApplyStageValues(stages []Stage, src []byte, corrections map[string]StageCorrection, stats *StageStats) error {
 	src = uncomment(src)
-	var own StageStats
-	theirs, index, err := readStageTables(src, nil, &own)
+	theirs, index, err := readStageTables(src, nil)
 	if err != nil {
 		return err
 	}
@@ -390,8 +386,7 @@ func DisplayName(s Stage) string {
 }
 
 func ApplyStageNames(stages []Stage, src []byte) ([]string, error) {
-	var own StageStats
-	theirs, _, err := readStageTables(uncomment(src), nil, &own)
+	theirs, _, err := readStageTables(uncomment(src), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -526,7 +521,7 @@ var (
 	filterStyles = regexp.MustCompile(`Filter\(\s*"([^"]*)"`)
 )
 
-func applyRules(src []byte, stages []Stage, index map[string]int, stats *StageStats) {
+func applyRules(src []byte, stages []Stage, index map[string]int) {
 	coop := coopIndex(index)
 	find := func(name string) (int, bool) {
 		if at, ok := index[name]; ok {
@@ -539,7 +534,6 @@ func applyRules(src []byte, stages []Stage, index map[string]int, stats *StageSt
 		st := &stages[at]
 		if st.Rules == nil {
 			st.Rules = &StageRules{}
-			stats.Ruled++
 		}
 		for _, style := range styles {
 			if !slices.Contains(st.Rules.Styles, style) {
@@ -553,7 +547,6 @@ func applyRules(src []byte, stages []Stage, index map[string]int, stats *StageSt
 		if !ok {
 			continue
 		}
-		stats.RuleEntries++
 		var styles []string
 		if f := filterStyles.FindSubmatch(m[2]); f != nil {
 			for _, part := range strings.Split(string(f[1]), "/") {
@@ -587,7 +580,6 @@ func applyRules(src []byte, stages []Stage, index map[string]int, stats *StageSt
 			}
 		}
 		if ruled {
-			stats.RuleEntries++
 			flag(at, nil)
 		}
 	}
