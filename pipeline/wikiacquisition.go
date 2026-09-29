@@ -884,11 +884,6 @@ func upperFirst(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
-func (c *acqContext) unit(template, code string) (string, bool) {
-	u, ok := c.units[template][strings.TrimSpace(code)]
-	return u, ok
-}
-
 func (c *acqContext) amounts(text string) []Cost {
 	var out []Cost
 	for _, m := range wikiAmount.FindAllStringSubmatch(text, -1) {
@@ -904,7 +899,7 @@ func (c *acqContext) cost(amount, template, code string) (Cost, bool) {
 	if err != nil || n <= 0 {
 		return Cost{}, false
 	}
-	unit, ok := c.unit(template, code)
+	unit, ok := c.units[template][strings.TrimSpace(code)]
 	if !ok {
 		c.stats.UnknownUnits++
 		return Cost{}, false
