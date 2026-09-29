@@ -47,10 +47,6 @@ func (s Space) Branches() [][]Position {
 	return s.branches
 }
 
-func (s Space) BestPlaced(st scoring.Stage) (Result, scoring.Placement) {
-	return s.BestPlacedAt(st, scoring.MaxLevels)
-}
-
 func (s Space) BestPlacedAt(st scoring.Stage, l scoring.Levels) (Result, scoring.Placement) {
 	return s.BestPlacedFromAt(st, s.Best(st, nil), l)
 }

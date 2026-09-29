@@ -204,20 +204,6 @@ func legal(ps []Position, outfit []scoring.Item) bool {
 	return true
 }
 
-func TestExcludeKeepsGroups(t *testing.T) {
-	const handheld = 1
-	ps := []Position{
-		{Items: []scoring.Item{acc(1, 10)}, Group: handheld},
-		{Items: []scoring.Item{acc(2, 10)}, Group: handheld},
-		{Items: []scoring.Item{acc(3, 100)}, Group: handheld, Exclusive: true},
-		{Items: []scoring.Item{acc(4, 5)}},
-	}
-	got := Best(Exclude(ps, 4), stage(), nil)
-	if !legal(ps, got.Items) {
-		t.Errorf("after an exclusion, wore %v, which the game forbids", worn(got.Items))
-	}
-}
-
 func TestRequiredInGroupIsKept(t *testing.T) {
 	const handheld = 1
 	ps := []Position{

@@ -34,7 +34,7 @@ var (
 	stageWeights = [5]float64{2, 4, 0, 1, 3}
 	stageAttrs   = [5]int8{scoring.Simple, scoring.Lively, scoring.Cute, scoring.Sexy, scoring.Cool}
 	stageTags    = map[int]int{tagOne: 120, tagTwo: 60}
-	stageSkills  = scoring.Skills{scoring.Lively: scoring.CharmingSmile}
+	stageSkills  = scoring.Skills{scoring.Lively: 1.778}
 )
 
 var (
@@ -279,7 +279,7 @@ func named(p scoring.Placement, l scoring.Levels) func([]optimizer.Position, sco
 
 func autoAt(l scoring.Levels) func([]optimizer.Position, scoring.Stage) (optimizer.Result, *scoring.Placement) {
 	return func(positions []optimizer.Position, st scoring.Stage) (optimizer.Result, *scoring.Placement) {
-		r, p := optimizer.BestPlacedAt(positions, st, l)
+		r, p := optimizer.Require(positions, nil, nil).BestPlacedAt(st, l)
 		if l.Smile == 0 {
 			p.Smile = -1
 		}
@@ -422,7 +422,7 @@ func TestSkillsParity(t *testing.T) {
 	}
 
 	all := positionsFrom(c, ownedIDs(), false)
-	if smiled := optimizer.Best(all, st, scoring.Skills{scoring.Lively: scoring.SmileOnly}).Score; smiled == scores["one attribute named twice all"] {
+	if smiled := optimizer.Best(all, st, scoring.Skills{scoring.Lively: 1.27}).Score; smiled == scores["one attribute named twice all"] {
 		t.Errorf("Smile alone on Lively also scores %d, so nothing checks that naming it twice keeps Charming", smiled)
 	}
 	if scores["auto all"] == scores["two attributes all"] {
@@ -558,11 +558,11 @@ func nativeRequired(positions []optimizer.Position, st scoring.Stage, run requir
 	switch skills := run.skills.(type) {
 	case map[string]bool:
 		var p scoring.Placement
-		res, p = space.BestPlaced(st)
-		placement, sk = &p, p.Skills()
+		res, p = space.BestPlacedAt(st, scoring.MaxLevels)
+		placement, sk = &p, p.SkillsAt(scoring.MaxLevels)
 	case map[string]int:
 		p := scoring.Placement{CharmSmile: skills["charmSmile"], Smile: -1}
-		placement, sk = &p, p.Skills()
+		placement, sk = &p, p.SkillsAt(scoring.MaxLevels)
 		res = space.Best(st, sk)
 	default:
 		res = space.Best(st, sk)
@@ -629,7 +629,11 @@ func TestRequiredParity(t *testing.T) {
 			t.Errorf("weak dress %s: wears %v, want the required dress and no separates", scope, worn(res))
 		}
 	}
-	if free := optimizer.Best(optimizer.Exclude(all, 20001), st, nil); !wears(free, 40001) || !wears(free, 50001) {
+	withoutStrong := slices.Clone(all)
+	for i := range withoutStrong {
+		withoutStrong[i].Items = slices.DeleteFunc(slices.Clone(withoutStrong[i].Items), func(it scoring.Item) bool { return it.ID == 20001 })
+	}
+	if free := optimizer.Best(withoutStrong, st, nil); !wears(free, 40001) || !wears(free, 50001) {
 		t.Errorf("without the strong dress the best outfit wears %v, so the separates never had to make way for the weak dress", worn(free))
 	}
 	for _, row := range r.Required[0].All.Items {
@@ -638,7 +642,7 @@ func TestRequiredParity(t *testing.T) {
 		}
 	}
 
-	sk := (&scoring.Placement{CharmSmile: scoring.Lively, Smile: -1}).Skills()
+	sk := (&scoring.Placement{CharmSmile: scoring.Lively, Smile: -1}).SkillsAt(scoring.MaxLevels)
 	for _, scope := range []struct {
 		name      string
 		ownedOnly bool
@@ -658,7 +662,7 @@ func TestRequiredParity(t *testing.T) {
 	if wears(twoPlaces, 170009) && (wears(twoPlaces, rightHand) || wears(twoPlaces, 170008)) {
 		t.Errorf("one of two places: wears %v, a both-hands item with a one-hand item", worn(twoPlaces))
 	}
-	if free, _ := optimizer.BestPlaced(all, st); wears(free, 170006) || wears(free, 170009) {
+	if free, _ := optimizer.Require(all, nil, nil).BestPlacedAt(st, scoring.MaxLevels); wears(free, 170006) || wears(free, 170009) {
 		t.Errorf("without the rule the best outfit already wears %v, so the rule proves nothing", worn(free))
 	}
 

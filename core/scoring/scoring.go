@@ -56,11 +56,6 @@ type Stage struct {
 	Tags    map[int]int
 }
 
-const (
-	CharmingSmile = 1.778
-	SmileOnly     = 1.27
-)
-
 type Skills map[int]float64
 
 func (s Skills) mult(code int8) float64 {
@@ -87,10 +82,6 @@ func (l Levels) Valid() bool {
 
 func (l Levels) None() bool {
 	return l.Charming == 0 && l.Smile == 0
-}
-
-func (p Placement) Skills() Skills {
-	return p.SkillsAt(MaxLevels)
 }
 
 func (p Placement) SkillsAt(l Levels) Skills {

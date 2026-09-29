@@ -142,7 +142,7 @@ func TestOfMatchesBest(t *testing.T) {
 		if withSkills := optimizer.Best(positions, s.Scoring, scoring.Skills{}); withSkills.Score != want.Score {
 			t.Errorf("stage %d: no skills scores %d and an empty skill set %d", i, want.Score, withSkills.Score)
 		}
-		auto, placement := optimizer.BestPlaced(positions, s.Scoring)
+		auto, placement := optimizer.Require(positions, nil, nil).BestPlacedAt(s.Scoring, scoring.MaxLevels)
 		if got.Auto.Placement != placement || got.Auto.Score != auto.Score || len(got.Auto.Items) != len(auto.Items) {
 			t.Errorf("stage %d: auto %+v scores %d wearing %d, and BestPlaced %+v scores %d wearing %d",
 				i, got.Auto.Placement, got.Auto.Score, len(got.Auto.Items), placement, auto.Score, len(auto.Items))

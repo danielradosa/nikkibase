@@ -158,7 +158,10 @@ func TestMissingSetIsLeftUnmet(t *testing.T) {
 		t.Errorf("unmet = %v, want the two sets the pool has nothing for", unmet)
 	}
 
-	excluded := Exclude(ps, 4)
+	excluded := slices.Clone(ps)
+	for i := range excluded {
+		excluded[i].Items = slices.DeleteFunc(slices.Clone(excluded[i].Items), func(it scoring.Item) bool { return it.ID == 4 })
+	}
 	got = Require(excluded, indexOf(ps), [][]int{{4}}).Best(livelyStage, nil)
 	if unmet := Unmet(got.Items, [][]int{{4}}); len(unmet) != 1 {
 		t.Errorf("an excluded item still counts as held: wore %v", ids(got.Items))
@@ -194,8 +197,8 @@ func TestWithoutSetsRequireIsBest(t *testing.T) {
 		if got, want := space.Best(livelyStage, nil), Best(ps, livelyStage, nil); !reflect.DeepEqual(got, want) {
 			t.Errorf("sets %v: %+v, and Best gives %+v", sets, got, want)
 		}
-		got, placement := space.BestPlaced(livelyStage)
-		want, wantPlacement := BestPlaced(ps, livelyStage)
+		got, placement := space.BestPlacedAt(livelyStage, scoring.MaxLevels)
+		want, wantPlacement := Require(ps, nil, nil).BestPlacedAt(livelyStage, scoring.MaxLevels)
 		if placement != wantPlacement || !reflect.DeepEqual(got, want) {
 			t.Errorf("sets %v: placed %+v %+v, and BestPlaced gives %+v %+v", sets, placement, got, wantPlacement, want)
 		}
@@ -214,7 +217,7 @@ func TestRequireLeavesThePositionsAlone(t *testing.T) {
 	}
 	space := Require(ps, indexOf(ps), [][]int{{4}, {20, 21}, {99}})
 	space.Best(livelyStage, nil)
-	space.BestPlaced(livelyStage)
+	space.BestPlacedAt(livelyStage, scoring.MaxLevels)
 	if !reflect.DeepEqual(ps, before) {
 		t.Errorf("searching changed the caller's positions")
 	}
@@ -315,7 +318,7 @@ func TestRequiredMatchesExhaustiveSearch(t *testing.T) {
 		if got.Score != want {
 			t.Fatalf("trial %d: scored %d, and the best outfit meeting %v scores %d", trial, got.Score, held, want)
 		}
-		if auto, _ := space.BestPlaced(st); len(Unmet(auto.Items, held)) > 0 {
+		if auto, _ := space.BestPlacedAt(st, scoring.MaxLevels); len(Unmet(auto.Items, held)) > 0 {
 			t.Fatalf("trial %d: with skills wore %v, which misses %v", trial, ids(auto.Items), Unmet(auto.Items, held))
 		}
 	}

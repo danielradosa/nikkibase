@@ -88,17 +88,6 @@ func TestRequiredAccessoryIsWorn(t *testing.T) {
 	}
 }
 
-func TestExcludeDropsBannedItems(t *testing.T) {
-	positions := Exclude([]Position{
-		{Items: []scoring.Item{item(1, scoring.Hair, 99), item(2, scoring.Hair, 50)}},
-	}, 1)
-
-	got := Best(positions, livelyStage, nil)
-	if !slices.Equal(ids(got.Items), []int{2}) {
-		t.Errorf("chose %v, want the banned item 1 gone", ids(got.Items))
-	}
-}
-
 func TestRankedOrdersByWorth(t *testing.T) {
 	ranked := Ranked([]scoring.Item{
 		item(1, scoring.Hair, 10),
@@ -185,8 +174,8 @@ func TestBestPlaced(t *testing.T) {
 
 		unskilled := Best(positions, stage, nil)
 		wantPlacement := scoring.Place(unskilled.Items, stage)
-		want := Best(positions, stage, wantPlacement.Skills())
-		got, placement := BestPlaced(positions, stage)
+		want := Best(positions, stage, wantPlacement.SkillsAt(scoring.MaxLevels))
+		got, placement := Require(positions, nil, nil).BestPlacedAt(stage, scoring.MaxLevels)
 		if placement != wantPlacement {
 			t.Fatalf("trial %d: placed %+v, and the unskilled best outfit's points say %+v", trial, placement, wantPlacement)
 		}

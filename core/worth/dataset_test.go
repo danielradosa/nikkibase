@@ -215,7 +215,7 @@ func TestBundleValuesAreContribution(t *testing.T) {
 	l := newLayout(b.positions, b.posOf, b.own)
 	checked := 0
 	for _, s := range b.stages {
-		for _, sk := range []scoring.Skills{nil, scoring.Placement{CharmSmile: int(s.Scoring.Attrs[0]), Smile: int(s.Scoring.Attrs[3])}.Skills()} {
+		for _, sk := range []scoring.Skills{nil, scoring.Placement{CharmSmile: int(s.Scoring.Attrs[0]), Smile: int(s.Scoring.Attrs[3])}.SkillsAt(scoring.MaxLevels)} {
 			c := l.coefOf(s.Scoring, sk)
 			if !c.exact {
 				t.Fatalf("%s: the packed values are not used", s.Key())

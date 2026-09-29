@@ -5,6 +5,11 @@ import (
 	"testing"
 )
 
+const (
+	charmingSmile = 1.778
+	smileOnly     = 1.27
+)
+
 func hair(lively int, tags ...int) Item {
 	it := Item{Slot: Hair, Tags: tags}
 	it.Attrs = [pairs]int8{Gorgeous, Lively, Mature, Sexy, Warm}
@@ -22,9 +27,9 @@ func TestSingleItemAndSkills(t *testing.T) {
 		want   int
 	}{
 		{"no skills", nil, 920},
-		{"charming+smile on Lively", Skills{Lively: CharmingSmile}, 1635},
-		{"smile on Lively", Skills{Lively: SmileOnly}, 1168},
-		{"skill on an unrelated attribute", Skills{Cute: CharmingSmile}, 920},
+		{"charming+smile on Lively", Skills{Lively: charmingSmile}, 1635},
+		{"smile on Lively", Skills{Lively: smileOnly}, 1168},
+		{"skill on an unrelated attribute", Skills{Cute: charmingSmile}, 920},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			if got := Score([]Item{cuteSmile}, stage, tc.skills); got != tc.want {
@@ -42,7 +47,7 @@ func TestTagIsExemptFromSkills(t *testing.T) {
 	if got := Score([]Item{item}, stage, nil); got != 880 {
 		t.Errorf("without skills = %d, want 880", got)
 	}
-	if got := Score([]Item{item}, stage, Skills{Lively: CharmingSmile}); got != 1525 {
+	if got := Score([]Item{item}, stage, Skills{Lively: charmingSmile}); got != 1525 {
 		t.Errorf("with charming+smile = %d, want 1525", got)
 	}
 }
@@ -63,7 +68,7 @@ func TestSpiritFlatBonus(t *testing.T) {
 	spirit.Stats[1], spirit.Stats[2] = 37, 25
 
 	lively := CustomStage([pairs]int{0, 100, 0, 0, 0}, nil)
-	if got := Score([]Item{spirit}, lively, Skills{Lively: CharmingSmile}); got != 2157 {
+	if got := Score([]Item{spirit}, lively, Skills{Lively: charmingSmile}); got != 2157 {
 		t.Errorf("boosted = %d, want 2157", got)
 	}
 	cute := CustomStage([pairs]int{0, 0, 100, 0, 0}, nil)
@@ -171,15 +176,15 @@ func TestPlacementSkills(t *testing.T) {
 		p    Placement
 		want Skills
 	}{
-		{"two attributes", Placement{Lively, Cute}, Skills{Lively: CharmingSmile, Cute: SmileOnly}},
-		{"the same attribute keeps Charming", Placement{Lively, Lively}, Skills{Lively: CharmingSmile}},
-		{"no Smile", Placement{Lively, -1}, Skills{Lively: CharmingSmile}},
-		{"no Charming", Placement{-1, Cute}, Skills{Cute: SmileOnly}},
+		{"two attributes", Placement{Lively, Cute}, Skills{Lively: charmingSmile, Cute: smileOnly}},
+		{"the same attribute keeps Charming", Placement{Lively, Lively}, Skills{Lively: charmingSmile}},
+		{"no Smile", Placement{Lively, -1}, Skills{Lively: charmingSmile}},
+		{"no Charming", Placement{-1, Cute}, Skills{Cute: smileOnly}},
 		{"nothing placed", Placement{-1, -1}, Skills{}},
-		{"Gorgeous is code zero, not nothing", Placement{Gorgeous, Simple}, Skills{Gorgeous: CharmingSmile, Simple: SmileOnly}},
+		{"Gorgeous is code zero, not nothing", Placement{Gorgeous, Simple}, Skills{Gorgeous: charmingSmile, Simple: smileOnly}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			got := tc.p.Skills()
+			got := tc.p.SkillsAt(MaxLevels)
 			if len(got) != len(tc.want) {
 				t.Fatalf("Skills = %v, want %v", got, tc.want)
 			}
@@ -192,15 +197,15 @@ func TestPlacementSkills(t *testing.T) {
 	}
 
 	stage := CustomStage([pairs]int{0, 100, 0, 0, 0}, nil)
-	if got := Score([]Item{hair(92)}, stage, Placement{Lively, Lively}.Skills()); got != 1635 {
+	if got := Score([]Item{hair(92)}, stage, Placement{Lively, Lively}.SkillsAt(MaxLevels)); got != 1635 {
 		t.Errorf("Charming and Smile named on one attribute score %d, want the Charming 1635", got)
 	}
 }
 
 func TestSkillsAtMaxAreTheLiterals(t *testing.T) {
 	sk := Placement{Lively, Cute}.SkillsAt(MaxLevels)
-	if math.Float64bits(sk[Lively]) != math.Float64bits(CharmingSmile) || math.Float64bits(sk[Cute]) != math.Float64bits(SmileOnly) {
-		t.Errorf("max levels give %v, want exactly %v and %v", sk, CharmingSmile, SmileOnly)
+	if math.Float64bits(sk[Lively]) != math.Float64bits(charmingSmile) || math.Float64bits(sk[Cute]) != math.Float64bits(smileOnly) {
+		t.Errorf("max levels give %v, want exactly %v and %v", sk, charmingSmile, smileOnly)
 	}
 }
 

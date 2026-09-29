@@ -74,14 +74,6 @@ func Best(positions []Position, st scoring.Stage, sk scoring.Skills) Result {
 		Dress: value(dress), Separates: value(top) + value(bottom)}
 }
 
-func BestPlaced(positions []Position, st scoring.Stage) (Result, scoring.Placement) {
-	return BestPlacedAt(positions, st, scoring.MaxLevels)
-}
-
-func BestPlacedAt(positions []Position, st scoring.Stage, l scoring.Levels) (Result, scoring.Placement) {
-	return Space{branches: [][]Position{positions}}.BestPlacedAt(st, l)
-}
-
 func GroupChoices[T any](seed []T, grouped map[uint8][]T, exclusive, required func(T) bool) [][]T {
 	choices := [][]T{seed}
 	for _, g := range slices.Sorted(maps.Keys(grouped)) {
@@ -251,22 +243,6 @@ func Ranked(items []scoring.Item, st scoring.Stage, sk scoring.Skills) []scoring
 		ranked[i] = items[r.at]
 	}
 	return ranked
-}
-
-func Exclude(positions []Position, ids ...int) []Position {
-	out := make([]Position, 0, len(positions))
-	for _, p := range positions {
-		kept := make([]scoring.Item, 0, len(p.Items))
-		for _, it := range p.Items {
-			if !slices.Contains(ids, it.ID) {
-				kept = append(kept, it)
-			}
-		}
-		q := p
-		q.Items = kept
-		out = append(out, q)
-	}
-	return out
 }
 
 type pick struct {

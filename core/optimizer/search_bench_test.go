@@ -162,14 +162,14 @@ func search(positions []optimizer.Position, posOf map[int]int, v version, skills
 	case "none":
 		return space.Best(v.st, scoring.Skills{}), scoring.Skills{}, scoring.Placement{CharmSmile: -1, Smile: -1}
 	case "auto":
-		r, p := space.BestPlaced(v.st)
-		return r, p.Skills(), p
+		r, p := space.BestPlacedAt(v.st, scoring.MaxLevels)
+		return r, p.SkillsAt(scoring.MaxLevels), p
 	case "levels":
 		r, p := space.BestPlacedAt(v.st, lowLevels)
 		return r, p.SkillsAt(lowLevels), p
 	default:
 		p := heaviest(v.st)
-		sk := p.Skills()
+		sk := p.SkillsAt(scoring.MaxLevels)
 		return space.Best(v.st, sk), sk, p
 	}
 }
