@@ -98,13 +98,7 @@ var (
 	wikiCategory     = regexp.MustCompile(`\[\[Category:\s*([^\]|]+?)\s*(?:\|[^\]]*)?\]\]`)
 )
 
-var rechargeCategories = []struct{ category, text string }{
-	{"Abyssal Island", "Abyssal Island"},
-	{"Lucky Bags", "Lucky Bags"},
-	{"Zodiac Lucky Pack", "Zodiac Lucky Pack"},
-	{"Time-limited Pack", "Time-limited Pack"},
-	{"First Recharge Giftpack", "First Recharge Giftpack"},
-}
+var rechargeCategories = []string{"Abyssal Island", "Lucky Bags", "Zodiac Lucky Pack", "Time-limited Pack", "First Recharge Giftpack"}
 
 type fixedSource struct {
 	kind, text string
@@ -340,8 +334,8 @@ func categoryRecharge(list []Acquisition, categories []string) []Acquisition {
 	}
 	var named []Acquisition
 	for _, c := range rechargeCategories {
-		if slices.ContainsFunc(categories, func(got string) bool { return strings.EqualFold(got, c.category) }) {
-			named = append(named, Acquisition{Kind: "recharge", Text: c.text, Past: pastSource("recharge", c.text)})
+		if slices.ContainsFunc(categories, func(got string) bool { return strings.EqualFold(got, c) }) {
+			named = append(named, Acquisition{Kind: "recharge", Text: c, Past: pastSource("recharge", c)})
 		}
 	}
 	if len(named) == 0 {
