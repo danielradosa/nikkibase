@@ -43,8 +43,15 @@ func pushService(root string) http.Handler {
 	if dir == "" {
 		return nil
 	}
-	if err := dropRoot(dir); err != nil {
-		log.Fatalf("serve: %v", err)
+	if os.Geteuid() == 0 {
+		owned := own(dir, nonroot)
+		if err := becomeUser(nonroot); err != nil {
+			log.Fatalf("serve: leaving root: %v", err)
+		}
+		if owned != nil {
+			log.Printf("push: off: %v", owned)
+			return nil
+		}
 	}
 	vapid, err := push.ParseVAPID(os.Getenv("VAPID_PRIVATE_KEY"), envOr("VAPID_SUBJECT", "mailto:nikkibaseproject@gmail.com"))
 	if err != nil {
@@ -68,29 +75,26 @@ func pushService(root string) http.Handler {
 	return &push.Service{Store: store, Public: vapid.Public, Allowed: push.PushHost, Limit: &push.Limiter{Max: 30, Window: time.Hour}}
 }
 
-func dropRoot(dir string) error {
-	if os.Geteuid() != 0 {
-		return nil
-	}
+func own(dir string, id int) error {
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return err
 	}
-	err := filepath.WalkDir(dir, func(p string, _ fs.DirEntry, err error) error {
+	return filepath.WalkDir(dir, func(p string, _ fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		return os.Lchown(p, nonroot, nonroot)
+		return os.Lchown(p, id, id)
 	})
-	if err != nil {
-		return err
-	}
+}
+
+func becomeUser(id int) error {
 	if err := syscall.Setgroups(nil); err != nil {
 		return err
 	}
-	if err := syscall.Setgid(nonroot); err != nil {
+	if err := syscall.Setgid(id); err != nil {
 		return err
 	}
-	return syscall.Setuid(nonroot)
+	return syscall.Setuid(id)
 }
 
 func handler(root string, pushes http.Handler) http.Handler {
