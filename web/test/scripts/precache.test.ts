@@ -35,7 +35,7 @@ const dist = (
     ['.DS_Store', 6000],
     ['data/.DS_Store', 6000],
   ] as [string, number][]
-).map(([path, size]) => ({ path, size }))
+).map(([path, size]) => ({ path, size, hash: `sha-${size}` }))
 
 const entries = precacheList(dist, { dataVersion: 'cloud', keystream: KEYSTREAM })
 const urls = entries.map((entry: { url: string }) => entry.url)
@@ -74,12 +74,12 @@ test('each kept file carries its size', () => {
   assert.equal(entries.find((entry: { url: string }) => entry.url === '/').size, 900)
 })
 
-test('the cache name changes with the files, their sizes and the worker, not with listing order', () => {
+test('the cache name changes with the files, their contents and the worker, not with listing order', () => {
   const name = cacheName(entries, template)
   assert.match(name, /^nikkibase-[0-9a-f]{12}$/)
   assert.equal(cacheName(precacheList([...dist].reverse(), { dataVersion: 'cloud', keystream: KEYSTREAM }), template), name)
-  const grown = dist.map((file) => (file.path === 'favicon.ico' ? { ...file, size: 1401 } : file))
-  assert.notEqual(cacheName(precacheList(grown, { dataVersion: 'cloud', keystream: KEYSTREAM }), template), name)
+  const edited = dist.map((file) => (file.path === 'favicon.ico' ? { ...file, hash: 'sha-edited' } : file))
+  assert.notEqual(cacheName(precacheList(edited, { dataVersion: 'cloud', keystream: KEYSTREAM }), template), name)
   const renamed = dist.map((file) => (file.path === 'assets/index-abc.js' ? { ...file, path: 'assets/index-xyz.js' } : file))
   assert.notEqual(cacheName(precacheList(renamed, { dataVersion: 'cloud', keystream: KEYSTREAM }), template), name)
   assert.notEqual(cacheName(precacheList(dist, { dataVersion: 'lilith', keystream: KEYSTREAM }), template), name)

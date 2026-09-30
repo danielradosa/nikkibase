@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs'
 import { join, sep } from 'node:path'
 import { cacheName, keystreamUrl, precacheList, renderWorker } from './precache.mjs'
@@ -7,7 +8,9 @@ if (!existsSync('dist/index.html')) throw new Error('sw: run after vite build, f
 const files = []
 for (const rel of readdirSync('dist', { recursive: true })) {
   const info = statSync(join('dist', rel))
-  if (info.isFile()) files.push({ path: rel.split(sep).join('/'), size: info.size })
+  if (!info.isFile()) continue
+  const hash = createHash('sha256').update(readFileSync(join('dist', rel))).digest('hex')
+  files.push({ path: rel.split(sep).join('/'), size: info.size, hash })
 }
 
 const dataVersion = JSON.parse(readFileSync('dist/data/index.json', 'utf8')).version

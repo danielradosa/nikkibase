@@ -11,7 +11,7 @@ export function keystreamUrl(bytes) {
 export function precacheList(files, { dataVersion, keystream }) {
   const present = new Set(files.map((file) => file.path))
   const entries = []
-  for (const { path, size } of files) {
+  for (const { path, size, hash } of files) {
     const parts = path.split('/')
     if (path === 'sw.js' || parts.some((part) => part.startsWith('.'))) continue
     if (SIBLINGS.some((suffix) => path.endsWith(suffix) && present.has(path.slice(0, -suffix.length)))) continue
@@ -19,14 +19,14 @@ export function precacheList(files, { dataVersion, keystream }) {
     let url = '/' + parts.map(encodeURIComponent).join('/')
     if (path === 'index.html') url = '/'
     if (path === 'keystream.bin') url = keystream
-    entries.push({ url, size })
+    entries.push({ url, size, hash })
   }
   return entries.sort((a, b) => (a.url < b.url ? -1 : a.url > b.url ? 1 : 0))
 }
 
 export function cacheName(entries, template) {
   const hash = createHash('sha256').update(template)
-  for (const { url, size } of entries) hash.update(`\n${url} ${size}`)
+  for (const entry of entries) hash.update(`\n${entry.url} ${entry.hash}`)
   return `nikkibase-${hash.digest('hex').slice(0, 12)}`
 }
 
