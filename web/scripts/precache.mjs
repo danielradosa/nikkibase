@@ -13,7 +13,7 @@ export function precacheList(files, { dataVersion, keystream }) {
   const entries = []
   for (const { path, size, hash } of files) {
     const parts = path.split('/')
-    if (path === 'sw.js' || parts.some((part) => part.startsWith('.'))) continue
+    if (path === 'sw.js' || path.endsWith('.woff') || parts.some((part) => part.startsWith('.'))) continue
     if (SIBLINGS.some((suffix) => path.endsWith(suffix) && present.has(path.slice(0, -suffix.length)))) continue
     if (parts[0] === 'data' && parts.length > 2 && parts[1] !== dataVersion) continue
     let url = '/' + parts.map(encodeURIComponent).join('/')

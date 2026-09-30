@@ -17,6 +17,8 @@ const dist = (
     ['assets/nikkibase-def.wasm', 90000],
     ['assets/nikkibase-def.wasm.br', 30000],
     ['assets/worker-ghi.js', 3000],
+    ['assets/cormorant-latin-500-normal-Ab12Cd34.woff2', 20000],
+    ['assets/cormorant-latin-500-normal-Ef56-h78.woff', 26000],
     ['data/index.json', 20],
     ['data/cloud/items.json', 2600],
     ['data/cloud/items.json.gz', 400],
@@ -48,6 +50,7 @@ test('the keystream URL is its sha256 cut to 16 hex digits, like the page asks f
 test('every built file is kept once, the page as / and the keystream at its versioned URL', () => {
   assert.deepEqual(urls, [
     '/',
+    '/assets/cormorant-latin-500-normal-Ab12Cd34.woff2',
     '/assets/index-abc.js',
     '/assets/nikkibase-def.wasm',
     '/assets/worker-ghi.js',
@@ -63,9 +66,9 @@ test('every built file is kept once, the page as / and the keystream at its vers
   ])
 })
 
-test('compressed copies, older data, the worker itself and hidden files are left out', () => {
+test('compressed copies, older data, the worker itself, hidden files and .woff fonts are left out', () => {
   for (const url of urls) {
-    assert.doesNotMatch(url, /\.br$|\.js\.gz$|\.json\.gz$|lilith|\/sw\.js|DS_Store|index\.html/)
+    assert.doesNotMatch(url, /\.br$|\.js\.gz$|\.json\.gz$|lilith|\/sw\.js|DS_Store|index\.html|\.woff$/)
   }
 })
 
