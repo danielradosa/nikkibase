@@ -1,6 +1,7 @@
 const CACHE = __CACHE__
 const PRECACHE = __PRECACHE__
 const PREFIX = 'nikkibase-'
+const SLOW_PAGE = 3500
 
 const lasting = (url) =>
   url.pathname.startsWith('/assets/') ||
@@ -15,14 +16,25 @@ async function cached(request) {
   }
 }
 
-async function networkFirst(request, fallback) {
+async function networkFirst(request) {
   try {
     return await fetch(request)
   } catch (error) {
-    const hit = (await cached(request)) ?? (fallback && (await cached(fallback)))
+    const hit = await cached(request)
     if (hit) return hit
     throw error
   }
+}
+
+async function openPage(request) {
+  const network = fetch(request)
+  network.catch(() => {})
+  const slow = new Promise((resolve) => setTimeout(resolve, SLOW_PAGE))
+  try {
+    const answer = await Promise.race([network, slow])
+    if (answer) return answer
+  } catch {}
+  return (await cached(request)) ?? (await cached('/')) ?? network
 }
 
 async function cacheFirst(event) {
@@ -58,7 +70,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
-  if (request.mode === 'navigate') event.respondWith(networkFirst(request, '/'))
+  if (request.mode === 'navigate') event.respondWith(openPage(request))
   else if (lasting(url)) event.respondWith(cacheFirst(event))
   else event.respondWith(networkFirst(request))
 })

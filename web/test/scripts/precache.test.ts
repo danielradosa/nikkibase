@@ -108,10 +108,11 @@ type Body = string | { body: string; type: string }
 function worker(site: Record<string, Body>, kept = urls, name = 'nikkibase-new') {
   const stores = new Map<string, Map<string, Response>>()
   const key = (r: string | Req) => new URL(typeof r === 'string' ? r : r.url, ORIGIN).href
-  const net = { online: true, calls: [] as string[] }
+  const net = { online: true, stall: false, stalled: [] as (() => void)[], calls: [] as string[] }
   const fetch = async (r: string | Req) => {
     const url = new URL(key(r))
     net.calls.push(url.pathname + url.search)
+    if (net.stall) await new Promise<void>((resolve) => net.stalled.push(resolve))
     if (!net.online) throw new TypeError('Failed to fetch')
     const body = site[url.pathname + url.search]
     if (body === undefined) return new Response('missing', { status: 404 })
@@ -136,7 +137,9 @@ function worker(site: Record<string, Body>, kept = urls, name = 'nikkibase-new')
   const caches = { open, match, keys: async () => [...stores.keys()], delete: async (name: string) => stores.delete(name) }
   const listeners = new Map<string, (event: object) => void>()
   const self = { location: new URL('/sw.js', ORIGIN), addEventListener: (type: string, fn: (event: object) => void) => listeners.set(type, fn) }
-  runInNewContext(renderWorker(template, name, kept), { self, caches, fetch, URL, Response })
+  const timers: { ms: number; fn: () => void }[] = []
+  const setTimeout = (fn: () => void, ms: number) => timers.push({ ms, fn })
+  runInNewContext(renderWorker(template, name, kept), { self, caches, fetch, URL, Response, setTimeout })
 
   const lifecycle = (type: string) => {
     let done: Promise<unknown> = Promise.resolve()
@@ -153,7 +156,7 @@ function worker(site: Record<string, Body>, kept = urls, name = 'nikkibase-new')
     return response
   }
   const text = async (r: Req) => (await get(r))!.text()
-  return { stores, net, open, install: () => lifecycle('install'), activate: () => lifecycle('activate'), get, text }
+  return { stores, net, timers, open, install: () => lifecycle('install'), activate: () => lifecycle('activate'), get, text }
 }
 
 const site = () => Object.fromEntries(urls.map((url: string) => [url, `v1 ${url}`]))
@@ -193,6 +196,27 @@ test('opening a page asks the network first and falls back to the kept page offl
   assert.equal(await sw.text(req('/', 'navigate')), 'v1 /')
   assert.equal(await sw.text(req('/stages', 'navigate')), 'v1 /')
   assert.equal(await sw.text(req('/privacy.txt?x=1', 'navigate')), 'v1 /')
+})
+
+test('a page the network does not answer within a few seconds opens from the kept copy', async () => {
+  const sw = worker(site())
+  await sw.install()
+  sw.net.stall = true
+  const opening = sw.text(req('/stages', 'navigate'))
+  assert.equal(sw.timers.length, 1)
+  assert.ok(sw.timers[0].ms >= 3000 && sw.timers[0].ms <= 4000, `${sw.timers[0].ms} ms`)
+  sw.timers[0].fn()
+  assert.equal(await opening, 'v1 /')
+})
+
+test('a slow page with no kept copy is still waited for', async () => {
+  const sw = worker({ '/stages': 'slow page' })
+  sw.net.stall = true
+  const opening = sw.text(req('/stages', 'navigate'))
+  sw.timers[0].fn()
+  await new Promise((resolve) => setImmediate(resolve))
+  sw.net.stalled.forEach((release) => release())
+  assert.equal(await opening, 'slow page')
 })
 
 test('offline, a page opens from the newest complete copy, never from an older one', async () => {
