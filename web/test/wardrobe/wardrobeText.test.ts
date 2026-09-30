@@ -203,13 +203,18 @@ test('a bad wardrobe code says plainly what is wrong with it', () => {
   assert.deepEqual(codeLoad({ ok: false, problem: 'invalid' }, null), { ok: false, error: NOT_A_CODE })
 })
 
-test('a wardrobe code keeps the items the data knows and counts the rest like a data update', () => {
+test('a wardrobe code keeps the items the data knows and says how many of the rest it left out', () => {
   const known = new Set([10001, 20001, 30001])
   assert.deepEqual(codeLoad({ ok: true, ids: [10001, 20001] }, known), { ok: true, ids: [10001, 20001], notice: null })
   assert.deepEqual(codeLoad({ ok: true, ids: [10001, 20001, 99998, 99999] }, known), {
     ok: true,
     ids: [10001, 20001],
-    notice: "NikkiBase's item data was updated. 2 of your items aren't in it any more.",
+    notice: "2 items in that code aren't in NikkiBase's item data.",
+  })
+  assert.deepEqual(codeLoad({ ok: true, ids: [10001, 99999] }, known), {
+    ok: true,
+    ids: [10001],
+    notice: "1 item in that code isn't in NikkiBase's item data.",
   })
   assert.deepEqual(codeLoad({ ok: true, ids: [10001, 99999] }, null), { ok: true, ids: [10001, 99999], notice: null })
 })

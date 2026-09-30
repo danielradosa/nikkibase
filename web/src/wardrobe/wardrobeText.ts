@@ -53,10 +53,16 @@ export const CODE_EMPTY = 'That code has no items NikkiBase knows.'
 
 export type CodeLoad = { ok: true; ids: number[]; notice: string | null } | { ok: false; error: string }
 
+function codeLeftOut(count: number): string | null {
+  if (count <= 0) return null
+  const one = count === 1
+  return `${count.toLocaleString('en-US')} ${one ? 'item' : 'items'} in that code ${one ? "isn't" : "aren't"} in NikkiBase's item data.`
+}
+
 export function codeLoad(read: CodeRead, known: ReadonlySet<number> | null): CodeLoad {
   if (!read.ok) return { ok: false, error: read.problem === 'incomplete' ? CODE_INCOMPLETE : NOT_A_CODE }
-  const kept = known ? updatedWardrobe(read.ids, known) : { ids: read.ids, notice: null }
-  return kept.ids.length ? { ok: true, ...kept } : { ok: false, error: CODE_EMPTY }
+  const ids = known ? read.ids.filter((id) => known.has(id)) : read.ids
+  return ids.length ? { ok: true, ids, notice: codeLeftOut(read.ids.length - ids.length) } : { ok: false, error: CODE_EMPTY }
 }
 
 export const CODE_TEXT = {
