@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"log"
 	"mime"
@@ -29,29 +30,36 @@ func main() {
 	if _, err := os.Stat(filepath.Join(root, "index.html")); err != nil {
 		log.Fatalf("serve: no index.html under %s -- run the web build first: %v", root, err)
 	}
+	dir := os.Getenv("PUSH_DIR")
+	pushOK := dir != ""
+	if os.Geteuid() == 0 {
+		if dir != "" {
+			if err := own(dir, nonroot); err != nil {
+				log.Printf("push: off: %v", err)
+				pushOK = false
+			}
+		}
+		if err := becomeUser(nonroot); err != nil {
+			log.Printf("serve: WARNING still running as root, could not switch to user %d: %v", nonroot, err)
+		}
+	}
+	var pushes http.Handler
+	if pushOK {
+		pushes = pushService(root, dir)
+	}
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           handler(root, pushService(root)),
+		Handler:           handler(root, pushes),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	log.Printf("serve: %s on :%s", root, port)
 	log.Fatal(srv.ListenAndServe())
 }
 
-func pushService(root string) http.Handler {
-	dir := os.Getenv("PUSH_DIR")
-	if dir == "" {
+func pushService(root, dir string) http.Handler {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		log.Printf("push: off: %v", err)
 		return nil
-	}
-	if os.Geteuid() == 0 {
-		owned := own(dir, nonroot)
-		if err := becomeUser(nonroot); err != nil {
-			log.Fatalf("serve: leaving root: %v", err)
-		}
-		if owned != nil {
-			log.Printf("push: off: %v", owned)
-			return nil
-		}
 	}
 	vapid, err := push.ParseVAPID(os.Getenv("VAPID_PRIVATE_KEY"), envOr("VAPID_SUBJECT", "mailto:nikkibaseproject@gmail.com"))
 	if err != nil {
@@ -72,7 +80,13 @@ func pushService(root string) http.Handler {
 		}
 	}()
 	log.Printf("push: on, %d subscriptions", store.Len())
-	return &push.Service{Store: store, Public: vapid.Public, Allowed: push.PushHost, Limit: &push.Limiter{Max: 30, Window: time.Hour}}
+	return &push.Service{
+		Store:   store,
+		Public:  vapid.Public,
+		Allowed: push.PushHost,
+		Limit:   &push.Limiter{Max: 30, Window: time.Hour},
+		Confirm: sender.Confirm,
+	}
 }
 
 func own(dir string, id int) error {
@@ -88,13 +102,7 @@ func own(dir string, id int) error {
 }
 
 func becomeUser(id int) error {
-	if err := syscall.Setgroups(nil); err != nil {
-		return err
-	}
-	if err := syscall.Setgid(id); err != nil {
-		return err
-	}
-	return syscall.Setuid(id)
+	return errors.Join(syscall.Setgroups(nil), syscall.Setgid(id), syscall.Setuid(id))
 }
 
 func handler(root string, pushes http.Handler) http.Handler {
