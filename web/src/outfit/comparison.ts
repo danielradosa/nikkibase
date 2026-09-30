@@ -98,8 +98,10 @@ export function outfitText(
     `${stage.mode} ${stage.name}${level} — ${bookScore(outfit.score, reads).toLocaleString('en-US')} (${outfit.items.length} items)`,
   ]
   for (const it of [...outfit.items].sort((a, b) => a.pos - b.pos)) {
+    const name = names.get(it.id) ?? `#${it.id}`
     const suit = suits.get(it.id)
-    lines.push(`${places[it.pos]?.name ?? slots[it.slot] ?? `#${it.pos}`}: ${names.get(it.id) ?? `#${it.id}`}${suit ? ` (${suit})` : ''}`)
+    const own = suit && suit.toLowerCase() !== name.toLowerCase() ? ` (${suit})` : ''
+    lines.push(`${places[it.pos]?.name ?? slots[it.slot] ?? `#${it.pos}`}: ${name}${own}`)
   }
   if (ideal) lines.push(`best possible — ${bookScore(ideal.score, reads).toLocaleString('en-US')}`)
   lines.push(skills)

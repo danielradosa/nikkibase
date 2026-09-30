@@ -138,6 +138,12 @@ test('the copied outfit names the suit of each piece that has one', () => {
   ])
 })
 
+test('the copied outfit does not repeat a name when the suit is named after the piece', () => {
+  const suits = new Map([[10, 'Rose Bun'], [20, 'Silk gown'], [40, 'Metallic Crisis']])
+  const text = outfitText(outfit(1234, [[10, 0], [20, 1], [40, 3]]), null, { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, suits, PLACES, SLOTS, skillsLine(undefined, ATTRS))
+  assert.deepEqual(text.split('\n').slice(1, 4), ['Hair: Rose Bun', 'Dress: Silk Gown', 'Top: Lace Top (Metallic Crisis)'])
+})
+
 test('the copied outfit names the skills it was scored with', () => {
   const skilled = outfit(1234, [[10, 0]], { skills: { charmSmile: 3, smile: 5 } })
   const text = outfitText(skilled, outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(skilled.skills, ATTRS))
