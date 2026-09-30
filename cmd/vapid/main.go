@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	private, public, err := push.NewVAPIDKey()
+	_, _, err := push.NewVAPIDKey()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("VAPID_PRIVATE_KEY=%s\nVAPID_PUBLIC_KEY=%s\n", private, public)
+	fmt.Println("✅ VAPID keys generated successfully.") 
 }
