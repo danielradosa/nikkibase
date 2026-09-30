@@ -79,7 +79,7 @@ on three conditions:
 
 NikkiBase is free to use, credits Nikki Calc on the site under
 *Credits & licences*, and uses only the JSON files Nikki Calc publishes
-(`items-v0.14.json`, `ni-ids-v0.14.json` and the item batches), downloaded when
+(`items-v0.15.json`, `ni-ids-v0.15.json`, the item batches and the suit table), downloaded when
 the data is built. The site never loads anything from nikkicalc.com.
 [SOURCES.md](SOURCES.md) lists what NikkiBase takes from it.
 

@@ -119,7 +119,7 @@ owns one of the four gets no credit for it.
 
 ## Items graded by Nikki Calc alone
 
-982 items released on Global, most of them Global-only, have no grades in the
+1,007 items released on Global, most of them Global-only, have no grades in the
 Love Nikki Wiki or nikkiup2u3. Their letters, sides, wearable places and style
 tags come from Nikki Calc's item data: each sub-grade rounded to its letter
 (S- is S), its slot code for the place, and its style list for the tags.
@@ -144,13 +144,13 @@ item would be a letter off on that stat.
 
 ## Items in no suit
 
-`items.json` places 30,194 of 34,012 items in 2,293 suits: 29,337 as the
+`items.json` places 30,246 of 34,068 items in 2,297 suits: 29,337 as the
 Love Nikki Wiki's suit and item pages place them, 122 the wiki places in none
 that nikkiup2u3 files under a suit the wiki names in Chinese, 15 that nikkiup2u3
-files with pieces the wiki already places, and 720 under Nikki Calc's name for
-47 suits the wiki has no page for yet (the wiki is read as of 2026-09-22). The
-other 3,818 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base,
-1 whose Chinese suit no source names in English (To Eternity), and 2,462 no
+files with pieces the wiki already places, and 772 under Nikki Calc's name for
+51 suits the wiki has no page for yet (the wiki is read as of 2026-09-22). The
+other 3,822 are in no suit: 1,355 that nikkiup2u3 files only as a suit's base,
+1 whose Chinese suit no source names in English (To Eternity), and 2,466 no
 source places.
 A suit is named as its wiki page is titled, and the site shows it without the
 qualifier the wiki adds to tell suits apart ("Star Shadow", not "Star Shadow

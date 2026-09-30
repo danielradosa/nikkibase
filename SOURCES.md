@@ -13,10 +13,10 @@ what each status allows is in [DATA-LICENSE.md](DATA-LICENSE.md).
 | Source | Flag | What NikkiBase uses | Licence | Status |
 |---|---|---|---|---|
 | Love Nikki Wiki, by its editors | `-fandom` | Item names, slots and places, letter grades and style tags (~18,400 items); the style codes of Template:S; Maiden's tags on Story 5-12, 6-7 and 6-9; the items 57 story stages require; how to get 19,382 items, from item and suit pages, the event or shop behind 1,403 items' vaguer nikkiup2u3 lines, and the pack behind 343 lines that say only "Recharge"; from event pages, the event of 185 items whose lines are all vague, and from the Events timeline, the recharge channels 760 items were rerun on; the suit of 29,337 items, and the Chinese name of each suit | CC BY-SA 3.0 | redistributable |
-| nikkiup2u3 by 傲娇攻略组 | `-packed`, `-stage-values` | Every spirit's flat bonus; grades, tags and places for ~14,800 items no other source has; with Nikki Calc, the grade on 406 grades the wiki's item pages give otherwise; exact weights and tag awards for every stage except co-op; how to get ~14,600 items the wiki has no page for, and the base of 31 customizations and evolutions the wiki names none for; the suit of 137 items the wiki places in none | None located | permission-required |
+| nikkiup2u3 by 傲娇攻略组 | `-packed`, `-packed-first`, `-stage-values` | Every spirit's flat bonus; grades, tags and places for ~14,800 items no other source has; with Nikki Calc, the grade on 406 grades the wiki's item pages give otherwise; exact weights and tag awards for every stage except co-op; how to get ~14,600 items the wiki has no page for (50 of them as an earlier copy of its table gives it), and the base of 31 customizations and evolutions the wiki names none for; the suit of 137 items the wiki places in none | None located | permission-required |
 | nikkiup2u by lovenikkiusa | `-stage-names`, `-items` | English names of arena and co-op stages; Maiden's tag sizes on Story 5-12 | None located | permission-required |
 | nikkiup2u3_data by seal100x | `-stages` | The stage list, modes and rules; co-op weights and tag awards; the Maiden notes; the items 25 stages require where the wiki names none | None located | permission-required |
-| Nikki Calc (nikkicalc.com) | `-names`, `-keys`, `-subgrades`, `-calc-grades`, `-calc-recipes`, `-calc-suits` | Letter grades, sides, places and style tags for the 982 items no other source grades; the ingredients of 1,755 items the other sources say are crafted without naming them; with nikkiup2u3, the grade on 406 grades the wiki's item pages give otherwise; the English names of 47 suits the wiki has no page for (720 items); English item names where no other source has one, and one that `data/id-corrections.json` shows in place of the wiki's (181600); every item's rarity; the Global item-ID list; the sub-grades (+ and −) that set each item's stats within its letter grade; its spelling of item names, which decides which hyphenated words in item names stay joined and which hyphens are spaced as separators | None; written permission | permitted |
+| Nikki Calc (nikkicalc.com) | `-names`, `-keys`, `-subgrades`, `-calc-grades`, `-calc-recipes`, `-calc-suits` | Letter grades, sides, places and style tags for the 1,007 items no other source grades; the ingredients of 1,755 items the other sources say are crafted without naming them; with nikkiup2u3, the grade on 406 grades the wiki's item pages give otherwise; the English names of 51 suits the wiki has no page for (772 items); English item names where no other source has one, and one that `data/id-corrections.json` shows in place of the wiki's (181600); every item's rarity; the Global item-ID list; the sub-grades (+ and −) that set each item's stats within its letter grade; its spelling of item names, which decides which hyphenated words in item names stay joined and which hyphens are spaced as separators | None; written permission | permitted |
 
 The three permission-required sources ship only under the exceptions recorded
 in [`data/production-exceptions.json`](data/production-exceptions.json). Nikki
@@ -25,26 +25,27 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `cloud` rebuilds byte-for-byte from the files below
-(verified 2026-09-29, provenance included, with the build time fixed by
+The bundle `pigeon` rebuilds byte-for-byte from the files below
+(verified 2026-09-30, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/`, and the
 wiki dump extracted to `/tmp/fandom` and brought up to date by
 `fandom/patch-2026-09-29/merge.py` (see [Love Nikki Wiki](#love-nikki-wiki)):
 
 ```sh
-SOURCE_DATE_EPOCH=1790640000 go run ./cmd/bundle \
+SOURCE_DATE_EPOCH=1790726400 go run ./cmd/bundle \
   -fandom  /tmp/fandom/lovenikki673_pages_current-2026-09-29.xml \
   -stages       .ai/research/sources/community/seal100x/levels.js \
   -stage-values .ai/research/sources/community/aojiao/levels.js \
   -stage-names  .ai/research/sources/community/nikkiup2u/data/levels.js \
-  -packed  .ai/research/sources/community/aojiao/wardrobe.js \
-  -names   .ai/research/sources/ids/items-v0.14.json \
-  -keys    .ai/research/sources/ids/ni-ids-v0.14.json \
-  -subgrades '.ai/research/sources/nikkicalc/item-batches/item-batch-v0.14-*.json' \
+  -packed  .ai/research/sources/community/aojiao/wardrobe-2026-09-25.js \
+  -packed-first .ai/research/sources/community/aojiao/wardrobe.js \
+  -names   .ai/research/sources/ids/items-v0.15.json \
+  -keys    .ai/research/sources/ids/ni-ids-v0.15.json \
+  -subgrades '.ai/research/sources/nikkicalc/item-batches/item-batch-v0.15-*.json' \
   -calc-grades -calc-recipes \
-  -calc-suits .ai/research/sources/nikkicalc/suits-v0.14.json \
+  -calc-suits .ai/research/sources/nikkicalc/suits-v0.15.json \
   -out     web/public/data \
-  -version cloud
+  -version pigeon
 ```
 
 A version directory is served as immutable once deployed. Versions are named
@@ -53,6 +54,23 @@ lists them: `apple`, `lilith`, `cloud`, `pigeon`, `north`, `wasteland`,
 `ruin`; after `ruin` the list starts again with a number (`apple-2`,
 `lilith-2`, …). `SOURCE_DATE_EPOCH` is the build day's midnight UTC. Versions
 built before `apple` are named after their build day (`2026-09-29b`).
+
+`pigeon` changes `items.json`, `items.bin` and `acquire.json` from `cloud`;
+its `stages.json`, `tags.json` and `positions.json` are the same byte for
+byte. It reads Nikki Calc's data version v0.15 and nikkiup2u3's table of
+2026-09-25. 56 items new on Global join the catalogue, which holds 34,062:
+31 take their grades from the newer table and 25 from Nikki Calc, and 52 of
+them are in one of four new suits Nikki Calc names (Awakening Blooms, Eerie
+Midnight Call, Beer O'Clock and Explorer's Spirit). Fluffy Leopard Ears
+(187392) is now Fluffy Ears, as Nikki Calc names it. Three spirits of one set
+take the newer table's flat bonus, the one most spirits with as many hearts
+have: White Lotus 500 (was 200), Jade Lotus 800 (was 500) and Ink Memory 1,200
+(was 800). The newer table has moved 50 items that an event or log-in event
+gave into the gold shop or crafting; they keep the way the earlier table gives
+(`-packed-first`), so no item already listed changes its lines. 31 of the new
+items say how to get them; the other 25 are in no source that says so yet,
+and two of those are worn in a best possible outfit (`data/acquisition-gaps.json`).
+The best possible score rises on 32 of 605 stage versions, by at most 0.21%.
 
 `cloud` changes `items.json` and `items.bin` from `lilith` (and the version
 in `acquire.json`), after a check in the game. Crisis in the Mist (91095) takes
@@ -203,12 +221,13 @@ research-only, and `deploy.sh` will not ship it.
 
 - **URL:** https://github.com/aojiaogongluezu/nikkiup2u3 — `gh-pages` branch, `data/wardrobe.js` and `data/levels.js`
 - **Files:**
-  - `community/aojiao/wardrobe.js` — identical to upstream; self-dated `wardrobe_lastupd = '2026/8/24'`. SHA-256 `53c2b294d0237631a93785a351ed3302fad4c167407727adaa2d9784245ce0d2` (1,537,899 bytes).
+  - `community/aojiao/wardrobe-2026-09-25.js` (`-packed`) — identical to upstream at commit `6f991540cddd159161c9a2f73fa06e8a4f40d05a` (2026-09-25); self-dated `wardrobe_lastupd = '2026/9/25'`. SHA-256 `7dabce7a9881fe8ff860d9f8a769515b01d1ec9aa17cf6cffb918af22668773a` (1,543,836 bytes).
+  - `community/aojiao/wardrobe.js` (`-packed-first`) — the copy every bundle up to `cloud` read, identical to upstream before that commit; self-dated `wardrobe_lastupd = '2026/8/24'`. SHA-256 `53c2b294d0237631a93785a351ed3302fad4c167407727adaa2d9784245ce0d2` (1,537,899 bytes).
   - `community/aojiao/levels.js` (`-stage-values`) — identical to upstream at commit `0459ba134b9d6dc35f466b1419daf5be29731c6f` (2026-08-29); last changed 2026-08-28. SHA-256 `12aaf5cfb686380563cab8bd23d71f7af82ae46a7d2fe769d32c8d657cdddfe3` (60,791 bytes).
-- **Used for:** every spirit's flat bonus (its only source); letter grades, style tags and places for ~14,800 items no other source has; the stage values below; and, for the ~14,600 items the wiki has no page for, how to get them, from the source column of `wardrobe.js`, translated through `data/acquisition-cn.json` (a code missing there fails the build) and marked `"cn":1` in `acquire.json`. A customization or evolution line the wiki gives without its base takes the base this table gives (31 items). The table describes the Chinese server, so these lines can differ from Global; event names are given only where the wiki names the same event on at least three quarters of the items both cover, a count the build checks against both sources every time, and an evolution or customization base the table files under another garment's family is left out. Where the wiki's item page gives one grade and this table and Nikki Calc give another alike, theirs is kept (406 grades on 285 items). Its suit column gives the suit of 122 items the wiki places in none, under the title of the wiki's suit page whose "cnwiki" field or link to the Chinese wiki gives the same Chinese name, and of 15 more whose other pieces the wiki places, all in one suit; where both place an item they agree on 25,667 of the 25,682, and the wiki is kept on the other 15. Items it files only as a suit's base (1,355, the pieces a suit's evolved items start from) are left without one. Where no wiki suit page gives an item's Chinese suit name, Nikki Calc's name for that suit is used (see below); one item, To Eternity, is in a suit no source names in English.
+- **Used for:** every spirit's flat bonus (its only source); letter grades, style tags and places for ~14,800 items no other source has; the stage values below; and, for the ~14,600 items the wiki has no page for, how to get them, from the source column of `wardrobe.js`, translated through `data/acquisition-cn.json` (a code missing there fails the build) and marked `"cn":1` in `acquire.json`. Where the earlier copy gives an item only an event, log-in event or other time-limited way to get it and the newer one only the shop or crafting, the earlier copy's lines are kept (50 items): the table follows the Chinese server, which later moves such items into its shops. A customization or evolution line the wiki gives without its base takes the base this table gives (31 items). The table describes the Chinese server, so these lines can differ from Global; event names are given only where the wiki names the same event on at least three quarters of the items both cover, a count the build checks against both sources every time, and an evolution or customization base the table files under another garment's family is left out. Where the wiki's item page gives one grade and this table and Nikki Calc give another alike, theirs is kept (406 grades on 285 items). Its suit column gives the suit of 122 items the wiki places in none, under the title of the wiki's suit page whose "cnwiki" field or link to the Chinese wiki gives the same Chinese name, and of 15 more whose other pieces the wiki places, all in one suit; where both place an item they agree on 25,667 of the 25,682, and the wiki is kept on the other 15. Items it files only as a suit's base (1,355, the pieces a suit's evolved items start from) are left without one. Where no wiki suit page gives an item's Chinese suit name, Nikki Calc's name for that suit is used (see below); one item, To Eternity, is in a suit no source names in English.
 - **Stage values:** weights to four decimals, and every tag award as a factor of the stage's weight sum (grade `F`). Its numbers are Princess's where the two difficulties differ. They replace the stage source's on every stage it carries: all but the co-op stages, which it does not have.
 - **Licence:** none located.
-- **Filtering:** rows for items not released in the Global game (~4,900) are dropped against the Nikki Calc ID list.
+- **Filtering:** rows for items not released in the Global game (~5,000) are dropped against the Nikki Calc ID list.
 
 ## nikkiup2u by lovenikkiusa
 
@@ -231,11 +250,11 @@ research-only, and `deploy.sh` will not ship it.
 
 ## Nikki Calc
 
-- **URL:** https://nikkicalc.com/data/items-v0.14.json and https://nikkicalc.com/data/ni-ids-v0.14.json — both identical to upstream; and the item batches at https://nikkicalc.com/data/items/item-batch-v0.14-<n>.json
-- **SHA-256:** items `4b991ac68bf43b70c0068ff18a1b726e940f5b0c60bc467d6c6cb83ef9f1c5aa` (1,418,602 bytes); ids `7916e730db0a37bbbc486026175acc135a8c8e2f14b38b6973f01242a517f7f0` (462,771 bytes)
-- **Files (`-subgrades`):** `nikkicalc/item-batches/item-batch-v0.14-<n>.json`, 69 files of 500 items each (n = 0, 500, … 34000; data version v0.14, built 2026-09-08), fetched 2026-09-21 and 2026-09-24, 15,012,873 bytes in all. Each file's SHA-256 is recorded in the bundle's `provenance.json`.
-- **File (`-calc-suits`):** `nikkicalc/suits-v0.14.json`, its suit table (each suit's name and the items it holds), fetched 2026-09-21. SHA-256 `ff451d84dab62acdbf76078b5a7445d14e5121170789736a8b49f6d6f1ab3918` (220,450 bytes).
+- **URL:** https://nikkicalc.com/data/items-v0.15.json and https://nikkicalc.com/data/ni-ids-v0.15.json — both identical to upstream, fetched 2026-09-30; and the item batches at https://nikkicalc.com/data/items/item-batch-v0.15-<n>.json. Bundles up to `cloud` read data version v0.14, which nikkicalc.com no longer serves.
+- **SHA-256:** items `dfe52e16f68aa8bf6db6b6ebc4423c5d97150a20a63aa2a848dbce3c2bbf0d3b` (1,420,936 bytes); ids `17157f0f4919850a3afdcf6e5f5850d9a67d0a31904b5919a889719018753596` (463,578 bytes)
+- **Files (`-subgrades`):** `nikkicalc/item-batches/item-batch-v0.15-<n>.json`, 69 files of 500 items each (n = 0, 500, … 34000; data version v0.15), fetched 2026-09-30, 15,033,467 bytes in all. Each file's SHA-256 is recorded in the bundle's `provenance.json`.
+- **File (`-calc-suits`):** `nikkicalc/suits-v0.15.json`, its suit table (each suit's name and the items it holds), fetched 2026-09-30. SHA-256 `ba90c0e8f66667de2dd7739ef2569e62ebdec5dae5bcdebbc013dcb2436ff00c` (220,897 bytes).
 - **Licence:** none. **Permission:** in writing, from the maintainer, on 2026-09-26, on the conditions in [DATA-LICENSE.md](DATA-LICENSE.md).
-- **Used for:** English item names where no other source has one (~15,800 items: those nikkiup2u3 names in Chinese only, and the 989 no other source has, 982 of which it also grades), and the name of 181600, Cookie Sweet Dream, which `data/id-corrections.json` shows in place of the wiki's Biscuits & Sweet Dream; every item's rarity (34,012 items), from the rarity code each record holds after its index, where 1 to 6 and 7 to 12 both mean 1 to 6 hearts; the set of valid Global item IDs, which keeps unreleased items out; and each item's sub-grades (+ and −), which set its stats within its letter grade. A sub-grade is used only where its letter and side agree with the item's own grade (169,999 of 170,030 graded stats); the rest keep their letter's value. For the 982 items no other source grades (`-calc-grades`), it also gives the letter grades (each sub-grade without its + or −), sides, wearable places (from each record's slot code) and style tags (from its style list; a mark outside that list, on 38 items, is left out). Where the wiki's item page gives one grade and nikkiup2u3 and Nikki Calc give another alike, theirs is kept (406 grades). Its suit table names the suits the wiki has no page for: the pieces nikkiup2u3 files under one Chinese suit take Nikki Calc's name for it when every piece Nikki Calc places in one suit gives the same name, and an item no other source places in a suit takes the one suit Nikki Calc lists it in (720 items, 47 suits); a name Nikki Calc gives two suits is never used. Where the other sources say only that an item is crafted, its recipe gives the ingredients (`-calc-recipes`, 1,755 items); where they name the ingredients, theirs are kept (its recipes agree with the wiki's on 3,336 of the 3,382 items both give). Tag awards stay priced on the letter grades.
+- **Used for:** English item names where no other source has one (~15,800 items: those nikkiup2u3 names in Chinese only, and the 1,014 no other source has, 1,007 of which it also grades), and the name of 181600, Cookie Sweet Dream, which `data/id-corrections.json` shows in place of the wiki's Biscuits & Sweet Dream; every item's rarity (34,068 items), from the rarity code each record holds after its index, where 1 to 6 and 7 to 12 both mean 1 to 6 hearts; the set of valid Global item IDs, which keeps unreleased items out; and each item's sub-grades (+ and −), which set its stats within its letter grade. A sub-grade is used only where its letter and side agree with the item's own grade (170,279 of 170,310 graded stats); the rest keep their letter's value. For the 1,007 items no other source grades (`-calc-grades`), it also gives the letter grades (each sub-grade without its + or −), sides, wearable places (from each record's slot code) and style tags (from its style list; a mark outside that list, on 38 items, is left out). Where the wiki's item page gives one grade and nikkiup2u3 and Nikki Calc give another alike, theirs is kept (406 grades). Its suit table names the suits the wiki has no page for: the pieces nikkiup2u3 files under one Chinese suit take Nikki Calc's name for it when every piece Nikki Calc places in one suit gives the same name, and an item no other source places in a suit takes the one suit Nikki Calc lists it in (772 items, 51 suits); a name Nikki Calc gives two suits is never used. Where the other sources say only that an item is crafted, its recipe gives the ingredients (`-calc-recipes`, 1,755 items); where they name the ingredients, theirs are kept (its recipes agree with the wiki's on 3,336 of the 3,382 items both give). Tag awards stay priced on the letter grades.
 - **Spelling:** its spelling of item names decides which hyphenated words in item names stay joined and which hyphens are spaced as separators. A hyphen written with a space on one side only is spaced on both (Moonlight - White). A hyphenated word in an item's name stays joined where Nikki Calc spells it joined for the same item. Otherwise a hyphen is spaced as a separator where Nikki Calc writes a separator there instead (a middot, or a hyphen with a space beside it) for the same item, whatever the length of the words or the number of hyphens (Fox Talk - Me, Passers-By - Red). Otherwise it stays joined where a lowercase letter follows it, and a word made of two or more letters, one hyphen and three or more letters is spaced as a separator (Doll Dress - Blue), unless it starts with a common prefix such as anti- or re-; every other hyphen is kept as written.
 - **Not read:** item descriptions and every other field of the item batches except each item's attribute sides, sub-grades, slot code, style marks and recipe; the suit table's icons.
