@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func root(t *testing.T) string {
@@ -146,6 +147,38 @@ func TestServiceWorkerIsAlwaysFresh(t *testing.T) {
 		if got := res.Header.Get("Content-Type"); !strings.HasPrefix(got, "text/javascript") {
 			t.Errorf("/sw.js [%s]: Content-Type = %q, want text/javascript", accept, got)
 		}
+	}
+}
+
+func TestServiceWorkerIsSentWhenTheCopyOnDiskIsOlder(t *testing.T) {
+	dir := root(t)
+	old := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+	for _, name := range []string{"sw.js", "sw.js.br", "assets/index-abc123.js"} {
+		if err := os.Chtimes(filepath.Join(dir, filepath.FromSlash(name)), old, old); err != nil {
+			t.Fatal(err)
+		}
+	}
+	h := handler(dir)
+	since := old.Add(24 * time.Hour).Format(http.TimeFormat)
+	get := func(path, accept string) *http.Response {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		req.Header.Set("If-Modified-Since", since)
+		if accept != "" {
+			req.Header.Set("Accept-Encoding", accept)
+		}
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+		return w.Result()
+	}
+	for accept, want := range map[string]string{"": "self.addEventListener('fetch', () => {})", "br": "brotli sw"} {
+		res := get("/sw.js", accept)
+		body, _ := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusOK || string(body) != want {
+			t.Errorf("/sw.js [%s]: status %d, body %q; want 200 and the worker", accept, res.StatusCode, body)
+		}
+	}
+	if res := get("/assets/index-abc123.js", ""); res.StatusCode != http.StatusNotModified {
+		t.Errorf("/assets/index-abc123.js: status %d, want 304", res.StatusCode)
 	}
 }
 

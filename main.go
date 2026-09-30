@@ -39,6 +39,11 @@ func handler(root string) http.Handler {
 			return
 		}
 		clean := filepath.Clean("/" + r.URL.Path)
+		if clean == "/sw.js" {
+			r = r.Clone(r.Context())
+			r.Header.Del("If-Modified-Since")
+			r.Header.Del("If-None-Match")
+		}
 
 		security(w)
 		cache(w, clean, r.URL.Query().Has("v"))
