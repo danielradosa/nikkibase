@@ -1,9 +1,11 @@
 import { useCallback, useRef } from 'react'
 import { engine } from '../engine/engine'
+import { items } from '../boot'
 import { useStore } from '../store'
 import { clearWardrobe, saveWardrobe, type WardrobeSource } from './storage'
 import { tick, tickState } from '../items/ticks'
-import { afterSave, importError } from './wardrobeText'
+import { readWardrobeCode } from './wardrobeFile'
+import { afterSave, codeLoad, importError } from './wardrobeText'
 
 export function noteSave(ok: boolean, fresh = false) {
   const { saveFailing, set } = useStore.getState()
@@ -18,16 +20,39 @@ export function useWardrobe(version: string) {
 
   const ingest = useCallback(
     async (text: string) => {
-      if (useStore.getState().importing) return
+      if (useStore.getState().importing) return false
       set({ importing: true, error: null, notice: null })
       try {
+        const code = readWardrobeCode(text)
+        if (code.ok || code.problem !== 'none') {
+          const known = code.ok ? await items.then((list) => new Set(list.map((it) => it.id)), () => null) : null
+          const load = codeLoad(code, known)
+          if (!load.ok) {
+            set({ error: load.error, importing: false })
+            return false
+          }
+          const stats = await engine.setWardrobe(load.ids)
+          set({
+            owned: load.ids,
+            source: 'nikkibase',
+            decoded: { ...stats, unresolved: 0 },
+            importing: false,
+            outfit: null,
+            ideal: null,
+            notice: load.notice,
+          })
+          if (version) noteSave(await saveWardrobe({ version, ids: load.ids, source: 'nikkibase', savedAt: Date.now() }), true)
+          return true
+        }
         const source: WardrobeSource = text.trimStart().startsWith('@SEL') ? 'sel' : 'clothes_date'
         const result = await (source === 'sel' ? engine.selections(text) : engine.decode(text))
         set({ owned: result.ids, source, decoded: result, importing: false, outfit: null, ideal: null })
         if (version) noteSave(await saveWardrobe({ version, ids: result.ids, source, savedAt: Date.now() }), true)
+        return true
       } catch (e) {
         console.warn(e)
         set({ error: importError(e), importing: false })
+        return false
       }
     },
     [set, version],

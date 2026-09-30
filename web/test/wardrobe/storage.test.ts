@@ -6,7 +6,7 @@ const V = '2026-09-22'
 const record = (source: string, version = V) => ({ version, ids: [10001, 20001], source, savedAt: 0 })
 
 test('current sources load as they are', () => {
-  for (const source of ['sel', 'manual', 'clothes_date']) {
+  for (const source of ['sel', 'manual', 'clothes_date', 'nikkibase']) {
     const r = classify(record(source), V)
     assert.equal(r.status, 'ok')
     assert.equal(r.status === 'ok' && r.entry.source, source)
@@ -20,6 +20,7 @@ test('an unknown source is reported, not guessed at', () => {
 test('another catalogue version is stale whatever its source', () => {
   assert.equal(classify(record('clothes_date', '2026-07-29'), V).status, 'stale')
   assert.equal(classify(record('sel', '2026-07-29'), V).status, 'stale')
+  assert.equal(classify(record('nikkibase', '2026-07-29'), V).status, 'stale')
 })
 
 test('empty or malformed records are nothing', () => {

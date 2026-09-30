@@ -21,7 +21,7 @@ type Props = {
   itemsFailed: boolean
   tagNames: string[]
   places: Place[]
-  onFile: (text: string) => Promise<void>
+  onFile: (text: string) => Promise<boolean>
 }
 
 export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, places, onFile }: Props) {

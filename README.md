@@ -68,9 +68,11 @@ another calculator, not against the game.
 
 - Your game's `clothes_date` file.
 - A [Nikki Calc](https://nikkicalc.com) selections file (`@SEL…`).
+- A NikkiBase wardrobe file or code. Save one from a loaded wardrobe to move it
+  to another device.
 - Or tick the items you own by hand in the Items tab.
 
-Either file is read in your browser and never sent anywhere.
+Every file and code is read in your browser and never sent anywhere.
 
 ## What to get next
 

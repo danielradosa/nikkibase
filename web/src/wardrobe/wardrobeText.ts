@@ -1,4 +1,5 @@
 import type { LoadResult, WardrobeSource } from './storage'
+import type { CodeRead } from './wardrobeFile'
 
 const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, or a selections file saved from Nikki Calc."
 const EMPTY = 'That selections file has no items in it. Save it again from Nikki Calc.'
@@ -15,7 +16,7 @@ export function importError(e: unknown): string {
 const CLEARED = "Your saved wardrobe couldn't be read, so it was cleared. Import it again."
 
 const knownSource = (source: string): source is WardrobeSource =>
-  source === 'sel' || source === 'manual' || source === 'clothes_date'
+  source === 'sel' || source === 'manual' || source === 'clothes_date' || source === 'nikkibase'
 
 export type Restore =
   | { action: 'none' }
@@ -44,6 +45,31 @@ export function updatedWardrobe(ids: readonly number[], known: ReadonlySet<numbe
   return { ids: kept, notice: droppedNotice(ids.length - kept.length) }
 }
 
+export const CODE_INCOMPLETE = 'That code is incomplete. Copy it again, whole.'
+
+export const NOT_A_CODE = "That's not a NikkiBase wardrobe code."
+
+export const CODE_EMPTY = 'That code has no items NikkiBase knows.'
+
+export type CodeLoad = { ok: true; ids: number[]; notice: string | null } | { ok: false; error: string }
+
+export function codeLoad(read: CodeRead, known: ReadonlySet<number> | null): CodeLoad {
+  if (!read.ok) return { ok: false, error: read.problem === 'incomplete' ? CODE_INCOMPLETE : NOT_A_CODE }
+  const kept = known ? updatedWardrobe(read.ids, known) : { ids: read.ids, notice: null }
+  return kept.ids.length ? { ok: true, ...kept } : { ok: false, error: CODE_EMPTY }
+}
+
+export const CODE_TEXT = {
+  save: 'Save a copy',
+  copy: 'Copy code',
+  copied: 'Copied',
+  paste: 'Paste a code',
+  field: 'NikkiBase wardrobe code',
+  placeholder: 'Paste your NikkiBase wardrobe code',
+  load: 'Load',
+  blocked: "Copying didn't work. Copy the code below by hand.",
+}
+
 export type Decoded = { items: number; known: number; unresolved: number }
 
 export const UNSCORED_ALERT = 0.02
@@ -54,7 +80,7 @@ export const manyUnscored = (d: Decoded | null) => !!d && d.items > 0 && unscore
 
 export const TAGLINE = 'your wardrobe stays on this device'
 
-export const DROP_HINT = 'Or a Nikki Calc selections file. It stays on your device.'
+export const DROP_HINT = 'Or a Nikki Calc selections file, or a NikkiBase wardrobe file. It stays on your device.'
 
 export const NO_FILE = {
   before: 'No file? Tick what you own in the ',

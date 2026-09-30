@@ -1,18 +1,23 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  CODE_EMPTY,
+  CODE_INCOMPLETE,
+  CODE_TEXT,
   DROP_HINT,
   ENGINE_DOWN,
   ENGINE_FAILED,
   ENGINE_WAIT,
   LIST_FAILED,
   LIST_WAIT,
+  NOT_A_CODE,
   NO_FILE,
   READ_FAILED,
   SAVE_FAILED,
   SCORES_WAIT,
   TAGLINE,
   afterSave,
+  codeLoad,
   droppedNotice,
   dropText,
   engineReason,
@@ -59,7 +64,7 @@ test('an error the list does not know is shown as it is', () => {
 
 test('a wardrobe saved under older item data is kept and saved again, whatever its source', () => {
   const entry = (source: string, version = '2026-09-26') => ({ version, ids: [10001, 20001], source, savedAt: 0 })
-  for (const source of ['sel', 'manual', 'clothes_date'] as const) {
+  for (const source of ['sel', 'manual', 'clothes_date', 'nikkibase'] as const) {
     assert.deepEqual(restorePlan({ status: 'stale', entry: entry(source) }), {
       action: 'load',
       ids: [10001, 20001],
@@ -111,7 +116,7 @@ test('a full warning is kept only when more than 2% of the wardrobe has no stats
 test('the drop zone asks for the file in words that fit the device', () => {
   assert.equal(dropText(true), 'Tap to choose your clothes_date file')
   assert.equal(dropText(false), 'Drop or choose your clothes_date file')
-  assert.equal(DROP_HINT, 'Or a Nikki Calc selections file. It stays on your device.')
+  assert.equal(DROP_HINT, 'Or a Nikki Calc selections file, or a NikkiBase wardrobe file. It stays on your device.')
   assert.equal(TAGLINE, 'your wardrobe stays on this device')
 })
 
@@ -188,4 +193,41 @@ test('a failed save says the wardrobe will be gone, once for each run of failure
 
 test('a storage that cannot be read says so', () => {
   assert.equal(READ_FAILED, "Couldn't read this browser's storage, so no saved wardrobe was loaded.")
+})
+
+test('a bad wardrobe code says plainly what is wrong with it', () => {
+  assert.equal(CODE_INCOMPLETE, 'That code is incomplete. Copy it again, whole.')
+  assert.equal(NOT_A_CODE, "That's not a NikkiBase wardrobe code.")
+  assert.equal(CODE_EMPTY, 'That code has no items NikkiBase knows.')
+  assert.deepEqual(codeLoad({ ok: false, problem: 'incomplete' }, null), { ok: false, error: CODE_INCOMPLETE })
+  assert.deepEqual(codeLoad({ ok: false, problem: 'invalid' }, null), { ok: false, error: NOT_A_CODE })
+})
+
+test('a wardrobe code keeps the items the data knows and counts the rest like a data update', () => {
+  const known = new Set([10001, 20001, 30001])
+  assert.deepEqual(codeLoad({ ok: true, ids: [10001, 20001] }, known), { ok: true, ids: [10001, 20001], notice: null })
+  assert.deepEqual(codeLoad({ ok: true, ids: [10001, 20001, 99998, 99999] }, known), {
+    ok: true,
+    ids: [10001, 20001],
+    notice: "NikkiBase's item data was updated. 2 of your items aren't in it any more.",
+  })
+  assert.deepEqual(codeLoad({ ok: true, ids: [10001, 99999] }, null), { ok: true, ids: [10001, 99999], notice: null })
+})
+
+test('a wardrobe code with nothing to load leaves the wardrobe alone', () => {
+  assert.deepEqual(codeLoad({ ok: true, ids: [] }, null), { ok: false, error: CODE_EMPTY })
+  assert.deepEqual(codeLoad({ ok: true, ids: [99998, 99999] }, new Set([10001])), { ok: false, error: CODE_EMPTY })
+})
+
+test('the save, copy and paste controls use short plain words', () => {
+  assert.deepEqual(CODE_TEXT, {
+    save: 'Save a copy',
+    copy: 'Copy code',
+    copied: 'Copied',
+    paste: 'Paste a code',
+    field: 'NikkiBase wardrobe code',
+    placeholder: 'Paste your NikkiBase wardrobe code',
+    load: 'Load',
+    blocked: "Copying didn't work. Copy the code below by hand.",
+  })
 })

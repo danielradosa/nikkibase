@@ -2,7 +2,7 @@ const DB_NAME = 'nikkibase'
 const STORE = 'wardrobe'
 const KEY = 'current'
 
-export type WardrobeSource = 'sel' | 'manual' | 'clothes_date'
+export type WardrobeSource = 'sel' | 'manual' | 'clothes_date' | 'nikkibase'
 
 export type SavedWardrobe = {
   version: string
@@ -66,7 +66,7 @@ export function classify(raw: unknown, version: string): LoadResult {
     return { status: 'none' }
   }
   if (entry.version !== version) return { status: 'stale', entry }
-  if (entry.source === 'sel' || entry.source === 'manual' || entry.source === 'clothes_date') {
+  if (entry.source === 'sel' || entry.source === 'manual' || entry.source === 'clothes_date' || entry.source === 'nikkibase') {
     return { status: 'ok', entry: entry as SavedWardrobe }
   }
   return { status: 'unrecognised', entry }
