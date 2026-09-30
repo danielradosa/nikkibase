@@ -8,7 +8,7 @@ import WaitLine from '../components/WaitLine'
 import WardrobeCode from './WardrobeCode'
 import { DROP_HINT, ENGINE_DOWN, ENGINE_WAIT, NO_FILE, TAGLINE, dropText, importingText, loadedLabel, stripNotes } from './wardrobeText'
 
-export default function WardrobeImport({ onFile }: { onFile: (text: string) => Promise<boolean> }) {
+export default function WardrobeImport({ onFile }: { onFile: (text: string, pasted?: boolean) => Promise<boolean> }) {
   const owned = useStore((s) => s.owned)
   const decoded = useStore((s) => s.decoded)
   const importing = useStore((s) => s.importing)
@@ -64,7 +64,7 @@ export default function WardrobeImport({ onFile }: { onFile: (text: string) => P
         )}
       </Upload.Dragger>
 
-      <WardrobeCode onLoad={onFile} />
+      <WardrobeCode onLoad={(text) => onFile(text, true)} />
 
       {engine === 'loading' && !loaded && !importing && <WaitLine text={ENGINE_WAIT} className="nb-engine-wait" />}
       {engine === 'failed' && !loaded && (

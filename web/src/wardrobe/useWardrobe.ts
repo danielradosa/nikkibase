@@ -19,7 +19,7 @@ export function useWardrobe(version: string) {
   const before = useRef<WardrobeSource | null>(null)
 
   const ingest = useCallback(
-    async (text: string) => {
+    async (text: string, pasted = false) => {
       if (useStore.getState().importing) return false
       set({ importing: true, error: null, notice: null })
       try {
@@ -51,7 +51,7 @@ export function useWardrobe(version: string) {
         return true
       } catch (e) {
         console.warn(e)
-        set({ error: importError(e), importing: false })
+        set({ error: importError(e, pasted), importing: false })
         return false
       }
     },

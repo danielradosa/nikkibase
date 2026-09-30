@@ -56,6 +56,19 @@ test('an import error says what to do, in plain words', () => {
   }
 })
 
+test('pasted text with no code in it is told it is not a code, not asked for a file', () => {
+  for (const raw of [
+    'wardrobe: not valid base64: illegal base64 data at input byte 5',
+    'wardrobe: does not start with a Lua table',
+    'wardrobe: file is 12 bytes, too short to hold a table',
+    'wardrobe: not a selections file; no "@SEL" header',
+  ]) {
+    assert.equal(importError(new Error(raw), true), NOT_A_CODE, raw)
+  }
+  assert.equal(importError(new Error('wardrobe: selections file lists no items'), true), EMPTY)
+  assert.equal(importError(new Error('wardrobe: keystream too short'), true), UNREADABLE)
+})
+
 test('an error the list does not know is shown as it is', () => {
   const crash = 'The engine crashed and was restarted — import your wardrobe again.'
   assert.equal(importError(new Error(crash)), crash)

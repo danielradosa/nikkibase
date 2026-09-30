@@ -22,7 +22,7 @@ type Props = {
   itemsFailed: boolean
   tagNames: string[]
   places: Place[]
-  onFile: (text: string) => Promise<boolean>
+  onFile: (text: string, pasted?: boolean) => Promise<boolean>
 }
 
 export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, places, onFile }: Props) {

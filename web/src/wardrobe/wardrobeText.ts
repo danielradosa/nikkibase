@@ -5,11 +5,11 @@ const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_dat
 const EMPTY = 'That selections file has no items in it. Save it again from Nikki Calc.'
 const UNREADABLE = "NikkiBase couldn't read this clothes_date file. Try again, or tick what you own in the Items tab."
 
-export function importError(e: unknown): string {
+export function importError(e: unknown, pasted = false): string {
   const text = e instanceof Error ? e.message : String(e)
   if (text.includes('lists no items')) return EMPTY
   if (/keystream|ambiguous|no valid record/.test(text)) return UNREADABLE
-  if (/not valid base64|Lua table|too short|not a selections file/.test(text)) return NOT_A_FILE
+  if (/not valid base64|Lua table|too short|not a selections file/.test(text)) return pasted ? NOT_A_CODE : NOT_A_FILE
   return text
 }
 
