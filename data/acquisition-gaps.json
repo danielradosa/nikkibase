@@ -1,4 +1,7 @@
 {
   "note": "Items the shipped best possible outfits wear although acquire.json cannot say how to get them: the wiki dump has neither an item page for them nor a suit page listing them, and the packed table has no row for them. The golden test fails on any other such item, and on an entry here that is no longer worn or has since gained a line, so the list stays short and current.",
-  "items": []
+  "items": [
+    {"id": 188712, "name": "Earth's Memory", "reason": "New on Global after 2026-09-22: the wiki has no page for it yet and the packed table has no row, and Nikki Calc, the one source listing it, does not say how to get it."},
+    {"id": 188714, "name": "Vibrant Moment", "reason": "New on Global after 2026-09-22: the wiki has no page for it yet and the packed table has no row, and Nikki Calc, the one source listing it, does not say how to get it."}
+  ]
 }
