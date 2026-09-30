@@ -1,6 +1,6 @@
 # Privacy
 
-Last updated: 2026-09-23
+Last updated: 2026-09-30
 
 NikkiBase is an unofficial Love Nikki fan project run by Daniel Radosa. This
 page describes what happens to your data when you use it.
@@ -15,6 +15,18 @@ page describes what happens to your data when you use it.
   device, so it is still there next time. "Forget my wardrobe" deletes it, as
   does clearing this site's data in your browser.
 - Items you tick by hand are saved the same way.
+- "Save a copy" downloads a small text file listing the items you own. Your
+  browser saves it wherever it keeps downloads; NikkiBase never sees it.
+  "Copy code" puts the same list on your clipboard as text, for you to paste
+  wherever you choose. A code you paste in is read by your own browser, like a
+  wardrobe file.
+
+## Using NikkiBase offline
+
+- After your first visit, your browser keeps a copy of NikkiBase's own pages,
+  scripts and item data on your device, so the site opens without a
+  connection. The copy holds nothing personal and is refreshed when you visit
+  online. Clearing this site's data in your browser removes it.
 
 ## What NikkiBase does not do
 
