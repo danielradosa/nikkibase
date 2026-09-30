@@ -4,7 +4,7 @@ import { items } from '../boot'
 import { useStore } from '../store'
 import { clearWardrobe, saveWardrobe, type WardrobeSource } from './storage'
 import { tick, tickState } from '../items/ticks'
-import { readWardrobeCode } from './wardrobeFile'
+import { wardrobeKind } from './wardrobeFile'
 import { afterSave, codeLoad, importError } from './wardrobeText'
 
 export function noteSave(ok: boolean, fresh = false) {
@@ -23,10 +23,10 @@ export function useWardrobe(version: string) {
       if (useStore.getState().importing) return false
       set({ importing: true, error: null, notice: null })
       try {
-        const code = readWardrobeCode(text)
-        if (code.ok || code.problem !== 'none') {
-          const known = code.ok ? await items.then((list) => new Set(list.map((it) => it.id)), () => null) : null
-          const load = codeLoad(code, known)
+        const kind = wardrobeKind(text)
+        if (kind.kind === 'code') {
+          const known = kind.read.ok ? await items.then((list) => new Set(list.map((it) => it.id)), () => null) : null
+          const load = codeLoad(kind.read, known)
           if (!load.ok) {
             set({ error: load.error, importing: false })
             return false
@@ -44,7 +44,7 @@ export function useWardrobe(version: string) {
           if (version) noteSave(await saveWardrobe({ version, ids: load.ids, source: 'nikkibase', savedAt: Date.now() }), true)
           return true
         }
-        const source: WardrobeSource = text.trimStart().startsWith('@SEL') ? 'sel' : 'clothes_date'
+        const source: WardrobeSource = kind.kind
         const result = await (source === 'sel' ? engine.selections(text) : engine.decode(text))
         set({ owned: result.ids, source, decoded: result, importing: false, outfit: null, ideal: null })
         if (version) noteSave(await saveWardrobe({ version, ids: result.ids, source, savedAt: Date.now() }), true)

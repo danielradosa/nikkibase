@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { MAX_ID, MAX_IDS, fileName, readWardrobeCode, wardrobeCode, wardrobeFile } from '../../src/wardrobe/wardrobeFile.ts'
+import { MAX_ID, MAX_IDS, fileName, readWardrobeCode, wardrobeCode, wardrobeFile, wardrobeKind } from '../../src/wardrobe/wardrobeFile.ts'
 
 function varints(values: number[]): number[] {
   const bytes: number[] = []
@@ -208,4 +208,21 @@ test('the file name carries the local date', () => {
   assert.equal(fileName(new Date(2026, 8, 30, 23, 59)), 'nikkibase-wardrobe-2026-09-30.txt')
   assert.equal(fileName(new Date(2026, 0, 5, 0, 1)), 'nikkibase-wardrobe-2026-01-05.txt')
   assert.equal(fileName(new Date(2031, 11, 31, 12)), 'nikkibase-wardrobe-2031-12-31.txt')
+})
+
+test('a code is loaded as a code, even inside other text or when it is broken', () => {
+  const code = wardrobeCode([10001, 20002])
+  for (const text of [code, `Here is mine: ${code} have fun`, wardrobeFile([10001, 20002], new Date(2026, 8, 30), 'x')]) {
+    assert.deepEqual(wardrobeKind(text), { kind: 'code', read: { ok: true, ids: [10001, 20002] } }, text)
+  }
+  assert.deepEqual(wardrobeKind(code.slice(0, 6)), { kind: 'code', read: { ok: false, problem: 'incomplete' } })
+  assert.deepEqual(wardrobeKind('NB1.x'), { kind: 'code', read: { ok: false, problem: 'invalid' } })
+})
+
+test('a selections file is loaded as one, and anything else goes to the clothes_date reader', () => {
+  assert.deepEqual(wardrobeKind('@SEL10001,20002'), { kind: 'sel' })
+  assert.deepEqual(wardrobeKind('\n  @SEL10001'), { kind: 'sel' })
+  for (const text of ['aGVsbG8gd29ybGQ=', 'aGVs\nbG8g\nd29y', 'hello there', 'nb1.1.kU4', 'x @SEL10001']) {
+    assert.deepEqual(wardrobeKind(text), { kind: 'clothes_date' }, text)
+  }
 })

@@ -120,3 +120,11 @@ export function readWardrobeCode(text: string): CodeRead {
   if (pending !== 0 || payloadValue(text.charCodeAt(at)) >= 0) return broken()
   return { ok: true, ids }
 }
+
+export type WardrobeKind = { kind: 'code'; read: CodeRead } | { kind: 'sel' } | { kind: 'clothes_date' }
+
+export function wardrobeKind(text: string): WardrobeKind {
+  const read = readWardrobeCode(text)
+  if (read.ok || read.problem !== 'none') return { kind: 'code', read }
+  return text.trimStart().startsWith('@SEL') ? { kind: 'sel' } : { kind: 'clothes_date' }
+}
