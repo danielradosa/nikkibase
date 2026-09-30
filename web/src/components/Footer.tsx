@@ -22,7 +22,11 @@ export default function Footer({ version }: { version: string }) {
         <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noreferrer">
           CC BY-SA 3.0
         </a>
-        ) and five community sources with no licence located.{' '}
+        ),{' '}
+        <a href="https://nikkicalc.com" target="_blank" rel="noreferrer">
+          Nikki Calc
+        </a>{' '}
+        (used with permission) and three community sources with no licence located.{' '}
         <a
           href="#credits"
           onClick={(e) => {
