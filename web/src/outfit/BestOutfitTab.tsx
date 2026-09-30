@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { ATTRS, SLOTS, type Item } from '../items/items'
 import { FINDING, NAMES_WAIT, bookReads, comparisonRows, outfitText, resultView, type Place } from './comparison'
 import { skillsLine } from './skills'
+import { suitName } from '../worth/worth'
 import { missingMessage, stageKey, type Stage } from './stages'
 import { ENGINE_DOWN, manyUnscored, unscored } from '../wardrobe/wardrobeText'
 import WardrobeImport from '../wardrobe/WardrobeImport'
@@ -28,13 +29,14 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
   const { owned, decoded, stage, outfit, ideal, busy, engine, difficulty, mode, tab, jump, book, set } = useStore()
 
   const names = useMemo(() => new Map((items ?? []).map((it) => [it.id, it.name])), [items])
+  const suits = useMemo(() => new Map((items ?? []).filter((it) => it.suit).map((it) => [it.id, suitName(it.suit)])), [items])
   const naming = items === null && !itemsFailed
   const chosen = stages.find((s) => stageKey(s) === stage)
   const reads = bookReads(chosen?.mode, book)
   const rows = useMemo(() => comparisonRows(outfit, ideal, names, places, SLOTS, reads), [outfit, ideal, names, places, reads])
   const copyText = useMemo(
-    () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, places, SLOTS, skillsLine(outfit?.skills, ATTRS, reads), reads),
-    [outfit, ideal, chosen, difficulty, names, places, reads],
+    () => outfitText(outfit, ideal, chosen ?? null, difficulty, names, suits, places, SLOTS, skillsLine(outfit?.skills, ATTRS, reads), reads),
+    [outfit, ideal, chosen, difficulty, names, suits, places, reads],
   )
   const view = resultView({ owned: owned.length, chosen: !!chosen, outfit: !!outfit, busy })
 

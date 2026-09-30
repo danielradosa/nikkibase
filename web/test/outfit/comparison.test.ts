@@ -53,6 +53,7 @@ test('a list cut short at five says there are more, not that there are five', ()
 const SLOTS = ['hair', 'dress', 'coat', 'top']
 const ATTRS = ['Gorgeous', 'Simple', 'Elegant', 'Lively', 'Mature', 'Cute']
 const PLACES = [{ name: 'Hair', slot: 0 }, { name: 'Dress', slot: 1 }, { name: 'Coat', slot: 2 }, { name: 'Top', slot: 3 }]
+const NO_SUITS = new Map<number, string>()
 const NAMES = new Map([[10, 'Rose Bun'], [20, 'Silk Gown'], [30, 'Wool Coat'], [40, 'Lace Top'], [50, 'Star Crown']])
 
 function outfit(score: number, items: [id: number, pos: number][], extra: Partial<Outfit> = {}): Outfit {
@@ -115,7 +116,7 @@ test('unknown places and unnamed items fall back to their numbers', () => {
 })
 
 test('the copied outfit lists the stage, score and each item by place', () => {
-  const text = outfitText(outfit(1234, [[40, 3], [10, 0]]), outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
+  const text = outfitText(outfit(1234, [[40, 3], [10, 0]]), outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.deepEqual(text.split('\n'), [
     'Commission 1-1 — 1,234 (2 items)',
     'Hair: Rose Bun',
@@ -125,14 +126,26 @@ test('the copied outfit lists the stage, score and each item by place', () => {
   ])
 })
 
+test('the copied outfit names the suit of each piece that has one', () => {
+  const suits = new Map([[10, 'Metallic Crisis']])
+  const text = outfitText(outfit(1234, [[40, 3], [10, 0]]), outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, suits, PLACES, SLOTS, skillsLine(undefined, ATTRS))
+  assert.deepEqual(text.split('\n'), [
+    'Commission 1-1 — 1,234 (2 items)',
+    'Hair: Rose Bun (Metallic Crisis)',
+    'Top: Lace Top',
+    'best possible — 5,678',
+    `Scores assume no skills. ${SITE_HOST}`,
+  ])
+})
+
 test('the copied outfit names the skills it was scored with', () => {
   const skilled = outfit(1234, [[10, 0]], { skills: { charmSmile: 3, smile: 5 } })
-  const text = outfitText(skilled, outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(skilled.skills, ATTRS))
+  const text = outfitText(skilled, outfit(5678, []), { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(skilled.skills, ATTRS))
   assert.deepEqual(text.split('\n').slice(-2), [
     'best possible — 5,678',
     `Skills: Charming + Smile on Lively, Smile on Cute (max level). ${SITE_HOST}`,
   ])
-  const plain = outfitText(outfit(1234, [[10, 0]]), null, { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
+  const plain = outfitText(outfit(1234, [[10, 0]]), null, { mode: 'Commission', name: '1-1' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.equal(plain.split('\n').at(-1), `Scores assume no skills. ${SITE_HOST}`)
 })
 
@@ -162,7 +175,7 @@ test('with Cloud Adventure an alternative loses what your score would lose, and 
 
 test('the copied outfit counts Cloud Adventure in both scores and names it', () => {
   const reads = bookReads('Commission', 5)
-  const text = outfitText(outfit(77438, [[40, 3], [10, 0]]), outfit(80000, []), { mode: 'Commission', name: '2-3' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, reads), reads)
+  const text = outfitText(outfit(77438, [[40, 3], [10, 0]]), outfit(80000, []), { mode: 'Commission', name: '2-3' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS, reads), reads)
   assert.deepEqual(text.split('\n'), [
     'Commission 2-3 — 81,309 (2 items)',
     'Hair: Rose Bun',
@@ -171,18 +184,18 @@ test('the copied outfit counts Cloud Adventure in both scores and names it', () 
     `Scores assume no skills. Cloud Adventure +5%. ${SITE_HOST}`,
   ])
   const story = bookReads('Story', 5)
-  const plain = outfitText(outfit(77438, []), outfit(80000, []), { mode: 'Story', name: '2-3' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS, story), story)
+  const plain = outfitText(outfit(77438, []), outfit(80000, []), { mode: 'Story', name: '2-3' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS, story), story)
   assert.deepEqual(plain.split('\n'), ['Story 2-3 (Maiden) — 77,438 (0 items)', 'best possible — 80,000', `Scores assume no skills. ${SITE_HOST}`])
 })
 
 test('the copied outfit names the difficulty on Story stages only', () => {
-  const story = outfitText(outfit(1, []), null, { mode: 'Story', name: '6-9' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS))
+  const story = outfitText(outfit(1, []), null, { mode: 'Story', name: '6-9' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS))
   assert.equal(story.split('\n')[0], 'Story 6-9 (Maiden) — 1 (0 items)')
 })
 
 test('there is nothing to copy without an outfit and a stage', () => {
-  assert.equal(outfitText(null, null, { mode: 'Story', name: '1-1' }, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS)), '')
-  assert.equal(outfitText(outfit(1, []), null, null, 'Maiden', NAMES, PLACES, SLOTS, skillsLine(undefined, ATTRS)), '')
+  assert.equal(outfitText(null, null, { mode: 'Story', name: '1-1' }, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS)), '')
+  assert.equal(outfitText(outfit(1, []), null, null, 'Maiden', NAMES, NO_SUITS, PLACES, SLOTS, skillsLine(undefined, ATTRS)), '')
 })
 
 test('on phones each row names the best possible item under yours, or says yours is it', () => {

@@ -86,6 +86,7 @@ export function outfitText(
   stage: { mode: string; name: string } | null,
   difficulty: string,
   names: ReadonlyMap<number, string>,
+  suits: ReadonlyMap<number, string>,
   places: readonly Place[],
   slots: readonly string[],
   skills: string,
@@ -97,7 +98,8 @@ export function outfitText(
     `${stage.mode} ${stage.name}${level} — ${bookScore(outfit.score, reads).toLocaleString('en-US')} (${outfit.items.length} items)`,
   ]
   for (const it of [...outfit.items].sort((a, b) => a.pos - b.pos)) {
-    lines.push(`${places[it.pos]?.name ?? slots[it.slot] ?? `#${it.pos}`}: ${names.get(it.id) ?? `#${it.id}`}`)
+    const suit = suits.get(it.id)
+    lines.push(`${places[it.pos]?.name ?? slots[it.slot] ?? `#${it.pos}`}: ${names.get(it.id) ?? `#${it.id}`}${suit ? ` (${suit})` : ''}`)
   }
   if (ideal) lines.push(`best possible — ${bookScore(ideal.score, reads).toLocaleString('en-US')}`)
   lines.push(skills)
