@@ -25,6 +25,9 @@ func root(t *testing.T) string {
 		"assets/nikkibase-abc.wasm":    "\x00asm",
 		"assets/nikkibase-abc.wasm.br": "brotli wasm",
 		"keystream.bin":                "key",
+		"sw.js":                        "self.addEventListener('fetch', () => {})",
+		"sw.js.br":                     "brotli sw",
+		"manifest.webmanifest":         `{"name":"NikkiBase"}`,
 	} {
 		full := filepath.Join(dir, filepath.FromSlash(path))
 		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
@@ -121,11 +124,42 @@ func TestCacheLifetimes(t *testing.T) {
 		{"/stages", "no-cache"},
 		{"/keystream.bin?v=0123abcd", "immutable"},
 		{"/keystream.bin", "max-age=300"},
+		{"/sw.js", "no-cache"},
 	} {
 		got := fetch(t, h, http.MethodGet, c.path, "").Header.Get("Cache-Control")
 		if !strings.Contains(got, c.want) {
 			t.Errorf("%s: Cache-Control = %q, want it to contain %q", c.path, got, c.want)
 		}
+	}
+}
+
+func TestServiceWorkerIsAlwaysFresh(t *testing.T) {
+	h := handler(root(t))
+	for _, accept := range []string{"", "br"} {
+		res := fetch(t, h, http.MethodGet, "/sw.js", accept)
+		if res.StatusCode != http.StatusOK {
+			t.Errorf("/sw.js [%s]: status %d", accept, res.StatusCode)
+		}
+		if got := res.Header.Get("Cache-Control"); got != "no-cache" {
+			t.Errorf("/sw.js [%s]: Cache-Control = %q, want no-cache", accept, got)
+		}
+		if got := res.Header.Get("Content-Type"); !strings.HasPrefix(got, "text/javascript") {
+			t.Errorf("/sw.js [%s]: Content-Type = %q, want text/javascript", accept, got)
+		}
+	}
+}
+
+func TestManifest(t *testing.T) {
+	res := fetch(t, handler(root(t)), http.MethodGet, "/manifest.webmanifest", "br, gzip")
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != http.StatusOK || string(body) != `{"name":"NikkiBase"}` {
+		t.Errorf("status %d, body %q; want the manifest", res.StatusCode, body)
+	}
+	if got := res.Header.Get("Content-Type"); got != "application/manifest+json" {
+		t.Errorf("Content-Type = %q, want application/manifest+json", got)
+	}
+	if got := res.Header.Get("Cache-Control"); strings.Contains(got, "immutable") || strings.Contains(got, "31536000") {
+		t.Errorf("Cache-Control = %q; the manifest must not be kept for a year", got)
 	}
 }
 

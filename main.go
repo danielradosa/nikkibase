@@ -30,6 +30,7 @@ func main() {
 
 func handler(root string) http.Handler {
 	mime.AddExtensionType(".wasm", "application/wasm")
+	mime.AddExtensionType(".webmanifest", "application/manifest+json")
 	files := http.FileServer(noListing{http.Dir(root)})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
@@ -140,7 +141,7 @@ func positive(params string) bool {
 
 func cache(w http.ResponseWriter, path string, versioned bool) {
 	switch {
-	case path == "/data/index.json", path == "/index.html", filepath.Ext(path) == "":
+	case path == "/data/index.json", path == "/index.html", path == "/sw.js", filepath.Ext(path) == "":
 		w.Header().Set("Cache-Control", "no-cache")
 	case strings.HasPrefix(path, "/data/"), strings.HasPrefix(path, "/assets/"), versioned:
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
