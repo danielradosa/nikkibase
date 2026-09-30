@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:wasm && npm run build:ideal && tsc -b && vite build && node scripts/notices.mjs && node scripts/compress.mjs",
+    "build": "npm run build:wasm && npm run build:ideal && tsc -b && vite build && node scripts/notices.mjs && node scripts/sw.mjs && node scripts/compress.mjs",
     "preview": "vite preview",
     "build:wasm": "cd .. && GOOS=js GOARCH=wasm go build -ldflags=\"-s -w\" -o web/src/generated/nikkibase.wasm ./wasm",
     "build:ideal": "cd .. && go run ./cmd/ideal -data web/public/data -out web/src/generated/ideal.json",

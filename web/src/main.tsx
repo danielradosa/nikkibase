@@ -12,6 +12,7 @@ import './styles.css'
 import { themeFor } from './theme'
 import { usePhone } from './hooks/usePhone'
 import App from './App'
+import { keepForOffline } from './offline'
 
 function Root() {
   const phone = usePhone()
@@ -28,3 +29,5 @@ createRoot(document.getElementById('root')!).render(
     <Root />
   </StrictMode>,
 )
+
+keepForOffline()
