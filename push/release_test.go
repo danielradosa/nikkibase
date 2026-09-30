@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/danielradosa/nikkibase/core/catalogue"
 )
 
 type data struct {
@@ -13,6 +15,7 @@ type data struct {
 	acquire string
 	stages  string
 	tags    string
+	bin     []catalogue.Item
 }
 
 var base = data{
@@ -24,6 +27,16 @@ var base = data{
 	acquire: `{"version":"cloud","items":{"10001":[{"k":"other","t":"Available from the start"}]}}`,
 	stages:  `[{"name":"1-1","mode":"Story","weights":[1,2,3,4,5],"attrs":[1,3,5,7,9]}]`,
 	tags:    `["Animal","Apron"]`,
+	bin: []catalogue.Item{
+		{ID: 10001, Attrs: [5]int8{1, 3, 5, 7, 8}, Stats: [5]int32{900, 500, 500, 500, 500}},
+		{ID: 10002, Attrs: [5]int8{1, 3, 5, 7, 8}, Stats: [5]int32{900, 500, 500, 500, 500}, Tags: []int32{0}},
+	},
+}
+
+func withItem(items []catalogue.Item, i int, change func(*catalogue.Item)) []catalogue.Item {
+	out := append([]catalogue.Item(nil), items...)
+	change(&out[i])
+	return out
 }
 
 func writeRoot(t *testing.T, d data) string {
@@ -37,6 +50,9 @@ func writeRoot(t *testing.T, d data) string {
 		"data/" + d.version + "/tags.json":       d.tags,
 		"data/" + d.version + "/positions.json":  `[{"name":"Hair","slot":0}]`,
 		"data/" + d.version + "/provenance.json": `{"changes":"every release"}`,
+	}
+	if d.bin != nil {
+		files["data/"+d.version+"/items.bin"] = string(catalogue.Write(d.bin))
 	}
 	for path, body := range files {
 		full := filepath.Join(root, filepath.FromSlash(path))
@@ -133,6 +149,57 @@ func TestChangedAndRemovedItemsAndStagesAreFixes(t *testing.T) {
 	next.tags = `["Animal","Apron","Army"]`
 	if c := compare(t, base, next); !c.FixedOther || !c.Touches("fixes") || c.FixedItems != 0 {
 		t.Errorf("a changed tag list: %+v", c)
+	}
+}
+
+func TestChangedStatsSpiritBonusesAndTagsAreFixes(t *testing.T) {
+	for _, change := range []struct {
+		what string
+		how  func(*catalogue.Item)
+	}{
+		{"a stat", func(it *catalogue.Item) { it.Stats[0]++ }},
+		{"a spirit's flat bonus", func(it *catalogue.Item) { it.FlatBonus = 500 }},
+		{"a style tag", func(it *catalogue.Item) { it.Tags = []int32{1} }},
+		{"a wearable place", func(it *catalogue.Item) { it.Position = 2 }},
+	} {
+		next := base
+		next.bin = withItem(base.bin, 1, change.how)
+		if c := compare(t, base, next); c.FixedItems != 1 || !c.Touches("fixes") || c.Touches("items") {
+			t.Errorf("%s: %+v", change.what, c)
+		}
+	}
+
+	next := base
+	next.items = strings.Replace(base.items, `"Rose Bun",0,1,3,5,7,8,"S"`, `"Rose Bun",0,1,3,5,7,8,"SS"`, 1)
+	next.bin = withItem(base.bin, 1, func(it *catalogue.Item) { it.Stats[0] = 1200 })
+	if c := compare(t, base, next); c.FixedItems != 1 {
+		t.Errorf("an item whose grade and stat both changed counts %d times", c.FixedItems)
+	}
+}
+
+func TestAReleaseSavedWithoutScoresSeesNoScoreChanges(t *testing.T) {
+	before := release(t, base)
+	before.Scores = nil
+	path := filepath.Join(t.TempDir(), "release.json")
+	if err := before.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	saved, err := LoadRelease(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next := base
+	next.bin = withItem(base.bin, 1, func(it *catalogue.Item) { it.FlatBonus = 500 })
+	if c := Compare(saved, release(t, next)); !c.Empty() {
+		t.Errorf("a release saved before scores were kept counts every item as changed: %+v", c)
+	}
+}
+
+func TestReadReleaseNeedsItemsBin(t *testing.T) {
+	d := base
+	d.bin = nil
+	if _, err := ReadRelease(writeRoot(t, d)); err == nil {
+		t.Error("read a release with no items.bin")
 	}
 }
 

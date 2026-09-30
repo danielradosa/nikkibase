@@ -161,7 +161,7 @@ func Announce(ctx context.Context, webRoot, dir string, store *Store, sender *Se
 	}
 	changes := Compare(prev, cur)
 	if changes.Empty() {
-		if prev.Version != cur.Version {
+		if prev.Version != cur.Version || prev.Scores == nil {
 			return cur.Save(path)
 		}
 		return nil

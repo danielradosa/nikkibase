@@ -12,6 +12,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/danielradosa/nikkibase/core/catalogue"
 )
 
 type Release struct {
@@ -19,6 +21,7 @@ type Release struct {
 	Items   map[string]string `json:"items"`
 	Stages  map[string]string `json:"stages"`
 	Other   map[string]string `json:"other"`
+	Scores  map[string]string `json:"scores,omitempty"`
 	names   map[string]string
 	suits   map[string]string
 	order   []string
@@ -45,6 +48,7 @@ func ReadRelease(webRoot string) (*Release, error) {
 		Items:   map[string]string{},
 		Stages:  map[string]string{},
 		Other:   map[string]string{},
+		Scores:  map[string]string{},
 		names:   map[string]string{},
 		suits:   map[string]string{},
 		labels:  map[string]string{},
@@ -89,6 +93,24 @@ func ReadRelease(webRoot string) (*Release, error) {
 		r.names[key] = name
 		r.suits[key] = suit
 		r.order = append(r.order, key)
+	}
+
+	bin, err := os.ReadFile(filepath.Join(dir, "items.bin"))
+	if err != nil {
+		return nil, err
+	}
+	cat, err := catalogue.Read(bin)
+	if err != nil {
+		return nil, fmt.Errorf("items.bin: %w", err)
+	}
+	for i, id := range cat.IDs {
+		it := catalogue.Item{
+			ID: id, Slot: cat.Slots[i], Position: cat.Positions[i], Group: cat.Groups[i],
+			Tags: cat.Tags[cat.TagOffset[i]:cat.TagOffset[i+1]], FlatBonus: cat.FlatBonus[i],
+		}
+		copy(it.Attrs[:], cat.Attrs[i*5:i*5+5])
+		copy(it.Stats[:], cat.Stats[i*5:i*5+5])
+		r.Scores[strconv.Itoa(int(id))] = short(string(mustMarshal(it)))
 	}
 
 	var stages []map[string]json.RawMessage
@@ -203,7 +225,7 @@ func Compare(old, cur *Release) Changes {
 				seenSuit[suit] = true
 				c.NewSuits = append(c.NewSuits, suit)
 			}
-		case was != cur.Items[key]:
+		case was != cur.Items[key], old.Scores != nil && old.Scores[key] != cur.Scores[key]:
 			c.FixedItems++
 		}
 	}

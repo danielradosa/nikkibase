@@ -18,6 +18,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/danielradosa/nikkibase/core/catalogue"
 )
 
 func decryptForTest(t *testing.T, body []byte, ua *ecdh.PrivateKey, auth []byte) []byte {
@@ -243,6 +245,45 @@ func TestAnnounceRecordsTheFirstReleaseThenSendsOnlyForChanges(t *testing.T) {
 	}
 	if len(fake.requests) != 2 {
 		t.Errorf("a restart with the same data sent again: %d", len(fake.requests))
+	}
+}
+
+func TestAnnounceAddsScoresToAReleaseSavedWithoutThem(t *testing.T) {
+	dir := t.TempDir()
+	store, _ := OpenStore(dir, 10)
+	_, p256dh, auth := newSubscriber(t)
+	if err := store.Put(Entry{Endpoint: fcm, P256dh: p256dh, Auth: auth, Topics: []string{"fixes"}}, ""); err != nil {
+		t.Fatal(err)
+	}
+	fake := &fakePush{}
+	s := sender(t, fake)
+	logf := func(string, ...any) {}
+	old := release(t, base)
+	old.Scores = nil
+	path := filepath.Join(dir, "release.json")
+	if err := old.Save(path); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := Announce(context.Background(), writeRoot(t, base), dir, store, s, logf); err != nil {
+		t.Fatal(err)
+	}
+	if len(fake.requests) != 0 {
+		t.Fatalf("the same release sent %d messages", len(fake.requests))
+	}
+	saved, err := LoadRelease(path)
+	if err != nil || len(saved.Scores) != 2 {
+		t.Fatalf("the saved release did not gain its scores: %+v %v", saved, err)
+	}
+
+	next := base
+	next.version = "pigeon"
+	next.bin = withItem(base.bin, 0, func(it *catalogue.Item) { it.FlatBonus = 500 })
+	if err := Announce(context.Background(), writeRoot(t, next), dir, store, s, logf); err != nil {
+		t.Fatal(err)
+	}
+	if len(fake.requests) != 1 {
+		t.Errorf("a changed spirit bonus sent %d messages, want 1", len(fake.requests))
 	}
 }
 
