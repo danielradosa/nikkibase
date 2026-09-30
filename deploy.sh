@@ -11,7 +11,7 @@ npm --prefix web test >/dev/null
 echo "==> site"
 npm --prefix web run build >/dev/null
 
-for required in web/dist/index.html web/dist/assets/nikkibase-*.wasm web/dist/assets/nikkibase-*.wasm.br web/dist/third-party-notices.txt web/dist/privacy.txt web/dist/data/index.json web/dist/keystream.bin; do
+for required in web/dist/index.html web/dist/assets/nikkibase-*.wasm web/dist/assets/nikkibase-*.wasm.br web/dist/third-party-notices.txt web/dist/privacy.txt web/dist/data/index.json web/dist/keystream.bin web/dist/manifest.webmanifest; do
   [ -e "$required" ] || { echo "missing $required -- see .ai/research/sources/README.md" >&2; exit 1; }
 done
 version=$(python3 -c "import json;print(json.load(open('web/dist/data/index.json'))['version'])")
