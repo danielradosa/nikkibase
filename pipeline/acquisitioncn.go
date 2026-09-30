@@ -215,3 +215,18 @@ func giftBoxLine(suit string) string {
 	}
 	return "Styling Gift Box for completing " + shownSuit(suit)
 }
+
+func KeepFirstChannels(first, now map[int][]Acquisition) int {
+	lasting := func(a Acquisition) bool { return a.Kind == "store" || a.Kind == "craft" }
+	passing := func(a Acquisition) bool { return !lasting(a) }
+	kept := 0
+	for id, lines := range now {
+		was := first[id]
+		if len(was) == 0 || len(lines) == 0 || slices.ContainsFunc(was, lasting) || slices.ContainsFunc(lines, passing) {
+			continue
+		}
+		now[id] = was
+		kept++
+	}
+	return kept
+}

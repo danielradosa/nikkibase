@@ -23,7 +23,7 @@ type config struct {
 	stageValuesPath, stageNamesPath                       string
 	stageScopePath, stageDifficultyPath, stageRulesPath   string
 	packedPath, namesPath, keysPath, subgradesPath        string
-	calcSuitsPath                                         string
+	calcSuitsPath, packedFirstPath                        string
 	outDir, version                                       string
 	sourcesPath, exceptionsPath                           string
 	idCorrectionsPath, stageCorrectionsPath, coveragePath string
@@ -45,9 +45,10 @@ func main() {
 	flag.StringVar(&c.stageDifficultyPath, "stage-difficulty", "data/stage-difficulty.json", "story stages whose Maiden numbers differ from Princess's; empty for none")
 	flag.StringVar(&c.stageRulesPath, "stage-rules", "data/stage-rules.json", "the items particular stages require; empty for none")
 	flag.StringVar(&c.packedPath, "packed", "", "path to the packed Chinese item table (aojiao wardrobe.js)")
+	flag.StringVar(&c.packedFirstPath, "packed-first", "", "path to the first packed table the data read; an item it gives a time-limited way to get keeps it where -packed has since moved it to the shop or crafting")
 	flag.StringVar(&c.namesPath, "names", "", "path to Nikki Calc's items JSON, for names the dump lacks and rarity no other source gives")
 	flag.StringVar(&c.keysPath, "keys", "", "path to Nikki Calc's item-key JSON, required with -names and -subgrades")
-	flag.StringVar(&c.subgradesPath, "subgrades", "", "glob of Nikki Calc's item-batch files, whose sub-grades set each stat within its letter grade, e.g. .../item-batch-v0.14-*.json")
+	flag.StringVar(&c.subgradesPath, "subgrades", "", "glob of Nikki Calc's item-batch files, whose sub-grades set each stat within its letter grade, e.g. .../item-batch-v0.15-*.json")
 	flag.StringVar(&c.calcSuitsPath, "calc-suits", "", "path to Nikki Calc's suits JSON, naming the suits the wiki has no page for; needs -keys")
 	flag.BoolVar(&c.calcRecipes, "calc-recipes", false, "give the ingredients of the -subgrades item batches' recipes to items the other sources say are crafted without naming them")
 	flag.BoolVar(&c.calcGrades, "calc-grades", false, "grade the items no other source grades from the -subgrades item batches: letters, sides, places and style tags; needs -names")
@@ -98,6 +99,9 @@ func run(c config) error {
 	}
 	if (c.stageValuesPath != "" || c.stageNamesPath != "") && c.stagesPath == "" {
 		return fmt.Errorf("-stage-values and -stage-names refine the stages -stages reads, so they need -stages")
+	}
+	if c.packedFirstPath != "" && c.packedPath == "" {
+		return fmt.Errorf("-packed-first keeps what an older table says where -packed moved an item, so it needs -packed")
 	}
 	if c.subgradesPath != "" && c.keysPath == "" {
 		return fmt.Errorf("-subgrades needs -keys, which maps each item-batch record to its item")
@@ -347,7 +351,7 @@ func sourcesInUse(c config, reg *pipeline.Registry) ([]pipeline.Source, map[stri
 	given := []struct{ flag, path string }{
 		{"fandom", c.dumpPath}, {"items", c.itemsPath}, {"known", c.knownPath},
 		{"stages", c.stagesPath}, {"stage-values", c.stageValuesPath}, {"stage-names", c.stageNamesPath},
-		{"packed", c.packedPath},
+		{"packed", c.packedPath}, {"packed-first", c.packedFirstPath},
 		{"names", c.namesPath}, {"keys", c.keysPath}, {"subgrades", c.subgradesPath}, {"calc-suits", c.calcSuitsPath},
 	}
 	var used []pipeline.Source
@@ -692,6 +696,22 @@ func readAcquisition(c config, known map[int]bool, corrections *pipeline.IDCorre
 		}
 		if packed, err = m.Translate(sources, cat); err != nil {
 			return nil, nil, nil, nil, err
+		}
+		if c.packedFirstPath != "" {
+			raw, err := os.ReadFile(c.packedFirstPath)
+			if err != nil {
+				return nil, nil, nil, nil, err
+			}
+			firstSources, _, err := pipeline.ParsePackedSources(raw, known)
+			if err != nil {
+				return nil, nil, nil, nil, err
+			}
+			first, err := m.Translate(firstSources, cat)
+			if err != nil {
+				return nil, nil, nil, nil, err
+			}
+			fmt.Printf("acquisition: %d items the first packed table gives a time-limited way to get keep it; the newer table has moved them to the shop or crafting\n",
+				pipeline.KeepFirstChannels(first, packed))
 		}
 		if c.dumpPath != "" {
 			if err := m.CheckBasis(sources, wiki.Items); err != nil {

@@ -21,13 +21,13 @@
       "name": "nikkiup2u3",
       "by": "傲娇攻略组 (aojiaogongluezu)",
       "url": "https://github.com/aojiaogongluezu/nikkiup2u3",
-      "flags": ["packed", "stage-values"],
+      "flags": ["packed", "packed-first", "stage-values"],
       "licence": "none located",
       "redistribution": "not established",
       "status": "permission-required",
       "attributionRequired": false,
       "attribution": "nikkiup2u3 by 傲娇攻略组 (aojiaogongluezu)",
-      "fields": ["every spirit's flat bonus", "letter grades, style tags and places for ~14,800 items no other source has", "exact weights and tag awards for every stage except co-op", "how to get the ~14,600 items the wiki has no page for, from its source column, in English", "the suit each item belongs to where the wiki places it in none, under the English title of the wiki's suit page that gives the same Chinese name, or the suit its other pieces are in", "with Nikki Calc, the grade on the item-page grades both give otherwise", "the base of customizations and evolutions the wiki names none for"]
+      "fields": ["every spirit's flat bonus", "letter grades, style tags and places for ~14,800 items no other source has", "exact weights and tag awards for every stage except co-op", "how to get the ~14,600 items the wiki has no page for, from its source column, in English, keeping what an earlier copy of the table gave where a later one moved a time-limited item to the shop or crafting", "the suit each item belongs to where the wiki places it in none, under the English title of the wiki's suit page that gives the same Chinese name, or the suit its other pieces are in", "with Nikki Calc, the grade on the item-page grades both give otherwise", "the base of customizations and evolutions the wiki names none for"]
     },
     {
       "id": "lovenikkiusa-nikkiup2u",

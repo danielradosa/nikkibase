@@ -2,6 +2,7 @@ package pipeline
 
 import (
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -285,5 +286,47 @@ func TestShippedAcquisitionMapReads(t *testing.T) {
 	}
 	if m.Codes["联盟·协力"].Text != "Shadow Workshop" || m.DreamWeavers["绫罗"] != "Lunar" {
 		t.Error("the shipped map lost a reviewed line")
+	}
+}
+
+func TestKeepFirstChannelsKeepsTheReleaseOfItemsLaterMovedToTheShopOrCrafting(t *testing.T) {
+	event := Acquisition{Kind: "event", Text: "Rose Glow event", Past: true, CN: true}
+	login := Acquisition{Kind: "signin", Text: "Log-in Event", Past: true, CN: true}
+	gold := Acquisition{Kind: "store", Text: "Clothes Store (gold)", CN: true}
+	craft := Acquisition{Kind: "craft", Text: "Crafting", CN: true}
+	first := map[int][]Acquisition{
+		10001: {event},
+		10002: {login},
+		10003: {gold},
+		10004: {event},
+		10005: {event, gold},
+		10007: {login},
+	}
+	now := map[int][]Acquisition{
+		10001: {craft},
+		10002: {gold},
+		10003: {gold},
+		10004: {event, craft},
+		10005: {craft},
+		10006: {craft},
+	}
+	if n := KeepFirstChannels(first, now); n != 2 {
+		t.Errorf("kept %d items' first lines, want 2", n)
+	}
+	want := map[int][]Acquisition{
+		10001: {event},
+		10002: {login},
+		10003: {gold},
+		10004: {event, craft},
+		10005: {craft},
+		10006: {craft},
+	}
+	for id, w := range want {
+		if got := now[id]; !reflect.DeepEqual(got, w) {
+			t.Errorf("%d = %+v, want %+v", id, got, w)
+		}
+	}
+	if _, ok := now[10007]; ok {
+		t.Error("10007 is gone from the newer table and must stay without lines")
 	}
 }
