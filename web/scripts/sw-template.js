@@ -7,7 +7,13 @@ const lasting = (url) =>
   /^\/data\/[^/]+\/./.test(url.pathname) ||
   (url.pathname === '/keystream.bin' && url.searchParams.has('v'))
 
-const cached = (request) => caches.open(CACHE).then((cache) => cache.match(request, { ignoreVary: true }))
+async function cached(request) {
+  const names = (await caches.keys()).filter((key) => key.startsWith(PREFIX)).reverse()
+  for (const cacheName of names) {
+    const hit = await caches.match(request, { cacheName, ignoreVary: true })
+    if (hit) return hit
+  }
+}
 
 async function networkFirst(request, fallback) {
   try {

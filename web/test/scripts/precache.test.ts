@@ -103,7 +103,7 @@ type Req = { url: string; method: string; mode: string }
 
 const req = (path: string, mode = 'cors', method = 'GET'): Req => ({ url: new URL(path, ORIGIN).href, method, mode })
 
-function worker(site: Record<string, string>, kept = urls) {
+function worker(site: Record<string, string>, kept = urls, name = 'nikkibase-new') {
   const stores = new Map<string, Map<string, Response>>()
   const key = (r: string | Req) => new URL(typeof r === 'string' ? r : r.url, ORIGIN).href
   const net = { online: true, calls: [] as string[] }
@@ -129,10 +129,11 @@ function worker(site: Record<string, string>, kept = urls) {
       },
     }
   }
-  const caches = { open, keys: async () => [...stores.keys()], delete: async (name: string) => stores.delete(name) }
+  const match = async (r: string | Req, options: { cacheName: string }) => stores.get(options.cacheName)?.get(key(r))?.clone()
+  const caches = { open, match, keys: async () => [...stores.keys()], delete: async (name: string) => stores.delete(name) }
   const listeners = new Map<string, (event: object) => void>()
   const self = { location: new URL('/sw.js', ORIGIN), addEventListener: (type: string, fn: (event: object) => void) => listeners.set(type, fn) }
-  runInNewContext(renderWorker(template, 'nikkibase-new', kept), { self, caches, fetch, URL, Response })
+  runInNewContext(renderWorker(template, name, kept), { self, caches, fetch, URL, Response })
 
   const lifecycle = (type: string) => {
     let done: Promise<unknown> = Promise.resolve()
@@ -189,6 +190,37 @@ test('opening a page asks the network first and falls back to the kept page offl
   assert.equal(await sw.text(req('/', 'navigate')), 'v1 /')
   assert.equal(await sw.text(req('/stages', 'navigate')), 'v1 /')
   assert.equal(await sw.text(req('/privacy.txt?x=1', 'navigate')), 'v1 /')
+})
+
+test('offline, a page opens from the newest complete copy, never from an older one', async () => {
+  const sw = worker(site(), urls, 'nikkibase-a')
+  await sw.install()
+  const newer = await sw.open('nikkibase-b')
+  await newer.put('/', new Response('v2 /'))
+  await newer.put('/assets/index-v2.js', new Response('v2 js'))
+  await newer.put('/data/newer/items.json', new Response('v2 data'))
+  await newer.put('/manifest.webmanifest', new Response('v2 manifest'))
+  await sw.open('nikkibase-c')
+  const other = await sw.open('someone-else')
+  await other.put('/', new Response('not ours'))
+  sw.net.online = false
+  assert.equal(await sw.text(req('/', 'navigate')), 'v2 /')
+  assert.equal(await sw.text(req('/stages', 'navigate')), 'v2 /')
+  assert.equal(await sw.text(req('/assets/index-v2.js')), 'v2 js')
+  assert.equal(await sw.text(req('/data/newer/items.json')), 'v2 data')
+  assert.equal(await sw.text(req('/manifest.webmanifest')), 'v2 manifest')
+  assert.equal(await sw.text(req('/assets/index-abc.js')), 'v1 /assets/index-abc.js')
+})
+
+test('a newer copy is used for built files online too, without asking the network', async () => {
+  const sw = worker(site(), urls, 'nikkibase-a')
+  await sw.install()
+  const newer = await sw.open('nikkibase-b')
+  await newer.put('/assets/index-v2.js', new Response('v2 js'))
+  sw.net.calls.length = 0
+  assert.equal(await sw.text(req('/assets/index-v2.js')), 'v2 js')
+  assert.deepEqual(sw.net.calls, [])
+  assert.equal(sw.stores.get('nikkibase-a')!.has(new URL('/assets/index-v2.js', ORIGIN).href), false)
 })
 
 test('built files, data and the keystream come from the cache even online', async () => {
