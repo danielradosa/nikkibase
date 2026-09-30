@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"io/fs"
 	"log"
 	"mime"
@@ -40,7 +39,7 @@ func main() {
 			}
 		}
 		if err := becomeUser(nonroot); err != nil {
-			log.Printf("serve: WARNING still running as root, could not switch to user %d: %v", nonroot, err)
+			log.Fatalf("serve: refusing to run as root, could not switch to user %d: %v", nonroot, err)
 		}
 	}
 	var pushes http.Handler
@@ -102,7 +101,13 @@ func own(dir string, id int) error {
 }
 
 func becomeUser(id int) error {
-	return errors.Join(syscall.Setgroups(nil), syscall.Setgid(id), syscall.Setuid(id))
+	if err := syscall.Setgroups(nil); err != nil {
+		return err
+	}
+	if err := syscall.Setgid(id); err != nil {
+		return err
+	}
+	return syscall.Setuid(id)
 }
 
 func handler(root string, pushes http.Handler) http.Handler {
