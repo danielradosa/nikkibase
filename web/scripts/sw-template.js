@@ -29,7 +29,7 @@ async function cacheFirst(event) {
   const hit = await cached(event.request)
   if (hit) return hit
   const response = await fetch(event.request)
-  if (response.status === 200) {
+  if (response.status === 200 && !response.headers.get('content-type')?.startsWith('text/html')) {
     const copy = response.clone()
     event.waitUntil(
       caches

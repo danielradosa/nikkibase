@@ -103,7 +103,9 @@ type Req = { url: string; method: string; mode: string }
 
 const req = (path: string, mode = 'cors', method = 'GET'): Req => ({ url: new URL(path, ORIGIN).href, method, mode })
 
-function worker(site: Record<string, string>, kept = urls, name = 'nikkibase-new') {
+type Body = string | { body: string; type: string }
+
+function worker(site: Record<string, Body>, kept = urls, name = 'nikkibase-new') {
   const stores = new Map<string, Map<string, Response>>()
   const key = (r: string | Req) => new URL(typeof r === 'string' ? r : r.url, ORIGIN).href
   const net = { online: true, calls: [] as string[] }
@@ -112,7 +114,8 @@ function worker(site: Record<string, string>, kept = urls, name = 'nikkibase-new
     net.calls.push(url.pathname + url.search)
     if (!net.online) throw new TypeError('Failed to fetch')
     const body = site[url.pathname + url.search]
-    return body === undefined ? new Response('missing', { status: 404 }) : new Response(body)
+    if (body === undefined) return new Response('missing', { status: 404 })
+    return typeof body === 'string' ? new Response(body) : new Response(body.body, { headers: { 'content-type': body.type } })
   }
   const open = async (name: string) => {
     if (!stores.has(name)) stores.set(name, new Map())
@@ -246,6 +249,16 @@ test('a lasting file that is not kept yet is fetched once and then kept', async 
   assert.equal(await sw.text(req('/data/lilith/items.json')), 'old data')
   assert.equal(await sw.text(req('/keystream.bin?v=old')), 'old key')
   await assert.rejects(sw.get(req('/assets/missing.js')))
+})
+
+test('a page sent in place of a built file, data or the keystream is passed on but never kept', async () => {
+  const page = { body: '<!doctype html><title>NikkiBase</title>', type: 'text/html; charset=utf-8' }
+  const paths = ['/data/lilith/tags.json', '/assets/index-gone.js', '/keystream.bin?v=gone']
+  const sw = worker({ ...site(), ...Object.fromEntries(paths.map((path) => [path, page])) })
+  await sw.install()
+  for (const path of paths) assert.equal(await sw.text(req(path)), page.body)
+  sw.net.online = false
+  for (const path of paths) await assert.rejects(sw.get(req(path)), path)
 })
 
 test('everything else asks the network first and uses the kept copy offline', async () => {
