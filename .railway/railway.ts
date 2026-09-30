@@ -3,7 +3,7 @@ import { defineRailway, preserve, project, service, volume } from "railway/iac";
 export const partial = "nikkibase";
 
 export default defineRailway(() => {
-  const pushes = volume("nikkibase-push");
+  const pushes = volume("nikkibase-push", { region: "europe-west4-drams3a", sizeMB: 50000 });
   const nikkibase = service("nikkibase", {
     build: { builder: "DOCKERFILE", dockerfilePath: "Dockerfile" },
     deploy: { restartPolicyType: "ON_FAILURE", restartPolicyMaxRetries: 3 },
