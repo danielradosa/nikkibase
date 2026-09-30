@@ -9,8 +9,9 @@ page describes what happens to your data when you use it.
 
 - A wardrobe file you import is read by your own browser. Its contents are not
   uploaded to NikkiBase: the app has no upload feature, the NikkiBase server
-  accepts only requests to fetch pages and data, and the page's security policy
-  stops it from contacting any other server.
+  accepts only requests to fetch pages and data (and your notification choices,
+  if you turn notifications on), and the page's security policy stops it from
+  contacting any other server.
 - Your wardrobe is saved in your browser's IndexedDB storage, on your own
   device, so it is still there next time. "Forget my wardrobe" deletes it, as
   does clearing this site's data in your browser.
@@ -27,6 +28,24 @@ page describes what happens to your data when you use it.
   scripts and item data on your device, so the site opens without a
   connection. The copy holds nothing personal and is refreshed when you visit
   online. Clearing this site's data in your browser removes it.
+
+## Notifications (only if you turn them on)
+
+- Notifications are off until you switch them on with the bell at the top of
+  the page. Your browser then asks for your permission.
+- Turning them on makes your browser create a push address for NikkiBase with
+  its push service (Google for Chrome and Android, Mozilla for Firefox, Apple
+  for Safari, Microsoft for Edge), plus two keys used to encrypt messages to
+  it. The NikkiBase server keeps that address, the two keys, which topics you
+  picked (new items, new stages, fixes) and the date you turned them on.
+  Nothing else: no name, email address, account or wardrobe.
+- NikkiBase sends a message only when its data changes in a way you picked.
+  Messages are encrypted, so the push service delivers them without being able
+  to read them. The push service handles delivery under its own privacy policy.
+- Turning every switch off deletes what the server kept. If the push service
+  says the address no longer works (for example after you clear this site's
+  data), the server deletes it the next time it sends. Blocking notifications
+  for this site in your browser's settings stops them at once.
 
 ## What NikkiBase does not do
 
