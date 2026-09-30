@@ -37,3 +37,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx tsc -b
+
+  server-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build --target build .
