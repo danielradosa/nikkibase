@@ -27,8 +27,9 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
   const [copies, setCopies] = useState(0)
   const copied = copies > 0
   const [byHand, setByHand] = useState<{ ids: number[]; code: string } | null>(null)
-  const [pasting, setPasting] = useState(false)
-  const [pasted, setPasted] = useState('')
+  const [paste, setPaste] = useState<{ owned: number[]; text: string } | null>(null)
+  const pasting = paste?.owned === owned
+  const pasted = pasting ? paste.text : ''
 
   useEffect(() => {
     if (!copies) return
@@ -63,10 +64,7 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
   }
 
   const load = async () => {
-    if (await onLoad(pasted)) {
-      setPasted('')
-      setPasting(false)
-    }
+    if (await onLoad(pasted)) setPaste(null)
   }
 
   return (
@@ -85,7 +83,7 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
             </button>
           </>
         )}
-        <button type="button" className="nb-why nb-code-link" aria-expanded={pasting} onClick={() => setPasting(!pasting)}>
+        <button type="button" className="nb-why nb-code-link" aria-expanded={pasting} onClick={() => setPaste(pasting ? null : { owned, text: '' })}>
           {CODE_TEXT.paste}
         </button>
       </div>
@@ -112,7 +110,7 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
           <Input.TextArea
             autoFocus
             value={pasted}
-            onChange={(e) => setPasted(e.target.value)}
+            onChange={(e) => setPaste({ owned, text: e.target.value })}
             autoSize={{ minRows: 2, maxRows: 4 }}
             placeholder={CODE_TEXT.placeholder}
             aria-label={CODE_TEXT.field}
