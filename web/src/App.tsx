@@ -5,6 +5,7 @@ import { useBundle } from './hooks/useBundle'
 import { useBestOutfit } from './outfit/useBestOutfit'
 import { useWardrobe } from './wardrobe/useWardrobe'
 import { usePhone } from './hooks/usePhone'
+import { useTabSwipe } from './hooks/useTabSwipe'
 import Blossom from './components/Blossom'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -29,6 +30,59 @@ export default function App() {
   useEffect(() => {
     page.current?.toggleAttribute('inert', covered)
   }, [covered])
+
+  const choose = (key: string) => {
+    set({ tab: key })
+    if (phone) window.scrollTo({ top: 0 })
+  }
+  const tabs = [
+    {
+      key: 'outfit',
+      label: 'Best outfit',
+      children: (
+        <BestOutfitTab
+          stages={stages}
+          items={items}
+          itemsFailed={itemsFailed}
+          tagNames={tagNames}
+          places={places}
+          onFile={ingest}
+        />
+      ),
+    },
+    {
+      key: 'worth',
+      label: 'Worth getting',
+      children: (
+        <WorthTab
+          stages={stages}
+          items={items}
+          itemsFailed={itemsFailed}
+          places={places}
+          owned={ownedSet}
+          version={version}
+        />
+      ),
+    },
+    {
+      key: 'items',
+      label: itemsTabLabel(items ? items.length : null, phone),
+      children: items ? (
+        <ItemBrowser
+          items={items}
+          places={places}
+          owned={ownedSet}
+          onToggle={toggleOwned}
+          manual={source === 'manual' || owned.length === 0}
+        />
+      ) : itemsFailed ? (
+        <Alert type="info" showIcon className="nb-alert" message={LIST_FAILED} description="Reload the page to try again." />
+      ) : (
+        <WaitLine text={LIST_WAIT} />
+      ),
+    },
+  ]
+  useTabSwipe(page, { keys: tabs.map((t) => t.key), tab, enabled: ready, onSwipe: choose })
 
   const [announcement, setAnnouncement] = useState('')
   useEffect(() => {
@@ -62,62 +116,7 @@ export default function App() {
             />
           )}
 
-          {ready && (
-            <Tabs
-              activeKey={tab}
-              onChange={(key) => {
-                set({ tab: key })
-                if (phone) window.scrollTo({ top: 0 })
-              }}
-              items={[
-                {
-                  key: 'outfit',
-                  label: 'Best outfit',
-                  children: (
-                    <BestOutfitTab
-                      stages={stages}
-                      items={items}
-                      itemsFailed={itemsFailed}
-                      tagNames={tagNames}
-                      places={places}
-                      onFile={ingest}
-                    />
-                  ),
-                },
-                {
-                  key: 'worth',
-                  label: 'Worth getting',
-                  children: (
-                    <WorthTab
-                      stages={stages}
-                      items={items}
-                      itemsFailed={itemsFailed}
-                      places={places}
-                      owned={ownedSet}
-                      version={version}
-                    />
-                  ),
-                },
-                {
-                  key: 'items',
-                  label: itemsTabLabel(items ? items.length : null, phone),
-                  children: items ? (
-                    <ItemBrowser
-                      items={items}
-                      places={places}
-                      owned={ownedSet}
-                      onToggle={toggleOwned}
-                      manual={source === 'manual' || owned.length === 0}
-                    />
-                  ) : itemsFailed ? (
-                    <Alert type="info" showIcon className="nb-alert" message={LIST_FAILED} description="Reload the page to try again." />
-                  ) : (
-                    <WaitLine text={LIST_WAIT} />
-                  ),
-                },
-              ]}
-            />
-          )}
+          {ready && <Tabs activeKey={tab} onChange={choose} items={tabs} />}
         </Layout.Content>
 
         <Footer version={version} />
