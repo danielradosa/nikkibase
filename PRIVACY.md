@@ -39,9 +39,13 @@ page describes what happens to your data when you use it.
   it. The NikkiBase server keeps that address, the two keys, which topics you
   picked (new items, new stages, fixes) and the date you turned them on.
   Nothing else: no name, email address, account or wardrobe.
-- NikkiBase sends a message only when its data changes in a way you picked.
-  Messages are encrypted, so the push service delivers them without being able
-  to read them. The push service handles delivery under its own privacy policy.
+- NikkiBase sends one message to confirm they are on, and after that only when
+  its data changes in a way you picked. Messages are encrypted, so the push
+  service delivers them without being able to read them. The push service
+  handles delivery under its own privacy policy.
+- While notifications are on, your browser sends the same push address and
+  choices again about once a day when you open NikkiBase, so the server's copy
+  stays current.
 - Turning every switch off deletes what the server kept. If the push service
   says the address no longer works (for example after you clear this site's
   data), the server deletes it the next time it sends. Blocking notifications
