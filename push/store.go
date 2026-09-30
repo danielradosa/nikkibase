@@ -70,6 +70,10 @@ func (s *Store) All() []Entry {
 func (s *Store) Put(e Entry, drop string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	_, dropping := s.entries[drop]
+	if old, ok := s.entries[e.Endpoint]; ok && same(old, e) && (!dropping || drop == e.Endpoint) {
+		return nil
+	}
 	before := s.copy()
 	if drop != "" && drop != e.Endpoint {
 		delete(s.entries, drop)
@@ -105,6 +109,18 @@ func (s *Store) Delete(endpoints ...string) error {
 		return err
 	}
 	return nil
+}
+
+func same(a, b Entry) bool {
+	if a.Endpoint != b.Endpoint || a.P256dh != b.P256dh || a.Auth != b.Auth || !a.Added.Equal(b.Added) || len(a.Topics) != len(b.Topics) {
+		return false
+	}
+	for i := range a.Topics {
+		if a.Topics[i] != b.Topics[i] {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *Store) copy() map[string]Entry {

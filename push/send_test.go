@@ -245,3 +245,26 @@ func TestAnnounceRecordsTheFirstReleaseThenSendsOnlyForChanges(t *testing.T) {
 		t.Errorf("a restart with the same data sent again: %d", len(fake.requests))
 	}
 }
+
+func TestConfirmSendsAShortLivedHelloAndReportsRefusals(t *testing.T) {
+	_, p256dh, auth := newSubscriber(t)
+	dead := "https://fcm.googleapis.com/fcm/send/dead"
+	fake := &fakePush{status: map[string]int{dead: http.StatusNotFound}}
+	s := sender(t, fake)
+	if err := s.Confirm(context.Background(), Entry{Endpoint: fcm, P256dh: p256dh, Auth: auth}); err != nil {
+		t.Fatal(err)
+	}
+	req := fake.requests[0]
+	if req.Header.Get("TTL") != "60" || req.Header.Get("Topic") != "nikkibase-hello" {
+		t.Errorf("headers %v", req.Header)
+	}
+	if err := s.Confirm(context.Background(), Entry{Endpoint: dead, P256dh: p256dh, Auth: auth}); err == nil {
+		t.Error("a 404 from the push service counted as confirmed")
+	}
+	if err := s.Confirm(context.Background(), Entry{Endpoint: "https://x1.notify.windows.com.evil.example/w", P256dh: p256dh, Auth: auth}); err == nil {
+		t.Error("a host that is not a push service was confirmed")
+	}
+	if len(fake.requests) != 2 {
+		t.Errorf("%d requests went out, want 2", len(fake.requests))
+	}
+}

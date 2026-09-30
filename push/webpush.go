@@ -20,7 +20,10 @@ import (
 	"time"
 )
 
-const recordSize = 4096
+const (
+	recordSize = 4096
+	MaxPayload = 3993
+)
 
 var b64 = base64.RawURLEncoding
 
@@ -69,11 +72,11 @@ func encrypt(payload, uaPublic, authSecret []byte, as *ecdh.PrivateKey, salt []b
 	if err != nil {
 		return nil, err
 	}
+	header := make([]byte, 0, 16+4+1+len(asPublic))
 	plain := append(append(make([]byte, 0, len(payload)+1), payload...), 2)
-	if len(plain)+gcm.Overhead() > recordSize {
+	if cap(header)+len(plain)+gcm.Overhead() > recordSize {
 		return nil, errors.New("payload too large")
 	}
-	header := make([]byte, 0, 16+4+1+len(asPublic))
 	header = append(header, salt...)
 	header = binary.BigEndian.AppendUint32(header, recordSize)
 	header = append(header, byte(len(asPublic)))

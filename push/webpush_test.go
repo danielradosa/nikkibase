@@ -56,8 +56,11 @@ func TestEncryptRejectsBadKeysAndLargePayloads(t *testing.T) {
 	if _, err := encrypt([]byte("x"), ua, auth[:15], as, salt); err == nil {
 		t.Error("a short auth secret was accepted")
 	}
-	if _, err := encrypt(make([]byte, recordSize), ua, auth, as, salt); err == nil {
-		t.Error("a payload larger than one record was accepted")
+	if got, err := encrypt(make([]byte, MaxPayload), ua, auth, as, salt); err != nil || len(got) != recordSize {
+		t.Errorf("the largest payload RFC 8291 allows: %d bytes, %v", len(got), err)
+	}
+	if _, err := encrypt(make([]byte, MaxPayload+1), ua, auth, as, salt); err == nil {
+		t.Error("a payload one byte over the RFC 8291 limit was accepted")
 	}
 	if _, err := Encrypt([]byte("x"), "not base64!", "BTBZMqHH6r4Tts7J_aSIgg"); err == nil {
 		t.Error("a p256dh that is not base64url was accepted")

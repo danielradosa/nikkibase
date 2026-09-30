@@ -95,3 +95,24 @@ func TestStoreKeepsItsListWhenSavingFails(t *testing.T) {
 		t.Fatalf("store holds %d after failed saves, want 1", s.Len())
 	}
 }
+
+func TestStoreDoesNotRewriteTheFileWhenNothingChanged(t *testing.T) {
+	dir := t.TempDir()
+	s, _ := OpenStore(dir, 10)
+	e := entry("https://fcm.googleapis.com/a", "items", "fixes")
+	if err := s.Put(e, ""); err != nil {
+		t.Fatal(err)
+	}
+	s.path = filepath.Join(dir, "missing", "subscriptions.json")
+	if err := s.Put(e, ""); err != nil {
+		t.Fatalf("an unchanged subscription was written again: %v", err)
+	}
+	if err := s.Put(e, "https://fcm.googleapis.com/not-stored"); err != nil {
+		t.Fatalf("an unchanged subscription replacing nothing was written again: %v", err)
+	}
+	changed := e
+	changed.Topics = []string{"items"}
+	if err := s.Put(changed, ""); err == nil {
+		t.Fatal("a changed subscription was not written")
+	}
+}

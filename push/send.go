@@ -60,7 +60,7 @@ func (s *Sender) Send(ctx context.Context, entries []Entry, message func(Entry) 
 					mu.Unlock()
 					continue
 				}
-				status, err := s.one(ctx, e, msg)
+				status, err := s.Deliver(ctx, e, msg, s.TTL)
 				mu.Lock()
 				switch {
 				case err == nil && status >= 200 && status < 300:
@@ -85,7 +85,25 @@ func (s *Sender) Send(ctx context.Context, entries []Entry, message func(Entry) 
 	return res
 }
 
-func (s *Sender) one(ctx context.Context, e Entry, msg Message) (int, error) {
+var Hello = Message{
+	Title: "Notifications are on",
+	Body:  "NikkiBase will tell you when it has new data you picked.",
+	Tag:   "nikkibase-hello",
+	URL:   "/",
+}
+
+func (s *Sender) Confirm(ctx context.Context, e Entry) error {
+	status, err := s.Deliver(ctx, e, Hello, time.Minute)
+	if err != nil {
+		return err
+	}
+	if status < 200 || status >= 300 {
+		return fmt.Errorf("push service answered %d", status)
+	}
+	return nil
+}
+
+func (s *Sender) Deliver(ctx context.Context, e Entry, msg Message, ttl time.Duration) (int, error) {
 	if err := CheckEndpoint(e.Endpoint, s.Allowed); err != nil {
 		return 0, err
 	}
@@ -112,9 +130,9 @@ func (s *Sender) one(ctx context.Context, e Entry, msg Message) (int, error) {
 	req.Header.Set("Authorization", auth)
 	req.Header.Set("Content-Encoding", "aes128gcm")
 	req.Header.Set("Content-Type", "application/octet-stream")
-	req.Header.Set("TTL", strconv.Itoa(int(s.TTL/time.Second)))
+	req.Header.Set("TTL", strconv.Itoa(int(ttl/time.Second)))
 	req.Header.Set("Urgency", "normal")
-	req.Header.Set("Topic", "nikkibase-data")
+	req.Header.Set("Topic", msg.Tag)
 	resp, err := s.Client.Do(req)
 	if err != nil {
 		return 0, err

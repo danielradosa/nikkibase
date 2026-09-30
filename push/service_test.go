@@ -1,7 +1,9 @@
 package push
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -15,6 +17,16 @@ const (
 	fcm      = "https://fcm.googleapis.com/fcm/send/abc:def"
 )
 
+type confirmer struct {
+	calls []string
+	err   error
+}
+
+func (c *confirmer) confirm(_ context.Context, e Entry) error {
+	c.calls = append(c.calls, e.Endpoint)
+	return c.err
+}
+
 func service(t *testing.T) *Service {
 	t.Helper()
 	store, err := OpenStore(t.TempDir(), 3)
@@ -27,6 +39,7 @@ func service(t *testing.T) *Service {
 		Allowed: PushHost,
 		Now:     func() time.Time { return time.Unix(1_800_000_000, 0) },
 		Limit:   &Limiter{Max: 5, Window: time.Hour},
+		Confirm: (&confirmer{}).confirm,
 	}
 }
 
@@ -105,6 +118,7 @@ func TestSubscribeStoresTheSubscriptionWithTheChosenTopics(t *testing.T) {
 func TestSubscribeRefusesAnythingButAPushServiceSubscription(t *testing.T) {
 	cases := map[string]string{
 		"not a push service":      body("https://evil.example/push", uaPublic, uaAuth, []string{"items"}, ""),
+		"other apple host":        body("https://x1.push.apple.com/abc", uaPublic, uaAuth, []string{"items"}, ""),
 		"internal address":        body("https://127.0.0.1/push", uaPublic, uaAuth, []string{"items"}, ""),
 		"plain http":              body("http://fcm.googleapis.com/fcm/send/x", uaPublic, uaAuth, []string{"items"}, ""),
 		"another port":            body("https://fcm.googleapis.com:8443/fcm/send/x", uaPublic, uaAuth, []string{"items"}, ""),
@@ -205,20 +219,47 @@ func TestUnsubscribeRemovesTheSubscription(t *testing.T) {
 
 func TestTooManyChangesFromOneAddressAreRefused(t *testing.T) {
 	s := service(t)
+	from := func(ip string) map[string]string { return map[string]string{"X-Real-IP": ip} }
 	for i := range 5 {
-		if rec := call(s, http.MethodPost, "/push/unsubscribe", `{"endpoint":"x"}`, map[string]string{"X-Real-IP": "203.0.113.9"}); rec.Code != http.StatusNoContent {
+		if rec := call(s, http.MethodPost, "/push/subscribe", "{", from("203.0.113.9")); rec.Code != http.StatusBadRequest {
 			t.Fatalf("request %d: %d", i+1, rec.Code)
 		}
 	}
-	if rec := call(s, http.MethodPost, "/push/unsubscribe", `{"endpoint":"x"}`, map[string]string{"X-Real-IP": "203.0.113.9"}); rec.Code != http.StatusTooManyRequests {
+	if rec := call(s, http.MethodPost, "/push/subscribe", "{", from("203.0.113.9")); rec.Code != http.StatusTooManyRequests {
 		t.Errorf("sixth request: %d", rec.Code)
 	}
-	if rec := call(s, http.MethodPost, "/push/unsubscribe", `{"endpoint":"x"}`, map[string]string{"X-Real-IP": "203.0.113.10"}); rec.Code != http.StatusNoContent {
+	if rec := call(s, http.MethodPost, "/push/unsubscribe", `{"endpoint":"x"}`, from("203.0.113.9")); rec.Code != http.StatusNoContent {
+		t.Errorf("unsubscribing is never limited: %d", rec.Code)
+	}
+	if rec := call(s, http.MethodPost, "/push/subscribe", "{", from("203.0.113.10")); rec.Code != http.StatusBadRequest {
 		t.Errorf("another address: %d", rec.Code)
 	}
 	s.Now = func() time.Time { return time.Unix(1_800_000_000, 0).Add(time.Hour) }
-	if rec := call(s, http.MethodPost, "/push/unsubscribe", `{"endpoint":"x"}`, map[string]string{"X-Real-IP": "203.0.113.9"}); rec.Code != http.StatusNoContent {
+	if rec := call(s, http.MethodPost, "/push/subscribe", "{", from("203.0.113.9")); rec.Code != http.StatusBadRequest {
 		t.Errorf("an hour later: %d", rec.Code)
+	}
+}
+
+func TestANewSubscriptionIsStoredOnlyAfterItsPushServiceTakesAMessage(t *testing.T) {
+	s := service(t)
+	c := &confirmer{}
+	s.Confirm = c.confirm
+	call(s, http.MethodPost, "/push/subscribe", body(fcm, uaPublic, uaAuth, []string{"items"}, ""), nil)
+	call(s, http.MethodPost, "/push/subscribe", body(fcm, uaPublic, uaAuth, []string{"items", "stages"}, ""), nil)
+	if strings.Join(c.calls, ",") != fcm {
+		t.Fatalf("confirmations sent: %v, want one for the new subscription only", c.calls)
+	}
+	otherAuth := "AAAAAAAAAAAAAAAAAAAAAA"
+	call(s, http.MethodPost, "/push/subscribe", body(fcm, uaPublic, otherAuth, []string{"items"}, ""), nil)
+	if len(c.calls) != 2 {
+		t.Errorf("new keys on a known address were not confirmed: %v", c.calls)
+	}
+
+	refused := service(t)
+	refused.Confirm = (&confirmer{err: errors.New("push service answered 404")}).confirm
+	rec := call(refused, http.MethodPost, "/push/subscribe", body(fcm, uaPublic, uaAuth, []string{"items"}, ""), nil)
+	if rec.Code != http.StatusBadRequest || refused.Store.Len() != 0 {
+		t.Fatalf("a subscription its push service refused: %d, stored %d", rec.Code, refused.Store.Len())
 	}
 }
 
@@ -230,22 +271,37 @@ func TestAFullStoreSaysSo(t *testing.T) {
 			t.Fatalf("subscription %d: %d", i+1, rec.Code)
 		}
 	}
+	c := &confirmer{}
+	s.Confirm = c.confirm
 	if rec := call(s, http.MethodPost, "/push/subscribe", body("https://fcm.googleapis.com/d", uaPublic, uaAuth, []string{"items"}, ""), nil); rec.Code != http.StatusServiceUnavailable {
 		t.Errorf("fourth subscription in a store of three: %d", rec.Code)
 	}
+	if len(c.calls) != 0 {
+		t.Errorf("a full store still sent a confirmation: %v", c.calls)
+	}
+	if rec := call(s, http.MethodPost, "/push/subscribe", body("https://fcm.googleapis.com/d", uaPublic, uaAuth, nil, "https://fcm.googleapis.com/a"), nil); rec.Code != http.StatusNoContent {
+		t.Errorf("replacing a subscription in a full store: %d", rec.Code)
+	}
 }
 
-func TestLimiterForgetsOldAddressesWhenItFillsUp(t *testing.T) {
+func TestAFullLimiterMakesRoomByForgettingTheOldestAddress(t *testing.T) {
 	l := &Limiter{Max: 1, Window: time.Minute}
 	start := time.Unix(1_800_000_000, 0)
-	for i := range limiterKeys {
-		l.Allow(string(rune(i)), start)
+	l.Allow("first", start)
+	for i := range limiterKeys - 1 {
+		l.Allow(string(rune(i+1)), start.Add(time.Second))
 	}
-	if l.Allow("new", start) {
-		t.Error("a full limiter let a new address in within the window")
+	if !l.Allow("new", start.Add(2*time.Second)) {
+		t.Fatal("a full limiter turned a new address away")
 	}
-	if !l.Allow("new", start.Add(time.Minute)) {
-		t.Error("a full limiter did not make room once the window passed")
+	if !l.Allow("first", start.Add(3*time.Second)) {
+		t.Error("the oldest address was not the one forgotten")
+	}
+	if l.Allow(string(rune(5)), start.Add(4*time.Second)) {
+		t.Error("an address that is still counted got a second request in the window")
+	}
+	if len(l.seen) > limiterKeys {
+		t.Errorf("limiter holds %d addresses", len(l.seen))
 	}
 }
 
@@ -262,5 +318,11 @@ func TestClientIPPrefersTheProxyHeaders(t *testing.T) {
 	req.Header.Set("X-Real-IP", "198.51.100.7")
 	if got := clientIP(req); got != "198.51.100.7" {
 		t.Errorf("real ip: %s", got)
+	}
+	req.Header.Set("X-Real-IP", "2001:db8:1:2:aaaa::1")
+	a := clientIP(req)
+	req.Header.Set("X-Real-IP", "2001:db8:1:2:bbbb::9")
+	if b := clientIP(req); a != b || a != "2001:db8:1:2::/64" {
+		t.Errorf("one IPv6 /64 counts as one address: %s, %s", a, b)
 	}
 }

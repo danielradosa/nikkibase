@@ -1,6 +1,7 @@
 package push
 
 import (
+	"context"
 	"crypto/ecdh"
 	"encoding/json"
 	"errors"
@@ -27,7 +28,6 @@ func PushHost(host string) bool {
 	return host == "fcm.googleapis.com" ||
 		host == "updates.push.services.mozilla.com" ||
 		host == "web.push.apple.com" ||
-		strings.HasSuffix(host, ".push.apple.com") ||
 		strings.HasSuffix(host, ".notify.windows.com")
 }
 
@@ -87,6 +87,7 @@ type Service struct {
 	Allowed func(string) bool
 	Now     func() time.Time
 	Limit   *Limiter
+	Confirm func(context.Context, Entry) error
 }
 
 type subscribeRequest struct {
@@ -113,15 +114,15 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]any{"key": s.Public, "topics": Topics})
 	case "/push/subscribe":
-		s.change(w, r, s.subscribe)
+		s.change(w, r, true, s.subscribe)
 	case "/push/unsubscribe":
-		s.change(w, r, s.unsubscribe)
+		s.change(w, r, false, s.unsubscribe)
 	default:
 		http.NotFound(w, r)
 	}
 }
 
-func (s *Service) change(w http.ResponseWriter, r *http.Request, do func(body []byte) (int, string)) {
+func (s *Service) change(w http.ResponseWriter, r *http.Request, limited bool, do func(ctx context.Context, body []byte) (int, string)) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", "POST")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -135,7 +136,7 @@ func (s *Service) change(w http.ResponseWriter, r *http.Request, do func(body []
 		http.Error(w, "want application/json", http.StatusUnsupportedMediaType)
 		return
 	}
-	if s.Limit != nil && !s.Limit.Allow(clientIP(r), s.now()) {
+	if limited && s.Limit != nil && !s.Limit.Allow(clientIP(r), s.now()) {
 		http.Error(w, "too many requests", http.StatusTooManyRequests)
 		return
 	}
@@ -144,7 +145,7 @@ func (s *Service) change(w http.ResponseWriter, r *http.Request, do func(body []
 		http.Error(w, "request too large", http.StatusRequestEntityTooLarge)
 		return
 	}
-	status, msg := do(body)
+	status, msg := do(r.Context(), body)
 	if status == http.StatusNoContent {
 		w.WriteHeader(status)
 		return
@@ -159,7 +160,7 @@ func (s *Service) now() time.Time {
 	return time.Now()
 }
 
-func (s *Service) subscribe(body []byte) (int, string) {
+func (s *Service) subscribe(ctx context.Context, body []byte) (int, string) {
 	var req subscribeRequest
 	if err := json.Unmarshal(body, &req); err != nil {
 		return http.StatusBadRequest, "bad json"
@@ -183,11 +184,22 @@ func (s *Service) subscribe(body []byte) (int, string) {
 	if len(topics) == 0 {
 		return http.StatusBadRequest, "no topics"
 	}
-	added := s.now().UTC().Truncate(time.Second)
-	if old, ok := s.Store.Get(sub.Endpoint); ok {
-		added = old.Added
+	entry := Entry{Endpoint: sub.Endpoint, P256dh: sub.Keys.P256dh, Auth: sub.Keys.Auth, Topics: topics, Added: s.now().UTC().Truncate(time.Second)}
+	old, known := s.Store.Get(sub.Endpoint)
+	if known && old.P256dh == entry.P256dh && old.Auth == entry.Auth {
+		entry.Added = old.Added
+	} else {
+		if s.Store.Len() >= s.Store.limit && req.Replaces == "" {
+			return http.StatusServiceUnavailable, "no room for more subscriptions"
+		}
+		if s.Confirm != nil {
+			if err := s.Confirm(ctx, entry); err != nil {
+				log.Printf("push: a new subscription was refused by its push service: %v", err)
+				return http.StatusBadRequest, "the push service refused this subscription"
+			}
+		}
 	}
-	err = s.Store.Put(Entry{Endpoint: sub.Endpoint, P256dh: sub.Keys.P256dh, Auth: sub.Keys.Auth, Topics: topics, Added: added}, req.Replaces)
+	err = s.Store.Put(entry, req.Replaces)
 	if errors.Is(err, ErrFull) {
 		return http.StatusServiceUnavailable, "no room for more subscriptions"
 	}
@@ -198,7 +210,7 @@ func (s *Service) subscribe(body []byte) (int, string) {
 	return http.StatusNoContent, ""
 }
 
-func (s *Service) unsubscribe(body []byte) (int, string) {
+func (s *Service) unsubscribe(_ context.Context, body []byte) (int, string) {
 	var req struct {
 		Endpoint string `json:"endpoint"`
 	}
@@ -225,18 +237,28 @@ func sameOrigin(r *http.Request) bool {
 }
 
 func clientIP(r *http.Request) string {
-	if ip := strings.TrimSpace(r.Header.Get("X-Real-IP")); ip != "" {
-		return ip
+	raw := strings.TrimSpace(r.Header.Get("X-Real-IP"))
+	if raw == "" {
+		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+			parts := strings.Split(xff, ",")
+			raw = strings.TrimSpace(parts[len(parts)-1])
+		}
 	}
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		parts := strings.Split(xff, ",")
-		return strings.TrimSpace(parts[len(parts)-1])
+	if raw == "" {
+		host, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			host = r.RemoteAddr
+		}
+		raw = host
 	}
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
+	ip := net.ParseIP(raw)
+	if ip == nil {
+		return raw
 	}
-	return host
+	if ip.To4() != nil {
+		return ip.To4().String()
+	}
+	return ip.Mask(net.CIDRMask(64, 128)).String() + "/64"
 }
 
 type Limiter struct {
@@ -259,17 +281,20 @@ func (l *Limiter) Allow(key string, now time.Time) bool {
 	if l.seen == nil {
 		l.seen = map[string]*window{}
 	}
-	if len(l.seen) >= limiterKeys {
-		for k, w := range l.seen {
-			if now.Sub(w.start) >= l.Window {
+	w := l.seen[key]
+	if w == nil && len(l.seen) >= limiterKeys {
+		oldest, first := "", time.Time{}
+		for k, v := range l.seen {
+			if now.Sub(v.start) >= l.Window {
 				delete(l.seen, k)
+			} else if oldest == "" || v.start.Before(first) {
+				oldest, first = k, v.start
 			}
 		}
 		if len(l.seen) >= limiterKeys {
-			return false
+			delete(l.seen, oldest)
 		}
 	}
-	w := l.seen[key]
 	if w == nil || now.Sub(w.start) >= l.Window {
 		l.seen[key] = &window{start: now, n: 1}
 		return true
