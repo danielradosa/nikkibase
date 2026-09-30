@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { TOPICS_KEY, isApple, keyBytes, parseTopics, sameKey, supportOf, type Status, type Support, type Topic } from './notify'
+import { SYNC_KEY, TOPICS_KEY, isApple, keyBytes, needsSync, parseSync, parseTopics, sameKey, supportOf, type Status, type Support, type Topic } from './notify'
 
 const READY_MS = 10000
 
@@ -30,9 +30,55 @@ function environment(): Support {
   })
 }
 
-async function post(path: string, body: unknown) {
+function keepSync(endpoint: string | null) {
+  try {
+    if (endpoint) localStorage.setItem(SYNC_KEY, JSON.stringify({ endpoint, at: Date.now() }))
+    else localStorage.removeItem(SYNC_KEY)
+  } catch {
+  }
+}
+
+function savedSync() {
+  try {
+    return parseSync(localStorage.getItem(SYNC_KEY))
+  } catch {
+    return null
+  }
+}
+
+async function post(path: string, body: unknown): Promise<number> {
   const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-  if (!res.ok) throw new Error(`${path} answered ${res.status}`)
+  return res.status
+}
+
+async function register(reg: ServiceWorkerRegistration, key: Uint8Array, topics: Topic[]) {
+  const fresh = () => reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key as BufferSource })
+  let sub = await reg.pushManager.getSubscription()
+  let replaces = ''
+  if (sub && !sameKey(sub.options.applicationServerKey, key)) {
+    replaces = sub.endpoint
+    await sub.unsubscribe()
+    sub = null
+  }
+  if (!sub) sub = await fresh()
+  let status = await post('/push/subscribe', { subscription: sub.toJSON(), topics, replaces })
+  if (status === 400) {
+    replaces = sub.endpoint
+    await sub.unsubscribe()
+    sub = await fresh()
+    status = await post('/push/subscribe', { subscription: sub.toJSON(), topics, replaces })
+  }
+  if (status !== 204) throw new Error(`/push/subscribe answered ${status}`)
+  keepSync(sub.endpoint)
+}
+
+async function unregister(reg: ServiceWorkerRegistration) {
+  const sub = await reg.pushManager.getSubscription()
+  if (sub) {
+    await post('/push/unsubscribe', { endpoint: sub.endpoint }).catch(() => 0)
+    await sub.unsubscribe()
+  }
+  keepSync(null)
 }
 
 function registration(): Promise<ServiceWorkerRegistration> {
@@ -75,21 +121,25 @@ export function useNotify(): Notify {
   useEffect(() => {
     if (!key || support !== 'yes') return
     let live = true
-    registration()
-      .then((reg) => reg.pushManager.getSubscription())
-      .then(async (sub) => {
-        if (!live) return
-        const saved = savedTopics()
-        if (sub && saved.length === 0) {
-          await post('/push/unsubscribe', { endpoint: sub.endpoint }).catch(() => {})
-          await sub.unsubscribe()
-        }
-        if ((!sub || Notification.permission !== 'granted') && saved.length) {
-          keepTopics([])
-          setTopics([])
-        }
-      })
-      .catch(() => {})
+    const sync = async () => {
+      const reg = await registration()
+      const sub = await reg.pushManager.getSubscription()
+      const saved = savedTopics()
+      if (!live) return
+      if (saved.length === 0) {
+        if (sub) await unregister(reg)
+        return
+      }
+      if (Notification.permission !== 'granted') {
+        keepTopics([])
+        setTopics([])
+        return
+      }
+      if (!sub || !sameKey(sub.options.applicationServerKey, key) || needsSync(savedSync(), sub.endpoint, Date.now())) {
+        await register(reg, key, saved)
+      }
+    }
+    sync().catch((error) => console.warn('NikkiBase notifications:', error))
     return () => {
       live = false
     }
@@ -110,22 +160,8 @@ export function useNotify(): Notify {
         }
         setDenied(false)
         const reg = await registration()
-        let sub = await reg.pushManager.getSubscription()
-        if (next.length === 0) {
-          if (sub) {
-            await post('/push/unsubscribe', { endpoint: sub.endpoint }).catch(() => {})
-            await sub.unsubscribe()
-          }
-          keepTopics([])
-          setTopics([])
-          return
-        }
-        if (sub && !sameKey(sub.options.applicationServerKey, key)) {
-          await sub.unsubscribe()
-          sub = null
-        }
-        if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key as BufferSource })
-        await post('/push/subscribe', { subscription: sub.toJSON(), topics: next })
+        if (next.length === 0) await unregister(reg)
+        else await register(reg, key, next)
         keepTopics(next)
         setTopics(next)
       }

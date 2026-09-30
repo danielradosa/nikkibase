@@ -77,25 +77,33 @@ self.addEventListener('fetch', (event) => {
 
 const text = (value, fallback) => (typeof value === 'string' && value ? value : fallback)
 
+function onSite(raw) {
+  try {
+    const url = new URL(typeof raw === 'string' ? raw : '/', self.location.origin)
+    return url.origin === self.location.origin ? url.pathname + url.search + url.hash : '/'
+  } catch {
+    return '/'
+  }
+}
+
 self.addEventListener('push', (event) => {
   let message = {}
   try {
     message = event.data ? event.data.json() : {}
   } catch {}
-  const url = text(message.url, '/')
   event.waitUntil(
     self.registration.showNotification(text(message.title, 'NikkiBase'), {
       body: text(message.body, ''),
       tag: text(message.tag, 'nikkibase-data'),
       icon: '/icons/icon-192.png',
-      data: { url: url.startsWith('/') && !url.startsWith('//') ? url : '/' },
+      data: { url: onSite(message.url) },
     }),
   )
 })
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const url = new URL(event.notification.data?.url ?? '/', self.location.origin).href
+  const url = new URL(onSite(event.notification.data?.url), self.location.origin).href
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       const open = windows.find((client) => new URL(client.url).origin === self.location.origin)

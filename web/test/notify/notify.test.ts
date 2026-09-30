@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { TOPICS, cleanTopics, isApple, keyBytes, parseTopics, sameKey, statusText, supportOf, withTopic } from '../../src/notify/notify.ts'
+import { SYNC_MS, TOPICS, cleanTopics, isApple, keyBytes, needsSync, parseSync, parseTopics, sameKey, statusText, supportOf, withTopic } from '../../src/notify/notify.ts'
 
 const full = { serviceWorker: true, pushManager: true, notification: true, apple: false, standalone: false }
 
@@ -62,4 +62,23 @@ test('the status line says what is on, in the order of the switches', () => {
   assert.match(statusText({ kind: 'install' }), /Home Screen/)
   assert.match(statusText({ kind: 'failed', offline: true }), /offline/)
   assert.match(statusText({ kind: 'failed', offline: false }), /Try again/)
+})
+
+test('the subscription is sent to the server again when it changed, once a day, or when the clock went back', () => {
+  const now = 1_800_000_000_000
+  const last = { endpoint: 'https://fcm.googleapis.com/a', at: now - 1000 }
+  assert.equal(needsSync(last, 'https://fcm.googleapis.com/a', now), false)
+  assert.equal(needsSync(last, 'https://fcm.googleapis.com/b', now), true)
+  assert.equal(needsSync(null, 'https://fcm.googleapis.com/a', now), true)
+  assert.equal(needsSync({ ...last, at: now - SYNC_MS }, 'https://fcm.googleapis.com/a', now), true)
+  assert.equal(needsSync({ ...last, at: now + 60_000 }, 'https://fcm.googleapis.com/a', now), true)
+})
+
+test('a saved sync record is read only when it has both fields', () => {
+  assert.deepEqual(parseSync('{"endpoint":"e","at":5}'), { endpoint: 'e', at: 5 })
+  assert.equal(parseSync('{"endpoint":"e"}'), null)
+  assert.equal(parseSync('{"at":5}'), null)
+  assert.equal(parseSync('null'), null)
+  assert.equal(parseSync('{'), null)
+  assert.equal(parseSync(null), null)
 })

@@ -8,6 +8,8 @@ export const TOPIC_LABELS: Record<Topic, string> = {
 }
 
 export const TOPICS_KEY = 'nikkibase.notifyTopics'
+export const SYNC_KEY = 'nikkibase.notifySync'
+export const SYNC_MS = 24 * 60 * 60 * 1000
 
 export type Support = 'yes' | 'install' | 'no'
 
@@ -45,6 +47,22 @@ export function parseTopics(raw: string | null): Topic[] {
 
 export function withTopic(topics: readonly Topic[], topic: Topic, on: boolean): Topic[] {
   return cleanTopics(on ? [...topics, topic] : topics.filter((t) => t !== topic))
+}
+
+export type Sync = { endpoint: string; at: number }
+
+export function parseSync(raw: string | null): Sync | null {
+  if (!raw) return null
+  try {
+    const v = JSON.parse(raw)
+    return v && typeof v.endpoint === 'string' && typeof v.at === 'number' ? { endpoint: v.endpoint, at: v.at } : null
+  } catch {
+    return null
+  }
+}
+
+export function needsSync(last: Sync | null, endpoint: string, now: number): boolean {
+  return !last || last.endpoint !== endpoint || now - last.at >= SYNC_MS || now < last.at
 }
 
 export function keyBytes(base64url: string): Uint8Array {
