@@ -823,6 +823,42 @@ h5 {
   margin-inline-start: auto;
 }
 
+.ant-btn.nb-notify {
+  margin-inline-start: auto;
+}
+
+.ant-btn.nb-notify + .ant-btn.nb-forget {
+  margin-inline-start: 0;
+}
+
+.ant-popover.nb-notify-pop {
+  max-width: calc(100vw - 24px);
+}
+
+.nb-notify-panel {
+  max-width: 320px;
+}
+
+.nb-notify-sheet .nb-notify-panel {
+  max-width: none;
+}
+
+.nb-notify-topics {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.nb-notify-panel .ant-typography.nb-notify-intro,
+.nb-notify-panel .ant-typography.nb-notify-status {
+  margin-bottom: 8px;
+}
+
+.nb-notify-panel .ant-typography.nb-notify-privacy {
+  margin-bottom: 0;
+  font-size: 12px;
+}
+
 .ant-popover.nb-forget-confirm {
   max-width: calc(100vw - 24px);
 }

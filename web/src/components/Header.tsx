@@ -2,6 +2,7 @@ import { Button, Layout, Popconfirm, Typography } from 'antd'
 import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
 import { TAGLINE } from '../wardrobe/wardrobeText'
+import NotifyButton from '../notify/NotifyButton'
 
 export default function Header({ onForget }: { onForget: () => Promise<void> }) {
   const owned = useStore((s) => s.owned)
@@ -14,6 +15,7 @@ export default function Header({ onForget }: { onForget: () => Promise<void> }) 
         NikkiBase
       </Typography.Title>
       {!phone && <Typography.Text className="nb-tagline">{TAGLINE}</Typography.Text>}
+      <NotifyButton />
       {owned.length > 0 && (
         <Popconfirm
           placement="bottomRight"

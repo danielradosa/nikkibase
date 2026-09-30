@@ -74,3 +74,47 @@ self.addEventListener('fetch', (event) => {
   else if (lasting(url)) event.respondWith(cacheFirst(event))
   else event.respondWith(networkFirst(request))
 })
+
+const text = (value, fallback) => (typeof value === 'string' && value ? value : fallback)
+
+self.addEventListener('push', (event) => {
+  let message = {}
+  try {
+    message = event.data ? event.data.json() : {}
+  } catch {}
+  const url = text(message.url, '/')
+  event.waitUntil(
+    self.registration.showNotification(text(message.title, 'NikkiBase'), {
+      body: text(message.body, ''),
+      tag: text(message.tag, 'nikkibase-data'),
+      icon: '/icons/icon-192.png',
+      data: { url: url.startsWith('/') && !url.startsWith('//') ? url : '/' },
+    }),
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = new URL(event.notification.data?.url ?? '/', self.location.origin).href
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+      const open = windows.find((client) => new URL(client.url).origin === self.location.origin)
+      return open ? open.focus() : self.clients.openWindow(url)
+    }),
+  )
+})
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+  const old = event.oldSubscription
+  const renew = async () => {
+    const key = old?.options?.applicationServerKey
+    const next = event.newSubscription ?? (key ? await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }) : null)
+    if (!next || !old) return
+    await fetch('/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subscription: next.toJSON(), replaces: old.endpoint }),
+    })
+  }
+  event.waitUntil(renew().catch(() => {}))
+})
