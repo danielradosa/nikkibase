@@ -53,7 +53,7 @@ func fetch(t *testing.T, h http.Handler, method, path, accept string) *http.Resp
 }
 
 func TestPrecompressedSiblings(t *testing.T) {
-	h := handler(root(t))
+	h := handler(root(t), nil)
 	for _, c := range []struct{ path, accept, encoding, body, ctype string }{
 		{"/assets/index-abc123.js", "gzip, deflate, br, zstd", "br", "brotli js", "text/javascript"},
 		{"/assets/index-abc123.js", "gzip", "gzip", "gzip js", "text/javascript"},
@@ -93,7 +93,7 @@ func TestPrecompressedSiblings(t *testing.T) {
 }
 
 func TestPrecompressedKeepsHeadersAndHead(t *testing.T) {
-	h := handler(root(t))
+	h := handler(root(t), nil)
 	res := fetch(t, h, http.MethodHead, "/assets/index-abc123.js", "br")
 	body, _ := io.ReadAll(res.Body)
 	if res.Header.Get("Content-Encoding") != "br" || len(body) != 0 {
@@ -114,7 +114,7 @@ func TestPrecompressedKeepsHeadersAndHead(t *testing.T) {
 }
 
 func TestCacheLifetimes(t *testing.T) {
-	h := handler(root(t))
+	h := handler(root(t), nil)
 	for _, c := range []struct{ path, want string }{
 		{"/data/index.json", "no-cache"},
 		{"/data/2026-09-22/it.json", "immutable"},
@@ -135,7 +135,7 @@ func TestCacheLifetimes(t *testing.T) {
 }
 
 func TestServiceWorkerIsAlwaysFresh(t *testing.T) {
-	h := handler(root(t))
+	h := handler(root(t), nil)
 	for _, accept := range []string{"", "br"} {
 		res := fetch(t, h, http.MethodGet, "/sw.js", accept)
 		if res.StatusCode != http.StatusOK {
@@ -158,7 +158,7 @@ func TestServiceWorkerIsSentWhenTheCopyOnDiskIsOlder(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	h := handler(dir)
+	h := handler(dir, nil)
 	since := old.Add(24 * time.Hour).Format(http.TimeFormat)
 	get := func(path, accept string) *http.Response {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
@@ -183,7 +183,7 @@ func TestServiceWorkerIsSentWhenTheCopyOnDiskIsOlder(t *testing.T) {
 }
 
 func TestManifest(t *testing.T) {
-	res := fetch(t, handler(root(t)), http.MethodGet, "/manifest.webmanifest", "br, gzip")
+	res := fetch(t, handler(root(t), nil), http.MethodGet, "/manifest.webmanifest", "br, gzip")
 	body, _ := io.ReadAll(res.Body)
 	if res.StatusCode != http.StatusOK || string(body) != `{"name":"NikkiBase"}` {
 		t.Errorf("status %d, body %q; want the manifest", res.StatusCode, body)
@@ -197,7 +197,7 @@ func TestManifest(t *testing.T) {
 }
 
 func TestSecurityHeaders(t *testing.T) {
-	res := fetch(t, handler(root(t)), http.MethodGet, "/index.html", "")
+	res := fetch(t, handler(root(t), nil), http.MethodGet, "/index.html", "")
 	csp := res.Header.Get("Content-Security-Policy")
 	for _, want := range []string{"connect-src 'self'", "frame-ancestors 'none'", "'wasm-unsafe-eval'", "font-src 'self'"} {
 		if !strings.Contains(csp, want) {
@@ -215,13 +215,13 @@ func TestSecurityHeaders(t *testing.T) {
 }
 
 func TestOnlyReads(t *testing.T) {
-	if res := fetch(t, handler(root(t)), http.MethodPost, "/", ""); res.StatusCode != http.StatusMethodNotAllowed {
+	if res := fetch(t, handler(root(t), nil), http.MethodPost, "/", ""); res.StatusCode != http.StatusMethodNotAllowed {
 		t.Errorf("POST returned %d, want 405", res.StatusCode)
 	}
 }
 
 func TestNoDirectoryListings(t *testing.T) {
-	h := handler(root(t))
+	h := handler(root(t), nil)
 	for _, path := range []string{"/assets/", "/assets", "/data/", "/data", "/data/2026-09-22/", "/data/2026-09-22"} {
 		res := fetch(t, h, http.MethodGet, path, "br, gzip")
 		body, _ := io.ReadAll(res.Body)
@@ -238,5 +238,36 @@ func TestNoDirectoryListings(t *testing.T) {
 		if res.StatusCode != http.StatusOK || !strings.Contains(string(body), "<title>shell</title>") {
 			t.Errorf("%s: status %d, body %q; want the shell", path, res.StatusCode, body)
 		}
+	}
+}
+
+func TestPushPathsNeverFallBackToTheShell(t *testing.T) {
+	for _, method := range []string{http.MethodGet, http.MethodPost} {
+		res := fetch(t, handler(root(t), nil), method, "/push/key", "")
+		body, _ := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusNotFound || strings.Contains(string(body), "shell") {
+			t.Errorf("%s /push/key with push off: %d %q", method, res.StatusCode, body)
+		}
+		if res.Header.Get("Content-Security-Policy") == "" || res.Header.Get("Cache-Control") != "no-store" {
+			t.Errorf("%s /push/key with push off: headers %v", method, res.Header)
+		}
+	}
+	var got []string
+	pushes := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		got = append(got, r.Method+" "+r.URL.Path)
+		w.WriteHeader(http.StatusNoContent)
+	})
+	h := handler(root(t), pushes)
+	for _, method := range []string{http.MethodGet, http.MethodPost} {
+		res := fetch(t, h, method, "/push/subscribe", "")
+		if res.StatusCode != http.StatusNoContent || res.Header.Get("Content-Security-Policy") == "" {
+			t.Errorf("%s /push/subscribe: %d %v", method, res.StatusCode, res.Header)
+		}
+	}
+	if strings.Join(got, ",") != "GET /push/subscribe,POST /push/subscribe" {
+		t.Errorf("push handler saw %v", got)
+	}
+	if res := fetch(t, h, http.MethodPost, "/pushy", ""); res.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("POST /pushy: %d", res.StatusCode)
 	}
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"io/fs"
 	"log"
 	"mime"
 	"net/http"
@@ -9,7 +11,15 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
+
+	"github.com/danielradosa/nikkibase/push"
+)
+
+const (
+	nonroot          = 65532
+	maxSubscriptions = 20000
 )
 
 func main() {
@@ -21,18 +31,83 @@ func main() {
 	}
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           handler(root),
+		Handler:           handler(root, pushService(root)),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	log.Printf("serve: %s on :%s", root, port)
 	log.Fatal(srv.ListenAndServe())
 }
 
-func handler(root string) http.Handler {
+func pushService(root string) http.Handler {
+	dir := os.Getenv("PUSH_DIR")
+	if dir == "" {
+		return nil
+	}
+	if err := dropRoot(dir); err != nil {
+		log.Fatalf("serve: %v", err)
+	}
+	vapid, err := push.ParseVAPID(os.Getenv("VAPID_PRIVATE_KEY"), envOr("VAPID_SUBJECT", "mailto:nikkibaseproject@gmail.com"))
+	if err != nil {
+		log.Printf("push: off: %v", err)
+		return nil
+	}
+	store, err := push.OpenStore(dir, maxSubscriptions)
+	if err != nil {
+		log.Printf("push: off: %v", err)
+		return nil
+	}
+	sender := &push.Sender{VAPID: vapid, Client: push.NewClient(), Allowed: push.PushHost, TTL: 72 * time.Hour, Workers: 8}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+		defer cancel()
+		if err := push.Announce(ctx, root, dir, store, sender, log.Printf); err != nil {
+			log.Printf("push: announcing the data: %v", err)
+		}
+	}()
+	log.Printf("push: on, %d subscriptions", store.Len())
+	return &push.Service{Store: store, Public: vapid.Public, Allowed: push.PushHost, Limit: &push.Limiter{Max: 30, Window: time.Hour}}
+}
+
+func dropRoot(dir string) error {
+	if os.Geteuid() != 0 {
+		return nil
+	}
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return err
+	}
+	err := filepath.WalkDir(dir, func(p string, _ fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		return os.Lchown(p, nonroot, nonroot)
+	})
+	if err != nil {
+		return err
+	}
+	if err := syscall.Setgroups(nil); err != nil {
+		return err
+	}
+	if err := syscall.Setgid(nonroot); err != nil {
+		return err
+	}
+	return syscall.Setuid(nonroot)
+}
+
+func handler(root string, pushes http.Handler) http.Handler {
 	mime.AddExtensionType(".wasm", "application/wasm")
 	mime.AddExtensionType(".webmanifest", "application/manifest+json")
 	files := http.FileServer(noListing{http.Dir(root)})
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/push/") {
+			security(w)
+			if pushes == nil {
+				w.Header().Set("Cache-Control", "no-store")
+				http.NotFound(w, r)
+				return
+			}
+			pushes.ServeHTTP(w, r)
+			return
+		}
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			w.Header().Set("Allow", "GET, HEAD")
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

@@ -1,6 +1,7 @@
 FROM golang:1.26-alpine AS build
 WORKDIR /src
 COPY go.mod main.go ./
+COPY push ./push
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/serve .
 
 FROM gcr.io/distroless/static-debian12:nonroot
