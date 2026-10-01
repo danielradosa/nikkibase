@@ -1587,6 +1587,11 @@ h5 {
     margin-inline-end: -8px;
   }
 
+  .nb-outfit-table .ant-typography-copy {
+    padding: 8px 6px;
+    margin: -8px -6px -8px -2px;
+  }
+
   .ant-layout-content.nb-content {
     padding-top: 0;
   }
