@@ -25,14 +25,14 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `pigeon` rebuilds byte-for-byte from the files below
-(verified 2026-09-30, provenance included, with the build time fixed by
+The bundle `north` rebuilds byte-for-byte from the files below
+(verified 2026-10-01, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/`, and the
 wiki dump extracted to `/tmp/fandom` and brought up to date by
 `fandom/patch-2026-09-29/merge.py` (see [Love Nikki Wiki](#love-nikki-wiki)):
 
 ```sh
-SOURCE_DATE_EPOCH=1790726400 go run ./cmd/bundle \
+SOURCE_DATE_EPOCH=1790812800 go run ./cmd/bundle \
   -fandom  /tmp/fandom/lovenikki673_pages_current-2026-09-29.xml \
   -stages       .ai/research/sources/community/seal100x/levels.js \
   -stage-values .ai/research/sources/community/aojiao/levels.js \
@@ -45,7 +45,7 @@ SOURCE_DATE_EPOCH=1790726400 go run ./cmd/bundle \
   -calc-grades -calc-recipes \
   -calc-suits .ai/research/sources/nikkicalc/suits-v0.15.json \
   -out     web/public/data \
-  -version pigeon
+  -version north
 ```
 
 A version directory is served as immutable once deployed. Versions are named
@@ -54,6 +54,16 @@ lists them: `apple`, `lilith`, `cloud`, `pigeon`, `north`, `wasteland`,
 `ruin`; after `ruin` the list starts again with a number (`apple-2`,
 `lilith-2`, …). `SOURCE_DATE_EPOCH` is the build day's midnight UTC. Versions
 built before `apple` are named after their build day (`2026-09-29b`).
+
+`north` changes `items.json` and `acquire.json` from `pigeon`, and only in
+how item names are spelled; every grade, stat, score and stage is the same.
+Where an item's name is word for word the one Nikki Calc gives, it takes
+Nikki Calc's separators, which are the game's: a "·" between a name and its
+colour, rarity or part ("Bun Girl·Clothes", "Rose Maiden·Gold"), a hyphen
+inside a word ("Double-Ponytail Girl"), with the spaces the game puts around
+them. 3,712 names change: 3,711 gain a "·" where the wiki writes a hyphen, and
+one keeps the game's space after its hyphen. The lines in `acquire.json` that
+name those items change with them.
 
 `pigeon` changes `items.json`, `items.bin` and `acquire.json` from `cloud`;
 its `stages.json`, `tags.json` and `positions.json` are the same byte for
