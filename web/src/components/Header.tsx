@@ -29,7 +29,7 @@ export default function Header({ onForget }: { onForget: () => Promise<void> }) 
           onConfirm={onForget}
         >
           <Button type={phone ? 'text' : 'default'} className="nb-forget">
-            {phone ? 'Forget' : 'Forget my wardrobe'}
+            {phone ? 'Forget wardrobe' : 'Forget my wardrobe'}
           </Button>
         </Popconfirm>
       )}

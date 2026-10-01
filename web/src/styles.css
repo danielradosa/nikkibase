@@ -1563,6 +1563,30 @@ h5 {
     font-size: 18px;
   }
 
+  .ant-layout-header.nb-header .ant-btn {
+    height: 32px;
+    padding-inline: 10px;
+  }
+
+  .ant-layout-header.nb-header .ant-btn.nb-notify {
+    width: 32px;
+    padding-inline: 0;
+  }
+
+  .ant-layout-header.nb-header .ant-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px -4px;
+  }
+
+  .ant-layout-header.nb-header .ant-btn:last-child {
+    margin-inline-end: -10px;
+  }
+
+  .ant-layout-header.nb-header .ant-btn.nb-notify:last-child {
+    margin-inline-end: -8px;
+  }
+
   .ant-layout-content.nb-content {
     padding-top: 0;
   }
