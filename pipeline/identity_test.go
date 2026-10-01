@@ -275,7 +275,7 @@ func TestDisplayNamesReplaceTheNamesTheSourcesGive(t *testing.T) {
 		{"id": 20001, "name": "Test Gown", "was": "Tset Gown", "basis": "b"},
 		{"id": 180001, "name": "Far Away Test · Winter", "was": "Far Test-Winter", "basis": "b"},
 		{"id": 30003, "name": "Named Only (Coat)", "was": "Named Only", "basis": "b"},
-		{"id": 30004, "name": "Named · Only", "was": "Named-Alone", "basis": "b"}]}`)
+		{"id": 30004, "name": "Named · Only", "was": "Named·Alone", "basis": "b"}]}`)
 	entries := []Entry{
 		{Item: scoring.Item{ID: 20001, Slot: scoring.Dress}, Name: "Tset Gown"},
 		{Item: scoring.Item{ID: 20002, Slot: scoring.Dress}, Name: "Tset Gown"},

@@ -229,7 +229,7 @@ func ReadIDCorrections(b []byte) (*IDCorrections, error) {
 func (c *IDCorrections) DisplayNames(entries []Entry, names ItemNames) (map[int]string, error) {
 	given := make(map[int]string, len(entries)+len(names.Calc))
 	for id, name := range names.Calc {
-		given[id] = gameSpelling(name)
+		given[id] = inGameSpelling(name, name)
 	}
 	for _, e := range entries {
 		given[e.Item.ID] = plainName(e, names)

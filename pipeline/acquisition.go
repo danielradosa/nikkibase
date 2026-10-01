@@ -39,6 +39,7 @@ type Cost struct {
 type AcquisitionCatalogue struct {
 	Names             map[int]string
 	Shown             map[int]string
+	Calc              map[int]string
 	Display           map[int]string
 	Suits             map[int]string
 	Stages            map[string]bool
@@ -48,7 +49,7 @@ type AcquisitionCatalogue struct {
 
 func (c AcquisitionCatalogue) shown(id int) string {
 	if name, ok := c.Shown[id]; ok {
-		return gameSpelling(name)
+		return inGameSpelling(name, c.Calc[id])
 	}
 	if name, ok := c.Display[id]; ok {
 		return name
@@ -61,6 +62,7 @@ func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) A
 	cat := AcquisitionCatalogue{
 		Names:   make(map[int]string, len(entries)+len(extra)),
 		Shown:   names.Shown,
+		Calc:    names.Calc,
 		Display: make(map[int]string, len(entries)+len(extra)),
 		Suits:   make(map[int]string, len(entries)),
 		Stages:  make(map[string]bool, len(stages)),
@@ -75,7 +77,7 @@ func NewAcquisitionCatalogue(entries []Entry, names ItemNames, stages []Stage) A
 	for id, name := range extra {
 		if _, ok := cat.Names[id]; !ok {
 			cat.Names[id] = calcName(name)
-			cat.Display[id] = gameSpelling(name)
+			cat.Display[id] = inGameSpelling(name, name)
 		}
 	}
 	for _, s := range stages {

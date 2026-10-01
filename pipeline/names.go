@@ -28,12 +28,52 @@ var (
 	trailingBracket = regexp.MustCompile(`^(.*\S)\s+(\([^()]+\))$`)
 	oneSidedHyphen  = regexp.MustCompile(`(\S) -(\S)|(\S)- (\S)`)
 	suitQualifier   = regexp.MustCompile(`\s*\([^()]*\bSuit\)$`)
+	nameSeparator   = regexp.MustCompile(`\s*[·-]\s*`)
 )
 
 func gameSpelling(name string) string {
 	s := strings.TrimSpace(runsOfSpace.ReplaceAllString(name, " "))
 	s = middot.ReplaceAllString(s, "-")
 	return oneSidedHyphen.ReplaceAllString(s, "$1$3-$2$4")
+}
+
+func inGameSpelling(name, global string) string {
+	return withGameSeparators(gameSpelling(name), global)
+}
+
+func withGameSeparators(name, global string) string {
+	global = strings.TrimSpace(runsOfSpace.ReplaceAllString(global, " "))
+	if global == "" || hasHan(global) {
+		return name
+	}
+	parts, _ := splitAtSeparators(name)
+	globalParts, globalSeps := splitAtSeparators(global)
+	if len(parts) == 1 || len(parts) != len(globalParts) {
+		return name
+	}
+	for k := range parts {
+		if !strings.EqualFold(parts[k], globalParts[k]) {
+			return name
+		}
+	}
+	var b strings.Builder
+	for k, part := range parts {
+		if k > 0 {
+			b.WriteString(globalSeps[k-1])
+		}
+		b.WriteString(part)
+	}
+	return b.String()
+}
+
+func splitAtSeparators(s string) (parts, seps []string) {
+	at := 0
+	for _, m := range nameSeparator.FindAllStringIndex(s, -1) {
+		parts = append(parts, s[at:m[0]])
+		seps = append(seps, s[m[0]:m[1]])
+		at = m[1]
+	}
+	return append(parts, s[at:]), seps
 }
 
 func shownSuit(suit string) string {

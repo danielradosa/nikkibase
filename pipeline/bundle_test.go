@@ -22,7 +22,7 @@ func writtenItems(t *testing.T, raw []byte) map[int][]any {
 	return out
 }
 
-func TestItemNamesShowTheSourcesSpellingAndMatchByTidiedSpacing(t *testing.T) {
+func TestItemNamesShowTheGamesSeparatorsAndMatchByTidiedSpacing(t *testing.T) {
 	entries := []Entry{
 		{Item: scoring.Item{ID: 13298, Slot: scoring.Hair}, Name: "Honey-Soaked Song"},
 		{Item: scoring.Item{ID: 12457, Slot: scoring.Hair}, Name: "Fair Lady-Gorgeous"},
@@ -35,9 +35,9 @@ func TestItemNamesShowTheSourcesSpellingAndMatchByTidiedSpacing(t *testing.T) {
 	calc := map[int]string{13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress·Blue",
 		20003: "Day-Night Concerto", 20004: "Fox Talk·Me", 30006: "Test Dance·Purple", 30007: "Salt&Pepper-Joy"}
 	shown := map[int]string{
-		13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress-Blue",
-		20002: "Day-Night Concerto", 20003: "Day-Night Concerto", 20004: "Fox Talk-Me", 20005: "Moonlight-White",
-		30006: "Test Dance-Purple", 30007: "Salt&Pepper-Joy",
+		13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress·Blue",
+		20002: "Day-Night Concerto", 20003: "Day-Night Concerto", 20004: "Fox Talk·Me", 20005: "Moonlight-White",
+		30006: "Test Dance·Purple", 30007: "Salt&Pepper-Joy",
 	}
 	matched := map[int]string{
 		13298: "Honey-Soaked Song", 12457: "Fair Lady-Gorgeous", 20001: "Doll Dress - Blue",

@@ -72,9 +72,9 @@ func WriteItems(entries []Entry, names ItemNames, rarity map[int]int, suits map[
 		if seen[id] {
 			continue
 		}
-		name := gameSpelling(names.Calc[id])
+		name := inGameSpelling(names.Calc[id], names.Calc[id])
 		if shown, ok := names.Shown[id]; ok {
-			name = gameSpelling(shown)
+			name = inGameSpelling(shown, names.Calc[id])
 		}
 		rows = append(rows, []any{id, name, SlotOfID(id), 0, 0, 0, 0, 0, "", "", "", "", "", rarity[id], suits[id]})
 	}
@@ -188,7 +188,7 @@ func WriteTags() []byte {
 
 func displayName(e Entry, names ItemNames) string {
 	if name, ok := names.Shown[e.Item.ID]; ok {
-		return gameSpelling(name)
+		return inGameSpelling(name, names.Calc[e.Item.ID])
 	}
 	return plainName(e, names)
 }
@@ -200,7 +200,8 @@ func plainName(e Entry, names ItemNames) string {
 			name = english
 		}
 	}
-	return gameName(gameSpelling(name), names.Calc[e.Item.ID])
+	global := names.Calc[e.Item.ID]
+	return withGameSeparators(gameName(gameSpelling(name), global), global)
 }
 
 func sourceName(e Entry, names ItemNames) string {

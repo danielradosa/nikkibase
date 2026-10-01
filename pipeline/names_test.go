@@ -200,6 +200,29 @@ func TestGameSpellingKeepsTheWikisSeparators(t *testing.T) {
 	}
 }
 
+func TestShownNamesTakeNikkiCalcsSeparatorsWhenEveryWordMatches(t *testing.T) {
+	for _, c := range []struct{ name, global, want string }{
+		{"Bun Girl-Clothes", "Bun Girl·Clothes", "Bun Girl·Clothes"},
+		{"Red Satin - Epic", "Red Satin·Epic", "Red Satin·Epic"},
+		{"Pure Sleep-talking-Gorgeous", "Pure Sleep-talking · Gorgeous", "Pure Sleep-talking · Gorgeous"},
+		{"Cloud Song-Mist", "Cloud Song ·Mist", "Cloud Song ·Mist"},
+		{"Candy Girl - Pink", "Candy Girl-Pink", "Candy Girl-Pink"},
+		{"Double-Ponytail Girl", "Double-Ponytail Girl", "Double-Ponytail Girl"},
+		{"the Moon-Rising", "The Moon·Rising", "the Moon·Rising"},
+		{"Colorful Illusion-Blue", "Colorful Illusions·Blue", "Colorful Illusion-Blue"},
+		{"Sunset Glow", "Sunset·Glow", "Sunset Glow"},
+		{"Lake-Blue", "湖·蓝", "Lake-Blue"},
+		{"Lake-Blue", "", "Lake-Blue"},
+	} {
+		if got := withGameSeparators(c.name, c.global); got != c.want {
+			t.Errorf("withGameSeparators(%q, %q) = %q, want %q", c.name, c.global, got, c.want)
+		}
+	}
+	if got := inGameSpelling("Song of Clouds  ·  Mist", "Song of Clouds  ·  Mist"); got != "Song of Clouds · Mist" {
+		t.Errorf("a Nikki Calc-only name shows as %q, want its own separator with runs of spaces collapsed", got)
+	}
+}
+
 func TestShownSuitDropsTheWikisSuitQualifier(t *testing.T) {
 	for _, c := range []struct{ in, want string }{
 		{"Star Shadow (Hidden Suit)", "Star Shadow"},
