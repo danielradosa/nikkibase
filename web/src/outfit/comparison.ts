@@ -113,8 +113,17 @@ export function bestNote(row: Pick<ComparisonRow, 'best' | 'same'>): string {
   return `Best: ${row.best ?? '—'}`
 }
 
-export function rowOpens(row: Pick<ComparisonRow, 'alts'>): boolean {
-  return row.alts.length > 0
+export function rowOpens(row: Pick<ComparisonRow, 'same' | 'alts'>, phone: boolean): boolean {
+  return row.alts.length > 0 || (phone && !row.same)
+}
+
+export type CopyLine = { label: string; name: string }
+
+export function copyLines(row: Pick<ComparisonRow, 'mine' | 'best' | 'same'>): CopyLine[] {
+  const lines: CopyLine[] = []
+  if (row.mine) lines.push({ label: 'Your best', name: row.mine })
+  if (row.best && !row.same) lines.push({ label: 'Best possible', name: row.best })
+  return lines
 }
 
 export function expandLabel(slot: string): string {

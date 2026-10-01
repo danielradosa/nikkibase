@@ -1,21 +1,34 @@
 import { CheckOutlined } from '@ant-design/icons'
 import { Space, Table, Tag, Typography } from 'antd'
-import { alternativesLabel, bestNote, expandLabel, rowOpens, type ComparisonRow } from './comparison'
+import { alternativesLabel, bestNote, copyLines, expandLabel, rowOpens, type ComparisonRow } from './comparison'
 import type { Alternative } from '../engine/engine'
 import Skel from '../components/Skel'
 import { usePhone } from '../hooks/usePhone'
 
 type Props = { rows: ComparisonRow[]; names: ReadonlyMap<number, string>; naming: boolean }
 
-type DetailsProps = { row: ComparisonRow; names: ReadonlyMap<number, string>; naming: boolean }
+type DetailsProps = { row: ComparisonRow; phone: boolean; names: ReadonlyMap<number, string>; naming: boolean }
 
 const NAME_WIDTHS = ['70%', '55%', '64%', '75%', '60%']
 
 const nameSkel = (i: number) => <Skel width={NAME_WIDTHS[i % NAME_WIDTHS.length]} />
 
-function Details({ row, names, naming }: DetailsProps) {
+function Details({ row, phone, names, naming }: DetailsProps) {
   return (
     <Space direction="vertical" size={4} className="nb-alts">
+      {phone &&
+        copyLines(row).map((line, i) => (
+          <div key={line.label} className="nb-alt">
+            <Typography.Text type="secondary">{line.label}:</Typography.Text>
+            {naming ? (
+              nameSkel(i)
+            ) : (
+              <Typography.Text className="nb-alt-name" copyable={{ text: line.name }}>
+                {line.name}
+              </Typography.Text>
+            )}
+          </div>
+        ))}
       {row.alts.length > 0 && (
         <Typography.Text type="secondary">
           Other <Typography.Text strong>{row.slot}</Typography.Text> you own, and the points you&apos;d lose:
@@ -49,7 +62,7 @@ export default function ComparisonTable({ rows, names, naming }: Props) {
       pagination={false}
       aria-busy={naming || undefined}
       dataSource={rows}
-      rowClassName={(row: ComparisonRow) => (rowOpens(row) ? 'nb-row-tap' : '')}
+      rowClassName={(row: ComparisonRow) => (rowOpens(row, phone) ? 'nb-row-tap' : '')}
       columns={[
         { title: 'Slot', dataIndex: 'slot', width: phone ? 96 : 150 },
         {
@@ -65,11 +78,7 @@ export default function ComparisonTable({ rows, names, naming }: Props) {
                 <Typography.Text type="secondary">{row.unworn}</Typography.Text>
               )}
               {phone && (
-                <Typography.Text
-                  type={row.same ? 'success' : 'secondary'}
-                  className="nb-best-line"
-                  copyable={!row.same && row.best && !naming ? { text: row.best } : false}
-                >
+                <Typography.Text type={row.same ? 'success' : 'secondary'} className="nb-best-line">
                   {row.same ? (
                     <>
                       <CheckOutlined /> {bestNote(row)}
@@ -115,7 +124,7 @@ export default function ComparisonTable({ rows, names, naming }: Props) {
       ]}
       expandable={{
         expandRowByClick: true,
-        rowExpandable: (row: ComparisonRow) => rowOpens(row),
+        rowExpandable: (row: ComparisonRow) => rowOpens(row, phone),
         expandIcon: ({ prefixCls, expanded, expandable, onExpand, record }) => (
           <button
             type="button"
@@ -130,7 +139,7 @@ export default function ComparisonTable({ rows, names, naming }: Props) {
             }}
           />
         ),
-        expandedRowRender: (row: ComparisonRow) => <Details row={row} names={names} naming={naming} />,
+        expandedRowRender: (row: ComparisonRow) => <Details row={row} phone={phone} names={names} naming={naming} />,
       }}
     />
   )

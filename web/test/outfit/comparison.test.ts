@@ -10,6 +10,7 @@ import {
   closeCall,
   closeCallText,
   comparisonRows,
+  copyLines,
   expandLabel,
   outfitText,
   resultView,
@@ -209,10 +210,24 @@ test('on phones each row names the best possible item under yours, or says yours
   assert.equal(bestNote({ best: null, same: false }), 'Best: —')
 })
 
-test('a row opens only when it has alternatives', () => {
+test('a row opens when it has alternatives, and on phones also when it differs from the best possible', () => {
   const alts = [{ id: 11, delta: -40 }]
-  assert.equal(rowOpens({ alts: [] }), false)
-  assert.equal(rowOpens({ alts }), true)
+  assert.equal(rowOpens({ same: true, alts: [] }, false), false)
+  assert.equal(rowOpens({ same: false, alts: [] }, false), false)
+  assert.equal(rowOpens({ same: true, alts }, false), true)
+  assert.equal(rowOpens({ same: true, alts: [] }, true), false)
+  assert.equal(rowOpens({ same: false, alts: [] }, true), true)
+  assert.equal(rowOpens({ same: true, alts }, true), true)
+})
+
+test('an opened row on a phone offers each name in it to copy', () => {
+  assert.deepEqual(copyLines({ mine: 'Rose Bun', best: 'Star Crown', same: false }), [
+    { label: 'Your best', name: 'Rose Bun' },
+    { label: 'Best possible', name: 'Star Crown' },
+  ])
+  assert.deepEqual(copyLines({ mine: 'Rose Bun', best: 'Rose Bun', same: true }), [{ label: 'Your best', name: 'Rose Bun' }])
+  assert.deepEqual(copyLines({ mine: null, best: 'Silk Gown', same: false }), [{ label: 'Best possible', name: 'Silk Gown' }])
+  assert.deepEqual(copyLines({ mine: 'Lace Top', best: null, same: false }), [{ label: 'Your best', name: 'Lace Top' }])
 })
 
 test('the button that opens a row says which slot it opens', () => {
