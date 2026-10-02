@@ -119,7 +119,7 @@ func fandomEntry(page wikiPage, stats *FandomStats) (Entry, string) {
 	if grades == nil {
 		return Entry{}, "no grades"
 	}
-	parts := strings.Split(grades[1], "|")
+	parts := numberedArgs(grades[1])
 	if len(parts) < 10 {
 		return Entry{}, "short attributes"
 	}
@@ -148,6 +148,30 @@ func fandomEntry(page wikiPage, stats *FandomStats) (Entry, string) {
 		it.Tags = append(it.Tags, id)
 	}
 	return Entry{Item: it, Name: page.Title, Position: position, Grades: letters}, ""
+}
+
+func numberedArgs(body string) []string {
+	args := map[int]string{}
+	next := 1
+	for _, part := range strings.Split(body, "|") {
+		name, value, named := strings.Cut(part, "=")
+		if !named {
+			args[next] = part
+			next++
+			continue
+		}
+		if n, err := strconv.Atoi(strings.TrimSpace(name)); err == nil && n > 0 {
+			args[n] = value
+		}
+	}
+	var out []string
+	for i := 1; ; i++ {
+		v, ok := args[i]
+		if !ok {
+			return out
+		}
+		out = append(out, v)
+	}
 }
 
 func fandomSlot(kind string) (scoring.Slot, string, bool) {

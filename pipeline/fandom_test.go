@@ -177,3 +177,29 @@ func TestParseFandomDumpKeepsAnEmptyInfoboxFieldOnItsOwnLine(t *testing.T) {
 		t.Fatalf("got %d entries %+v, want 90630 (rejected = %d)", len(entries), entries, stats.UnknownAny)
 	}
 }
+
+func TestParseFandomDumpReadsNumberedAttributes(t *testing.T) {
+	want := [5]int8{scoring.Gorgeous, scoring.Lively, scoring.Cute, scoring.Pure, scoring.Warm}
+	for _, tc := range []struct{ name, attributes string }{
+		{"in order", "{{Attributes|1=Gorgeous|2=A|3=Lively|4=SS|5=Cute|6=A|7=Pure|8=SS|9=Warm|10=A}}"},
+		{"out of order", "{{Attributes|10=A|9=Warm|8=SS|7=Pure|6=A|5=Cute|4=SS|3=Lively|2=A|1=Gorgeous}}"},
+		{"spaces around the equals sign", "{{Attributes\n| 1 = Gorgeous | 2 = A\n| 3 = Lively | 4 = SS\n| 5 = Cute | 6 = A\n| 7 = Pure | 8 = SS\n| 9 = Warm | 10 = A\n}}"},
+		{"mixed with plain values", "{{Attributes|Gorgeous|A|Lively|SS|Cute|A|Pure|SS|Warm|10=A}}"},
+		{"a named note", "{{Attributes|note=from the event|Gorgeous|A|Lively|SS|Cute|A|Pure|SS|Warm|A}}"},
+	} {
+		page := "<mediawiki><page><title>Hand-planted Fragrance</title><ns>0</ns><revision><text>{{Clothing\n|type = Hair\n|wardrobe nr = 1720\n}}\n" +
+			tc.attributes + "</text></revision></page></mediawiki>"
+		entries, stats, err := ParseFandomDump(strings.NewReader(page), map[int]bool{11720: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(entries) != 1 {
+			t.Errorf("%s: got %d entries, want 1 (rejected = %d)", tc.name, len(entries), stats.UnknownAny)
+			continue
+		}
+		e := entries[0]
+		if e.Item.ID != 11720 || e.Item.Attrs != want || e.Grades != [5]string{"A", "SS", "A", "SS", "A"} {
+			t.Errorf("%s: got %d %v %v, want 11720 %v [A SS A SS A]", tc.name, e.Item.ID, e.Item.Attrs, e.Grades, want)
+		}
+	}
+}
