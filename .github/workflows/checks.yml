@@ -19,6 +19,10 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l $(git ls-files '*.go'))
+          if [ -n "$unformatted" ]; then echo "$unformatted"; exit 1; fi
       - run: go vet ./...
       - run: go test ./...
 
