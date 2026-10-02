@@ -333,7 +333,15 @@ func count(n int, one, many string) string {
 	if n == 1 {
 		return "1 " + one
 	}
-	return strconv.Itoa(n) + " " + many
+	return thousands(n) + " " + many
+}
+
+func thousands(n int) string {
+	s := strconv.Itoa(n)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "," + s[i:]
+	}
+	return s
 }
 
 func and(list []string) string {

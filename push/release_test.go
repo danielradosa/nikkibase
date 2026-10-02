@@ -264,6 +264,9 @@ func TestMessageWording(t *testing.T) {
 		{Changes{NewStages: []string{"Story 3-4", "Story 3-5", "Arena Beach Party"}}, "New stages: Story 3-4, Story 3-5 and Arena Beach Party."},
 		{Changes{NewStages: []string{"a", "b", "c", "d"}}, "4 new stages."},
 		{Changes{FixedItems: 1, FixedStages: 2}, "Fixes to 1 item and 2 stages."},
+		{Changes{FixedItems: 7473}, "Fixes to 7,473 items."},
+		{Changes{FixedItems: 1234567, FixedStages: 999}, "Fixes to 1,234,567 items and 999 stages."},
+		{Changes{NewItems: make([]string, 1000)}, "1,000 new items."},
 		{Changes{FixedOther: true}, "Fixes to the data."},
 	}
 	for _, tc := range cases {
