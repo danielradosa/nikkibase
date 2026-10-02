@@ -5,6 +5,7 @@ import {
   CODE_INCOMPLETE,
   CODE_TEXT,
   BACKUP_EMPTY,
+  FORGET_SAVE,
   IMPORT_CARDS,
   KEEP_CURRENT,
   ENGINE_DOWN,
@@ -150,6 +151,7 @@ test('each import card asks for its file in words that fit the device', () => {
   )
   for (const card of IMPORT_CARDS) assert.doesNotMatch(`${card.title} ${card.file} ${card.hint}`, /info/i)
   assert.equal(KEEP_CURRENT, 'Keep this wardrobe')
+  assert.equal(FORGET_SAVE, 'Save NikkiBase file first')
   assert.equal(TAGLINE, 'your wardrobe stays on this device')
 })
 

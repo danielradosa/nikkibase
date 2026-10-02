@@ -113,6 +113,8 @@ export const IMPORT_CARDS: readonly ImportCard[] = [
 
 export const KEEP_CURRENT = 'Keep this wardrobe'
 
+export const FORGET_SAVE = 'Save NikkiBase file first'
+
 const SOURCE_LABEL: Readonly<Record<WardrobeSource, string>> = {
   clothes_date: 'from clothes_date',
   sel: 'from Nikki Calc',

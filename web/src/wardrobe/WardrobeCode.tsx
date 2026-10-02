@@ -1,24 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Button, Input, Typography } from 'antd'
 import { useStore } from '../store'
-import { SITE_HOST } from '../outfit/skills'
-import { fileName, selectionsFile, selectionsFileName, wardrobeCode, wardrobeFile } from './wardrobeFile'
+import { download, saveWardrobeFile } from './download'
+import { selectionsFile, selectionsFileName, wardrobeCode } from './wardrobeFile'
 import { CODE_TEXT } from './wardrobeText'
 
 const COPIED_FOR = 2000
-const REVOKE_AFTER = 40000
-
-function download(text: string, name: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }))
-  const link = document.createElement('a')
-  link.href = url
-  link.download = name
-  link.hidden = true
-  document.body.append(link)
-  link.click()
-  link.remove()
-  setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER)
-}
 
 export function WardrobeExports() {
   const owned = useStore((s) => s.owned)
@@ -31,11 +18,6 @@ export function WardrobeExports() {
     const t = setTimeout(() => setCopies(0), COPIED_FOR)
     return () => clearTimeout(t)
   }, [copies])
-
-  const save = () => {
-    const now = new Date()
-    download(wardrobeFile(owned, now, SITE_HOST), fileName(now))
-  }
 
   const saveForCalc = () => download(selectionsFile(owned), selectionsFileName(new Date()))
 
@@ -63,7 +45,7 @@ export function WardrobeExports() {
   return (
     <>
       <div className="nb-code-row">
-        <button type="button" className="nb-why nb-code-link" onClick={save}>
+        <button type="button" className="nb-why nb-code-link" onClick={() => saveWardrobeFile(owned)}>
           {CODE_TEXT.save}
         </button>
         <button type="button" className="nb-why nb-code-link" onClick={copy}>

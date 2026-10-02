@@ -1,7 +1,8 @@
 import { Button, Layout, Popconfirm, Typography } from 'antd'
 import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
-import { TAGLINE } from '../wardrobe/wardrobeText'
+import { FORGET_SAVE, TAGLINE } from '../wardrobe/wardrobeText'
+import { saveWardrobeFile } from '../wardrobe/download'
 import NotifyButton from '../notify/NotifyButton'
 
 export default function Header({ onForget }: { onForget: () => Promise<void> }) {
@@ -21,7 +22,14 @@ export default function Header({ onForget }: { onForget: () => Promise<void> }) 
           placement="bottomRight"
           classNames={{ root: 'nb-forget-confirm' }}
           title="Remove your wardrobe from this device?"
-          description={source === 'manual' ? 'Your ticked items will be lost.' : undefined}
+          description={
+            <>
+              {source === 'manual' && <div>Your ticked items will be lost.</div>}
+              <button type="button" className="nb-why nb-code-link" onClick={() => saveWardrobeFile(owned)}>
+                {FORGET_SAVE}
+              </button>
+            </>
+          }
           okText="Remove"
           okButtonProps={{ danger: true, size: 'middle' }}
           cancelText="Keep"
