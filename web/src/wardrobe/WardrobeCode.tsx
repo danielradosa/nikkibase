@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, Input, Typography } from 'antd'
 import { useStore } from '../store'
 import { SITE_HOST } from '../outfit/skills'
-import { fileName, wardrobeCode, wardrobeFile } from './wardrobeFile'
+import { fileName, selectionsFile, selectionsFileName, wardrobeCode, wardrobeFile } from './wardrobeFile'
 import { CODE_TEXT } from './wardrobeText'
 
 const COPIED_FOR = 2000
@@ -20,16 +20,11 @@ function download(text: string, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), REVOKE_AFTER)
 }
 
-export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Promise<boolean> }) {
+export function WardrobeExports() {
   const owned = useStore((s) => s.owned)
-  const importing = useStore((s) => s.importing)
-  const loaded = owned.length > 0
   const [copies, setCopies] = useState(0)
   const copied = copies > 0
   const [byHand, setByHand] = useState<{ ids: number[]; code: string } | null>(null)
-  const [paste, setPaste] = useState<{ owned: number[]; text: string } | null>(null)
-  const pasting = paste?.owned === owned
-  const pasted = pasting ? paste.text : ''
 
   useEffect(() => {
     if (!copies) return
@@ -41,6 +36,8 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
     const now = new Date()
     download(wardrobeFile(owned, now, SITE_HOST), fileName(now))
   }
+
+  const saveForCalc = () => download(selectionsFile(owned), selectionsFileName(new Date()))
 
   const copy = () => {
     const ids = owned
@@ -63,32 +60,24 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
     )
   }
 
-  const load = async () => {
-    if (await onLoad(pasted)) setPaste(null)
-  }
-
   return (
     <>
-      <div className={`nb-code-row${loaded ? '' : ' is-empty'}`}>
-        {loaded && (
-          <>
-            <button type="button" className="nb-why nb-code-link" onClick={save}>
-              {CODE_TEXT.save}
-            </button>
-            <button type="button" className="nb-why nb-code-link" onClick={copy}>
-              <span className="nb-code-swap" aria-live="polite">
-                <span className={copied ? 'is-off' : undefined}>{CODE_TEXT.copy}</span>
-                <span className={copied ? undefined : 'is-off'}>{CODE_TEXT.copied}</span>
-              </span>
-            </button>
-          </>
-        )}
-        <button type="button" className="nb-why nb-code-link" aria-expanded={pasting} onClick={() => setPaste(pasting ? null : { owned, text: '' })}>
-          {CODE_TEXT.paste}
+      <div className="nb-code-row">
+        <button type="button" className="nb-why nb-code-link" onClick={save}>
+          {CODE_TEXT.save}
+        </button>
+        <button type="button" className="nb-why nb-code-link" onClick={copy}>
+          <span className="nb-code-swap" aria-live="polite">
+            <span className={copied ? 'is-off' : undefined}>{CODE_TEXT.copy}</span>
+            <span className={copied ? undefined : 'is-off'}>{CODE_TEXT.copied}</span>
+          </span>
+        </button>
+        <button type="button" className="nb-why nb-code-link" onClick={saveForCalc}>
+          {CODE_TEXT.calc}
         </button>
       </div>
 
-      {loaded && byHand?.ids === owned && (
+      {byHand?.ids === owned && (
         <div className="nb-code-box">
           <Typography.Text type="secondary" className="nb-code-note">
             {CODE_TEXT.blocked}
@@ -104,6 +93,28 @@ export default function WardrobeCode({ onLoad }: { onLoad: (text: string) => Pro
           />
         </div>
       )}
+    </>
+  )
+}
+
+export function PasteCode({ onLoad }: { onLoad: (text: string) => Promise<boolean> }) {
+  const owned = useStore((s) => s.owned)
+  const importing = useStore((s) => s.importing)
+  const [paste, setPaste] = useState<{ owned: number[]; text: string } | null>(null)
+  const pasting = paste?.owned === owned
+  const pasted = pasting ? paste.text : ''
+
+  const load = async () => {
+    if (await onLoad(pasted)) setPaste(null)
+  }
+
+  return (
+    <>
+      <div className="nb-code-row">
+        <button type="button" className="nb-why nb-code-link" aria-expanded={pasting} onClick={() => setPaste(pasting ? null : { owned, text: '' })}>
+          {CODE_TEXT.paste}
+        </button>
+      </div>
 
       {pasting && (
         <div className="nb-code-box">

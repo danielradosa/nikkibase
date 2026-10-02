@@ -35,16 +35,16 @@ export function useBundle(): Bundle {
         (stats) => useStore.getState().owned === ids && set({ decoded: { ...stats, unresolved: 0 } }),
         report,
       )
-    const resave = (ids: number[], source: WardrobeSource) =>
+    const resave = (ids: number[], source: WardrobeSource, savedAt: number) =>
       items.then(
         async (list) => {
           if (useStore.getState().owned !== ids) return
           const kept = updatedWardrobe(ids, new Set(list.map((it) => it.id)))
           if (kept.notice) {
-            set({ owned: kept.ids, source: kept.ids.length ? source : null, decoded: null, notice: kept.notice })
+            set({ owned: kept.ids, source: kept.ids.length ? source : null, savedAt: kept.ids.length ? savedAt : null, decoded: null, notice: kept.notice })
             send(kept.ids)
           }
-          noteSave(await saveWardrobe({ version, ids: kept.ids, source, savedAt: Date.now() }))
+          noteSave(await saveWardrobe({ version, ids: kept.ids, source, savedAt }))
         },
         () => {},
       )
@@ -67,8 +67,8 @@ export function useBundle(): Bundle {
         const plan = restorePlan(await loadWardrobe(version))
         if (plan.action === 'load') {
           send(plan.ids)
-          set({ owned: plan.ids, source: plan.source, decoded: null })
-          if (plan.resave) resave(plan.ids, plan.source)
+          set({ owned: plan.ids, source: plan.source, savedAt: plan.savedAt, decoded: null })
+          if (plan.resave) resave(plan.ids, plan.source, plan.savedAt ?? Date.now())
         } else {
           engine.loadKeystream().catch(() => {})
         }

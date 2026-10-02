@@ -1,6 +1,18 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { MAX_ID, MAX_IDS, fileName, readWardrobeCode, wardrobeCode, wardrobeFile, wardrobeKind } from '../../src/wardrobe/wardrobeFile.ts'
+import {
+  MAX_ID,
+  MAX_IDS,
+  backupCodeId,
+  fileName,
+  readBackup,
+  readWardrobeCode,
+  selectionsFile,
+  selectionsFileName,
+  wardrobeCode,
+  wardrobeFile,
+  wardrobeKind,
+} from '../../src/wardrobe/wardrobeFile.ts'
 
 function varints(values: number[]): number[] {
   const bytes: number[] = []
@@ -217,6 +229,44 @@ test('a code is loaded as a code, even inside other text or when it is broken', 
   }
   assert.deepEqual(wardrobeKind(code.slice(0, 6)), { kind: 'code', read: { ok: false, problem: 'incomplete' } })
   assert.deepEqual(wardrobeKind('NB1.x'), { kind: 'code', read: { ok: false, problem: 'invalid' } })
+})
+
+test('a wbak code names its item by slot letter and number', () => {
+  for (const [code, id] of [
+    ['H22', 10022], ['D1', 20001], ['C450', 30450], ['T450', 40450], ['B414', 50414], ['P12', 60012],
+    ['S7', 70007], ['A1001', 81001], ['M90', 90090], ['Z11937', 181937], ['X169', 880169], [' H22 ', 10022],
+  ] as const) {
+    assert.equal(backupCodeId(code), id, code)
+  }
+  for (const code of ['', 'H', '22', 'h22', 'Q22', 'H022', 'H1234567', 'H2.5', 'HH22', 'H-2']) {
+    assert.equal(backupCodeId(code), null, code)
+  }
+})
+
+test('a wbak file reads to sorted ids and counts the codes it cannot read', () => {
+  assert.deepEqual(readBackup('["H22","A1001","H22","Q9"]'), { ok: true, ids: [10022, 81001], unreadable: 1 })
+  assert.deepEqual(readBackup('[]'), { ok: true, ids: [], unreadable: 0 })
+  for (const text of ['[', '["H22",', '{"H22":1}', '["H22", 5]', 'null', '"H22"']) {
+    assert.deepEqual(readBackup(text), { ok: false }, text)
+  }
+})
+
+test('a wbak file is loaded as one', () => {
+  assert.deepEqual(wardrobeKind('  ["H22","S7"]\n'), { kind: 'wbak', read: { ok: true, ids: [10022, 70007], unreadable: 0 } })
+  assert.deepEqual(wardrobeKind('[oops'), { kind: 'wbak', read: { ok: false } })
+})
+
+test('a Nikki Calc selections file lists every item once, in its VER1 format', () => {
+  assert.equal(selectionsFile([30001, 10001, 880024, 10001]), '@SELVER1=0_10001,1_30001,2_880024')
+  assert.equal(selectionsFile([]), '@SELVER1=')
+  const many = selectionsFile(realIds(1500)).slice('@SELVER1='.length).split(',')
+  assert.equal(many.length, 1500)
+  for (const entry of many) assert.match(entry, /^\d{1,3}_[1-9]\d{4,5}$/)
+  assert.deepEqual(wardrobeKind(selectionsFile([10001])), { kind: 'sel' })
+})
+
+test('the Nikki Calc file name carries the local date', () => {
+  assert.equal(selectionsFileName(new Date(2026, 9, 2, 23, 59)), 'nikki-calc-selections-2026-10-02.txt')
 })
 
 test('a selections file is loaded as one, and anything else goes to the clothes_date reader', () => {

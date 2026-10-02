@@ -4,7 +4,9 @@ import {
   CODE_EMPTY,
   CODE_INCOMPLETE,
   CODE_TEXT,
-  DROP_HINT,
+  BACKUP_EMPTY,
+  IMPORT_CARDS,
+  KEEP_CURRENT,
   ENGINE_DOWN,
   ENGINE_FAILED,
   ENGINE_WAIT,
@@ -17,6 +19,7 @@ import {
   SCORES_WAIT,
   TAGLINE,
   afterSave,
+  backupLoad,
   codeLoad,
   droppedNotice,
   dropText,
@@ -26,12 +29,13 @@ import {
   loadedLabel,
   restorePlan,
   manyUnscored,
+  sourceLine,
   stripNotes,
   unscored,
   updatedWardrobe,
 } from '../../src/wardrobe/wardrobeText.ts'
 
-const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, or a selections file saved from Nikki Calc."
+const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, a selections file saved from Nikki Calc, or a wbak file."
 const EMPTY = 'That selections file has no items in it. Save it again from Nikki Calc.'
 const UNREADABLE = "NikkiBase couldn't read this clothes_date file. Try again, or tick what you own in the Items tab."
 
@@ -75,21 +79,28 @@ test('an error the list does not know is shown as it is', () => {
   assert.equal(importError('plain text'), 'plain text')
 })
 
-test('a wardrobe saved under older item data is kept and saved again, whatever its source', () => {
-  const entry = (source: string, version = '2026-09-26') => ({ version, ids: [10001, 20001], source, savedAt: 0 })
-  for (const source of ['sel', 'manual', 'clothes_date', 'nikkibase'] as const) {
+test('a wardrobe saved under older item data is kept and saved again, whatever its source, with its first save time', () => {
+  const at = Date.UTC(2026, 9, 2, 9)
+  const entry = (source: string, version = '2026-09-26') => ({ version, ids: [10001, 20001], source, savedAt: at })
+  for (const source of ['sel', 'manual', 'clothes_date', 'nikkibase', 'wbak'] as const) {
     assert.deepEqual(restorePlan({ status: 'stale', entry: entry(source) }), {
       action: 'load',
       ids: [10001, 20001],
       source,
+      savedAt: at,
       resave: true,
     })
     assert.deepEqual(restorePlan({ status: 'ok', entry: { ...entry(source, '2026-09-29'), source } }), {
       action: 'load',
       ids: [10001, 20001],
       source,
+      savedAt: at,
       resave: false,
     })
+  }
+  for (const savedAt of [0, -1, Number.NaN, undefined]) {
+    const plan = restorePlan({ status: 'ok', entry: { version: 'v', ids: [10001], source: 'sel', savedAt: savedAt as number } })
+    assert.equal(plan.action === 'load' && plan.savedAt, null, String(savedAt))
   }
 })
 
@@ -126,11 +137,53 @@ test('a full warning is kept only when more than 2% of the wardrobe has no stats
   assert.equal(manyUnscored({ items: 0, known: 0, unresolved: 0 }), false)
 })
 
-test('the drop zone asks for the file in words that fit the device', () => {
-  assert.equal(dropText(true), 'Tap to choose your clothes_date file')
-  assert.equal(dropText(false), 'Drop or choose your clothes_date file')
-  assert.equal(DROP_HINT, 'Or a Nikki Calc selections file, or a NikkiBase wardrobe file. It stays on your device.')
+test('each import card asks for its file in words that fit the device', () => {
+  assert.equal(dropText(true), 'Tap to choose')
+  assert.equal(dropText(false), 'Drop or choose')
+  assert.deepEqual(
+    IMPORT_CARDS.map((card) => [card.title, card.file]),
+    [
+      ['From the game', 'Your clothes_date file'],
+      ['From Nikki Calc', 'A selections file or a wbak file'],
+      ['From NikkiBase', 'Your NikkiBase wardrobe file'],
+    ],
+  )
+  for (const card of IMPORT_CARDS) assert.doesNotMatch(`${card.title} ${card.file} ${card.hint}`, /info/i)
+  assert.equal(KEEP_CURRENT, 'Keep this wardrobe')
   assert.equal(TAGLINE, 'your wardrobe stays on this device')
+})
+
+test('the loaded strip says where the wardrobe came from and when', () => {
+  const now = new Date(2026, 9, 2, 12)
+  assert.deepEqual(sourceLine('clothes_date', new Date(2026, 9, 2, 9).getTime(), now), ['from clothes_date', '2 Oct'])
+  assert.deepEqual(sourceLine('sel', null, now), ['from Nikki Calc'])
+  assert.deepEqual(sourceLine('wbak', new Date(2025, 11, 31).getTime(), now), ['from a wbak file', '31 Dec 2025'])
+  assert.deepEqual(sourceLine('nikkibase', null, now), ['from NikkiBase'])
+  assert.deepEqual(sourceLine('manual', null, now), ['ticked by hand'])
+  assert.deepEqual(sourceLine(null, null, now), [])
+})
+
+test('a wbak file loads the items NikkiBase knows and counts the rest', () => {
+  const known = new Set([10022, 81001])
+  assert.deepEqual(backupLoad({ ok: true, ids: [10022, 81001], unreadable: 0 }, known), { ok: true, ids: [10022, 81001], notice: null })
+  assert.deepEqual(backupLoad({ ok: true, ids: [10022, 99999], unreadable: 2 }, known), {
+    ok: true,
+    ids: [10022],
+    notice: "3 items in that wbak file aren't in NikkiBase's item data.",
+  })
+  assert.deepEqual(backupLoad({ ok: true, ids: [10022, 99999], unreadable: 0 }, known), {
+    ok: true,
+    ids: [10022],
+    notice: "1 item in that wbak file isn't in NikkiBase's item data.",
+  })
+  assert.deepEqual(backupLoad({ ok: true, ids: [10022, 99999], unreadable: 0 }, null), { ok: true, ids: [10022, 99999], notice: null })
+})
+
+test('a wbak file with nothing to load, or that is not one, leaves the wardrobe alone', () => {
+  assert.deepEqual(backupLoad({ ok: true, ids: [], unreadable: 4 }, null), { ok: false, error: BACKUP_EMPTY })
+  assert.deepEqual(backupLoad({ ok: true, ids: [99999], unreadable: 0 }, new Set([10001])), { ok: false, error: BACKUP_EMPTY })
+  assert.deepEqual(backupLoad({ ok: false }, null), { ok: false, error: NOT_A_FILE })
+  assert.equal(BACKUP_EMPTY, 'That wbak file has no items NikkiBase knows.')
 })
 
 test('the no-file hint points at the Items tab in two short lines', () => {
@@ -237,9 +290,10 @@ test('a wardrobe code with nothing to load leaves the wardrobe alone', () => {
   assert.deepEqual(codeLoad({ ok: true, ids: [99998, 99999] }, new Set([10001])), { ok: false, error: CODE_EMPTY })
 })
 
-test('the save, copy and paste controls use short plain words', () => {
+test('the save, copy, Nikki Calc and paste controls use short plain words', () => {
   assert.deepEqual(CODE_TEXT, {
-    save: 'Save a copy',
+    save: 'Save NikkiBase file',
+    calc: 'Save for Nikki Calc',
     copy: 'Copy code',
     copied: 'Copied',
     paste: 'Paste a code',

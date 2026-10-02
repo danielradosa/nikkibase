@@ -10,6 +10,7 @@ type State = {
   ready: boolean
   owned: number[]
   source: WardrobeSource | null
+  savedAt: number | null
   decoded: { items: number; unresolved: number; known: number } | null
   stage: string | null
   outfit: Outfit | null
@@ -78,6 +79,7 @@ export const useStore = create<State>((set) => ({
   ready: false,
   owned: [],
   source: null,
+  savedAt: null,
   decoded: null,
   stage: null,
   outfit: null,

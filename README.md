@@ -67,10 +67,14 @@ another calculator, not against the game.
 ## Importing a wardrobe
 
 - Your game's `clothes_date` file.
-- A [Nikki Calc](https://nikkicalc.com) selections file (`@SEL…`).
+- A [Nikki Calc](https://nikkicalc.com) selections file (`@SEL…`) or a `wbak`
+  file.
 - A NikkiBase wardrobe file or code. Save one from a loaded wardrobe to move it
   to another device.
 - Or tick the items you own by hand in the Items tab.
+
+A loaded wardrobe can also be saved as a Nikki Calc selections file, to upload
+on any of its stage pages.
 
 Every file and code is read in your browser and never sent anywhere.
 

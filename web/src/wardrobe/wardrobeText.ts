@@ -1,7 +1,7 @@
 import type { LoadResult, WardrobeSource } from './storage'
-import type { CodeRead } from './wardrobeFile'
+import type { BackupRead, CodeRead } from './wardrobeFile'
 
-const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, or a selections file saved from Nikki Calc."
+const NOT_A_FILE = "That isn't a wardrobe file. Pick the file called clothes_date, a selections file saved from Nikki Calc, or a wbak file."
 const EMPTY = 'That selections file has no items in it. Save it again from Nikki Calc.'
 const UNREADABLE = "NikkiBase couldn't read this clothes_date file. Try again, or tick what you own in the Items tab."
 
@@ -15,19 +15,23 @@ export function importError(e: unknown, pasted = false): string {
 
 const CLEARED = "Your saved wardrobe couldn't be read, so it was cleared. Import it again."
 
-const knownSource = (source: string): source is WardrobeSource =>
-  source === 'sel' || source === 'manual' || source === 'clothes_date' || source === 'nikkibase'
-
 export type Restore =
   | { action: 'none' }
-  | { action: 'load'; ids: number[]; source: WardrobeSource; resave: boolean }
+  | { action: 'load'; ids: number[]; source: WardrobeSource; savedAt: number | null; resave: boolean }
   | { action: 'clear'; notice: string }
   | { action: 'warn'; notice: string }
 
+const knownSource = (source: string): source is WardrobeSource =>
+  source === 'sel' || source === 'manual' || source === 'clothes_date' || source === 'nikkibase' || source === 'wbak'
+
+const savedTime = (t: unknown): number | null => (typeof t === 'number' && Number.isFinite(t) && t > 0 ? t : null)
+
 export function restorePlan(result: LoadResult): Restore {
-  if (result.status === 'ok') return { action: 'load', ids: result.entry.ids, source: result.entry.source, resave: false }
+  if (result.status === 'ok') {
+    return { action: 'load', ids: result.entry.ids, source: result.entry.source, savedAt: savedTime(result.entry.savedAt), resave: false }
+  }
   if (result.status === 'stale' && knownSource(result.entry.source)) {
-    return { action: 'load', ids: result.entry.ids, source: result.entry.source, resave: true }
+    return { action: 'load', ids: result.entry.ids, source: result.entry.source, savedAt: savedTime(result.entry.savedAt), resave: true }
   }
   if (result.status === 'stale' || result.status === 'unrecognised') return { action: 'clear', notice: CLEARED }
   if (result.status === 'unreadable') return { action: 'warn', notice: READ_FAILED }
@@ -65,8 +69,21 @@ export function codeLoad(read: CodeRead, known: ReadonlySet<number> | null): Cod
   return ids.length ? { ok: true, ids, notice: codeLeftOut(read.ids.length - ids.length) } : { ok: false, error: CODE_EMPTY }
 }
 
+export const BACKUP_EMPTY = 'That wbak file has no items NikkiBase knows.'
+
+export function backupLoad(read: BackupRead, known: ReadonlySet<number> | null): CodeLoad {
+  if (!read.ok) return { ok: false, error: NOT_A_FILE }
+  const ids = known ? read.ids.filter((id) => known.has(id)) : read.ids
+  if (!ids.length) return { ok: false, error: BACKUP_EMPTY }
+  const left = read.unreadable + read.ids.length - ids.length
+  if (left <= 0) return { ok: true, ids, notice: null }
+  const one = left === 1
+  return { ok: true, ids, notice: `${left.toLocaleString('en-US')} ${one ? 'item' : 'items'} in that wbak file ${one ? "isn't" : "aren't"} in NikkiBase's item data.` }
+}
+
 export const CODE_TEXT = {
-  save: 'Save a copy',
+  save: 'Save NikkiBase file',
+  calc: 'Save for Nikki Calc',
   copy: 'Copy code',
   copied: 'Copied',
   paste: 'Paste a code',
@@ -86,7 +103,34 @@ export const manyUnscored = (d: Decoded | null) => !!d && d.items > 0 && unscore
 
 export const TAGLINE = 'your wardrobe stays on this device'
 
-export const DROP_HINT = 'Or a Nikki Calc selections file, or a NikkiBase wardrobe file. It stays on your device.'
+export type ImportCard = { key: 'game' | 'calc' | 'nikkibase'; title: string; file: string; hint: string }
+
+export const IMPORT_CARDS: readonly ImportCard[] = [
+  { key: 'game', title: 'From the game', file: 'Your clothes_date file', hint: "It's in the game's usrdat folder. Take the largest one." },
+  { key: 'calc', title: 'From Nikki Calc', file: 'A selections file or a wbak file', hint: "Make one with Generate file on Nikki Calc's Manual page." },
+  { key: 'nikkibase', title: 'From NikkiBase', file: 'Your NikkiBase wardrobe file', hint: 'Saved here before, on this or another device.' },
+]
+
+export const KEEP_CURRENT = 'Keep this wardrobe'
+
+const SOURCE_LABEL: Readonly<Record<WardrobeSource, string>> = {
+  clothes_date: 'from clothes_date',
+  sel: 'from Nikki Calc',
+  wbak: 'from a wbak file',
+  nikkibase: 'from NikkiBase',
+  manual: 'ticked by hand',
+}
+
+export function sourceLine(source: WardrobeSource | null, savedAt: number | null, now = new Date()): string[] {
+  const parts: string[] = []
+  if (source) parts.push(SOURCE_LABEL[source])
+  if (savedAt) {
+    const when = new Date(savedAt)
+    const sameYear = when.getFullYear() === now.getFullYear()
+    parts.push(when.toLocaleDateString('en-GB', sameYear ? { day: 'numeric', month: 'short' } : { day: 'numeric', month: 'short', year: 'numeric' }))
+  }
+  return parts
+}
 
 export const NO_FILE = {
   before: 'No file? Tick what you own in the ',
@@ -106,7 +150,7 @@ export function afterSave(failing: boolean, ok: boolean): { failing: boolean; no
 }
 
 export function dropText(phone: boolean): string {
-  return phone ? 'Tap to choose your clothes_date file' : 'Drop or choose your clothes_date file'
+  return phone ? 'Tap to choose' : 'Drop or choose'
 }
 
 export function importingText(engineReady: boolean): string {

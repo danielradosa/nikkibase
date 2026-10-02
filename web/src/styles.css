@@ -909,10 +909,70 @@ h5 {
 }
 
 .nb-strip-replace {
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
   color: var(--rose-500);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.nb-import-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.ant-upload-wrapper.nb-import-card {
+  min-width: 0;
+}
+
+.ant-upload-wrapper.nb-import-card .ant-upload-drag {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.nb-import-paste {
+  min-width: 0;
+  margin-top: -8px;
+}
+
+.nb-import-paste .nb-code-row {
+  margin: 0;
+  justify-content: center;
+}
+
+.nb-import-paste .nb-code-box {
+  margin: 4px 0 0;
+}
+
+.nb-import-title {
+  margin: 0 0 4px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--rose-600);
+}
+
+.nb-import-drop {
+  margin: 4px 0;
+  color: var(--rose-500);
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .nb-import-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .nb-import-paste {
+    grid-column: 3;
+  }
 }
 
 .ant-alert.nb-import-hint {

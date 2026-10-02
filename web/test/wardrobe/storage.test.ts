@@ -6,7 +6,7 @@ const V = '2026-09-22'
 const record = (source: string, version = V) => ({ version, ids: [10001, 20001], source, savedAt: 0 })
 
 test('current sources load as they are', () => {
-  for (const source of ['sel', 'manual', 'clothes_date', 'nikkibase']) {
+  for (const source of ['sel', 'manual', 'clothes_date', 'nikkibase', 'wbak']) {
     const r = classify(record(source), V)
     assert.equal(r.status, 'ok')
     assert.equal(r.status === 'ok' && r.entry.source, source)

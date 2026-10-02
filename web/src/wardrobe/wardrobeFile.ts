@@ -121,10 +121,52 @@ export function readWardrobeCode(text: string): CodeRead {
   return { ok: true, ids }
 }
 
-export type WardrobeKind = { kind: 'code'; read: CodeRead } | { kind: 'sel' } | { kind: 'clothes_date' }
+const BACKUP_BASE: Readonly<Record<string, number>> = {
+  H: 10000, D: 20000, C: 30000, T: 40000, B: 50000, P: 60000, S: 70000, A: 80000, M: 90000, Z: 170000, X: 880000,
+}
+
+export function backupCodeId(code: string): number | null {
+  const m = /^([A-Z])(\d{1,6})$/.exec(code.trim())
+  if (!m || !(m[1] in BACKUP_BASE) || m[2].startsWith('0')) return null
+  return BACKUP_BASE[m[1]] + Number(m[2])
+}
+
+export type BackupRead = { ok: true; ids: number[]; unreadable: number } | { ok: false }
+
+export function readBackup(text: string): BackupRead {
+  let list: unknown
+  try {
+    list = JSON.parse(text)
+  } catch {
+    return { ok: false }
+  }
+  if (!Array.isArray(list) || !list.every((code) => typeof code === 'string')) return { ok: false }
+  const ids: number[] = []
+  let unreadable = 0
+  for (const code of list as string[]) {
+    const id = backupCodeId(code)
+    if (id === null) unreadable++
+    else ids.push(id)
+  }
+  return { ok: true, ids: tidy(ids), unreadable }
+}
+
+export function selectionsFile(ids: readonly number[]): string {
+  return '@SELVER1=' + tidy(ids).map((id, i) => `${i % 1000}_${id}`).join(',')
+}
+
+export const selectionsFileName = (date: Date): string => `nikki-calc-selections-${day(date)}.txt`
+
+export type WardrobeKind =
+  | { kind: 'code'; read: CodeRead }
+  | { kind: 'wbak'; read: BackupRead }
+  | { kind: 'sel' }
+  | { kind: 'clothes_date' }
 
 export function wardrobeKind(text: string): WardrobeKind {
   const read = readWardrobeCode(text)
   if (read.ok || read.problem !== 'none') return { kind: 'code', read }
-  return text.trimStart().startsWith('@SEL') ? { kind: 'sel' } : { kind: 'clothes_date' }
+  const start = text.trimStart()
+  if (start.startsWith('[')) return { kind: 'wbak', read: readBackup(start) }
+  return start.startsWith('@SEL') ? { kind: 'sel' } : { kind: 'clothes_date' }
 }
