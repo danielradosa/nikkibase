@@ -6,8 +6,8 @@ import SkillControls from './SkillControls'
 import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
 import {
-  coverageLabel, groupOptions, hasVariants, jumpOptions, matches, modeLabel, orderModes, pickerTree, placeOf, stagePlaceholder,
-  stagesInMode, stepStage, type Difficulty, type PickerBranch, type Stage,
+  coverageLabel, groupOptions, groupTint, hasVariants, jumpOptions, matches, modeLabel, orderModes, pickerTree, placeOf, scoreBand,
+  stagePlaceholder, stagesInMode, stepStage, type Difficulty, type PickerBranch, type Stage, type StageScore,
 } from './stages'
 
 type Props = {
@@ -15,6 +15,8 @@ type Props = {
   chosen: Stage | undefined
   mode: string
   onModeChange: (mode: string) => void
+  scores: ReadonlyMap<string, StageScore> | null
+  working: boolean
 }
 
 type Place = { branch: string; group: string }
@@ -29,7 +31,7 @@ function openPlace(tree: readonly PickerBranch[], saved: Place | undefined, chos
   return valid(saved) ?? (chosen ? placeOf(tree, chosen) : null) ?? (tree[0]?.groups[0] ? { branch: tree[0].key, group: tree[0].groups[0].key } : null)
 }
 
-export default function StagePicker({ stages, chosen, mode, onModeChange }: Props) {
+export default function StagePicker({ stages, chosen, mode, onModeChange, scores, working }: Props) {
   const { stage, difficulty, busy, setDifficulty, set } = useStore()
   const modes = useMemo(() => orderModes(stages), [stages])
   const tree = useMemo(() => pickerTree(stages, mode), [stages, mode])
@@ -59,11 +61,22 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
   const lift = (opened: boolean) => {
     if (opened && phone) box.current?.querySelector('.nb-stage-select, .nb-stage-jump')?.scrollIntoView({ block: 'start' })
   }
-  const chip = (key: string, label: string, on: boolean, onClick: () => void) => (
-    <button key={key} type="button" className={on ? 'nb-chip is-on' : 'nb-chip'} aria-pressed={on} onClick={onClick}>
+  const tintOf = (keys: readonly string[]) => {
+    const t = scores ? groupTint(keys, scores) : null
+    if (!t) return ''
+    return `${t.band ? ` tint-${t.band}` : ''}${t.failing ? ' is-failing' : ''}`
+  }
+  const chip = (key: string, label: string, on: boolean, onClick: () => void, tint = '', note?: string) => (
+    <button key={key} type="button" className={`nb-chip${on ? ' is-on' : ''}${tint}`} aria-pressed={on} onClick={onClick}>
       {label}
+      {note && <span className="nb-chip-note">{note}</span>}
     </button>
   )
+  const leafNote = (key: string) => {
+    const s = scores?.get(key)
+    return s ? (s.failing ? 'needs item' : `${s.pct}%`) : undefined
+  }
+  const allLeaves = (b: PickerBranch) => b.groups.flatMap((g) => g.leaves.map((l) => l.key))
 
   return (
     <div className="nb-stage-picker" ref={box}>
@@ -99,6 +112,16 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
               if (phone) setTimeout(() => select.current?.blur())
             }}
             filterOption={matches}
+            optionRender={(option) => {
+              const note = leafNote(String(option.value))
+              const s = scores?.get(String(option.value))
+              return (
+                <span className="nb-option">
+                  {option.label}
+                  {note && <span className={`nb-option-note${s && !s.failing ? ` tint-${scoreBand(s.pct)}` : ''}`}>{note}</span>}
+                </span>
+              )
+            }}
             notFoundContent={`No such stage. ${coverage}`}
             suffixIcon={busy ? <Petals size={14} /> : undefined}
             onOpenChange={lift}
@@ -114,8 +137,12 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
               <span className="nb-chip-label">Volume</span>
               <div className="nb-chips">
                 {tree.map((b) =>
-                  chip(b.key, b.label, b.key === branch?.key, () =>
-                    setSaved((s) => ({ ...s, [mode]: { branch: b.key, group: b.groups[0].key } })),
+                  chip(
+                    b.key,
+                    b.label,
+                    b.key === branch?.key,
+                    () => setSaved((s) => ({ ...s, [mode]: { branch: b.key, group: b.groups[0].key } })),
+                    tintOf(allLeaves(b)),
                   ),
                 )}
               </div>
@@ -126,8 +153,12 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
               <span className="nb-chip-label">{GROUP_LABEL[mode]}</span>
               <div className="nb-chips">
                 {branch.groups.map((g) =>
-                  chip(g.key, g.label, g.key === group?.key, () =>
-                    setSaved((s) => ({ ...s, [mode]: { branch: branch.key, group: g.key } })),
+                  chip(
+                    g.key,
+                    g.label,
+                    g.key === group?.key,
+                    () => setSaved((s) => ({ ...s, [mode]: { branch: branch.key, group: g.key } })),
+                    tintOf(g.leaves.map((l) => l.key)),
                   ),
                 )}
               </div>
@@ -136,7 +167,9 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
           {group && (
             <div role="group" aria-label="Stage">
               <span className="nb-chip-label">Stage</span>
-              <div className="nb-chips">{group.leaves.map((l) => chip(l.key, l.label, l.key === stage, () => pick(l.key)))}</div>
+              <div className="nb-chips">
+                {group.leaves.map((l) => chip(l.key, l.label, l.key === stage, () => pick(l.key), tintOf([l.key]), leafNote(l.key)))}
+              </div>
             </div>
           )}
           <div className="nb-stage-step">
@@ -181,6 +214,20 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
             />
           </div>
         </div>
+      )}
+      {scores && scores.size > 0 && (
+        <div className="nb-tint-legend" aria-hidden="true">
+          <span>Your best of the best possible:</span>
+          <span><i className="nb-swatch tint-high" />90%+</span>
+          <span><i className="nb-swatch tint-mid" />80–90%</span>
+          <span><i className="nb-swatch tint-low" />under 80%</span>
+          <span><i className="nb-swatch is-failing" />needs an item you don't own</span>
+        </div>
+      )}
+      {working && (
+        <Typography.Text type="secondary" className="nb-tint-working">
+          Working out your scores on every stage…
+        </Typography.Text>
       )}
       {chosen && hasVariants(chosen) && (
         <Typography.Text type="secondary" className="nb-stage-variant">

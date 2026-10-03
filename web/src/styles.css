@@ -1095,6 +1095,88 @@ h5 {
   padding-inline: 12px;
 }
 
+.nb-chip.tint-high,
+.nb-swatch.tint-high {
+  border-color: #9fd6c3;
+  background: #e6f5ef;
+  color: #2f6f5a;
+}
+
+.nb-chip.tint-mid,
+.nb-swatch.tint-mid {
+  border-color: #ecc77d;
+  background: #fbf1dc;
+  color: #7a5413;
+}
+
+.nb-chip.tint-low,
+.nb-swatch.tint-low {
+  border-color: #eba3ad;
+  background: #fbe5e8;
+  color: #8e2f3d;
+}
+
+.nb-chip.is-failing,
+.nb-swatch.is-failing {
+  border-style: dashed;
+  border-color: var(--ink-soft);
+}
+
+.nb-chip-note {
+  display: block;
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.85;
+}
+
+.nb-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nb-option-note {
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.nb-option-note.tint-high {
+  color: #2f6f5a;
+}
+
+.nb-option-note.tint-mid {
+  color: #7a5413;
+}
+
+.nb-option-note.tint-low {
+  color: #8e2f3d;
+}
+
+.nb-tint-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.nb-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border: 1px solid;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+
+.ant-typography.nb-tint-working {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
 .nb-chip.is-on {
   border-color: var(--rose-500);
   background: var(--rose-500);

@@ -9,6 +9,7 @@ import { missingMessage, stageKey, type Stage } from './stages'
 import { ENGINE_DOWN, manyUnscored, unscored } from '../wardrobe/wardrobeText'
 import WardrobeImport from '../wardrobe/WardrobeImport'
 import StagePicker from './StagePicker'
+import { useStageScores, useWorthRequest } from '../worth/useWorth'
 import StageSummary from './StageSummary'
 import OutfitScore from './OutfitScore'
 import ScoreWait from './ScoreWait'
@@ -39,6 +40,7 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
     [outfit, ideal, chosen, difficulty, names, suits, places, reads],
   )
   const view = resultView({ owned: owned.length, chosen: !!chosen, outfit: !!outfit, busy })
+  const { scores, working } = useStageScores(stages, useWorthRequest(stages, items))
 
   useLayoutEffect(() => {
     if (!jump) return
@@ -62,7 +64,14 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
 
       {owned.length > 0 && (
         <div className="nb-wardrobe-row">
-          <StagePicker stages={stages} chosen={chosen} mode={mode} onModeChange={(next) => set({ mode: next })} />
+          <StagePicker
+            stages={stages}
+            chosen={chosen}
+            mode={mode}
+            onModeChange={(next) => set({ mode: next })}
+            scores={scores}
+            working={working}
+          />
         </div>
       )}
 
