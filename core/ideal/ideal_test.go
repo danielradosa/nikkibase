@@ -537,3 +537,46 @@ func TestReadStagesRefusesMalformedStages(t *testing.T) {
 		}
 	}
 }
+
+func TestAllSplitsTheItemsOfAStagesThemes(t *testing.T) {
+	positions, posOf, placeOf := load(t)
+	r := rand.New(rand.NewPCG(9, 9))
+	same := randomStage(r)
+	stages := []Stage{
+		{Mode: "Story", Name: "9-9-1", Scoring: same},
+		{Mode: "Story", Name: "9-8", Scoring: same},
+		{Mode: "Story", Name: "9-9-2", Scoring: same},
+		{Mode: "Story", Name: "9-9-3", Scoring: randomStage(r)},
+	}
+	got, err := All(positions, posOf, placeOf, stages, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	alone := Of(positions, posOf, placeOf, same, nil)
+	if got[1].Outfit.Score != alone.Score {
+		t.Errorf("9-8 has one theme and should keep its best outfit: %d, want %d", got[1].Outfit.Score, alone.Score)
+	}
+	for _, auto := range []bool{false, true} {
+		seen := map[int]string{}
+		for _, i := range []int{0, 2, 3} {
+			items := got[i].Outfit.Items
+			if auto {
+				items = got[i].Outfit.Auto.Items
+			}
+			for _, it := range items {
+				if other, ok := seen[it[0]]; ok {
+					t.Errorf("auto %v: item %d is worn in %s and %s", auto, it[0], other, stages[i].Name)
+				}
+				seen[it[0]] = stages[i].Name
+			}
+		}
+	}
+	if got[0].Outfit.Score+got[2].Outfit.Score >= 2*alone.Score {
+		t.Errorf("two themes with the same numbers both kept the full best outfit: %d and %d", got[0].Outfit.Score, got[2].Outfit.Score)
+	}
+
+	stages[2].Variants = map[string]scoring.Stage{"maiden": same}
+	if _, err := All(positions, posOf, placeOf, stages, 1); err == nil {
+		t.Error("a theme with a Maiden variant was split without an error")
+	}
+}

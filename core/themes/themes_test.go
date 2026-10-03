@@ -179,3 +179,25 @@ func TestTwoIdenticalThemesShareTheItemsOut(t *testing.T) {
 		t.Errorf("one item per place can't score more than one full outfit: %v of %d", []int{got[0].Score, got[1].Score}, refs[0])
 	}
 }
+
+func TestSettleKeepsTheSplitApartAndNeverScoresLess(t *testing.T) {
+	rng := rand.New(rand.NewPCG(5, 17))
+	for trial := range 150 {
+		fx := newFixture(rng, 2+trial%2)
+		refs := fx.alone()
+		split := Split(len(fx.stages), refs, fx.solve)
+		final := Settle(split, fx.solve)
+		seen := map[int]int{}
+		for th, r := range final {
+			if r.Score < split[th].Score {
+				t.Fatalf("trial %d theme %d: settled %d below the split's %d", trial, th, r.Score, split[th].Score)
+			}
+			for _, id := range ids(r) {
+				if other, ok := seen[id]; ok {
+					t.Fatalf("trial %d: item %d is worn in themes %d and %d", trial, id, other, th)
+				}
+				seen[id] = th
+			}
+		}
+	}
+}

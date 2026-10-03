@@ -17,8 +17,10 @@ import (
 	"testing"
 
 	"github.com/danielradosa/nikkibase/core/catalogue"
+	bestpossible "github.com/danielradosa/nikkibase/core/ideal"
 	"github.com/danielradosa/nikkibase/core/optimizer"
 	"github.com/danielradosa/nikkibase/core/scoring"
+	"github.com/danielradosa/nikkibase/core/themes"
 	"github.com/danielradosa/nikkibase/pipeline"
 )
 
@@ -492,11 +494,61 @@ func TestShippedIdealIsCurrent(t *testing.T) {
 			t.Errorf(format, args...)
 		}
 	}
+	split := map[string]bestpossible.Outfit{}
+	for _, group := range themes.Groups(want) {
+		var members []bestpossible.Stage
+		for _, i := range group {
+			ver := b.stages[i].versions()[0]
+			members = append(members, bestpossible.Stage{Mode: b.stages[i].Mode, Name: b.stages[i].Name, Scoring: ver.st, Require: ver.require})
+		}
+		outfits, err := bestpossible.All(b.positions, b.posOf, b.placeOf, members, 0)
+		if err != nil {
+			t.Fatal(err)
+		}
+		worn, wornAuto := map[int]string{}, map[int]string{}
+		for k, i := range group {
+			key := want[i]
+			split[key] = outfits[k].Outfit
+			o := shipped.Stages[key].shippedOutfit
+			for _, it := range o.Items {
+				if other, ok := worn[it[0]]; ok {
+					report("%s and %s are themes of one stage and both wear item %d", other, key, it[0])
+				}
+				worn[it[0]] = key
+			}
+			if o.Auto != nil {
+				for _, it := range o.Auto.Items {
+					if other, ok := wornAuto[it[0]]; ok {
+						report("%s and %s are themes of one stage and both wear item %d with skills", other, key, it[0])
+					}
+					wornAuto[it[0]] = key
+				}
+			}
+		}
+	}
 	for _, s := range b.stages {
 		key := s.Mode + "/" + s.Name
 		got, ok := shipped.Stages[key]
 		if !ok {
 			report("%s: not shipped", key)
+			continue
+		}
+		if theme, ok := split[key]; ok {
+			ver := s.versions()[0]
+			o := got.shippedOutfit
+			if alone := b.best(ver).Score; o.Score > alone {
+				report("%s: shipped %d, above the %d the stage scores alone", key, o.Score, alone)
+			}
+			if o.Score != theme.Score || !slices.Equal(o.Items, theme.Items) {
+				report("%s: shipped %d wearing %v, and the split gives %d wearing %v", key, o.Score, o.Items, theme.Score, theme.Items)
+			}
+			if o.Auto == nil || o.Auto.CharmSmile != theme.Auto.Placement.CharmSmile || o.Auto.Smile != theme.Auto.Placement.Smile ||
+				o.Auto.Score != theme.Auto.Score || !slices.Equal(o.Auto.Items, theme.Auto.Items) {
+				report("%s: shipped auto %+v, and the split gives %+v", key, o.Auto, theme.Auto)
+			}
+			if missing := unmet(placedIDs(o.Items), ver.require); len(missing) > 0 {
+				report("%s: shipped an outfit that wears none of %v, which the stage requires", key, missing)
+			}
 			continue
 		}
 		if have, bundled := slices.Sorted(maps.Keys(got.Variants)), slices.Sorted(maps.Keys(s.Variants)); !slices.Equal(have, bundled) {

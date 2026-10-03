@@ -210,6 +210,27 @@ func shares(results []optimizer.Result, refs []int) (weakest, sum float64) {
 	return weakest, sum
 }
 
+func Settle(results []optimizer.Result, solve func(theme int, exclude map[int]bool) optimizer.Result) []optimizer.Result {
+	out := make([]optimizer.Result, len(results))
+	for t := range results {
+		exclude := map[int]bool{}
+		for o, r := range results {
+			if o > t {
+				for _, it := range r.Items {
+					exclude[it.ID] = true
+				}
+			}
+		}
+		for o := range t {
+			for _, it := range out[o].Items {
+				exclude[it.ID] = true
+			}
+		}
+		out[t] = solve(t, exclude)
+	}
+	return out
+}
+
 func Others(results []optimizer.Result) [][]int {
 	out := make([][]int, len(results))
 	for t := range results {

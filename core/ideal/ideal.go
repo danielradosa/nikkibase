@@ -12,6 +12,7 @@ import (
 
 	"github.com/danielradosa/nikkibase/core/optimizer"
 	"github.com/danielradosa/nikkibase/core/scoring"
+	"github.com/danielradosa/nikkibase/core/themes"
 )
 
 type Outfit struct {
@@ -188,6 +189,18 @@ func All(positions []optimizer.Position, posOf map[int]int, placeOf map[int]uint
 	wg.Wait()
 
 	ideals := make([]Ideal, len(stages))
+	keys := make([]string, len(stages))
+	for i, s := range stages {
+		keys[i] = s.Key()
+	}
+	groups := themes.Groups(keys)
+	for _, group := range groups {
+		for _, i := range group {
+			if len(stages[i].Variants) > 0 {
+				return nil, fmt.Errorf("%s is one of several themes and has a variant; themes are only split at one difficulty", stages[i].Key())
+			}
+		}
+	}
 	j := 0
 	for i, s := range stages {
 		ideals[i] = Ideal{Key: s.Key(), Outfit: outfits[j]}
@@ -200,7 +213,42 @@ func All(positions []optimizer.Position, posOf map[int]int, placeOf map[int]uint
 			j++
 		}
 	}
+	for _, group := range groups {
+		for k, outfit := range splitOutfits(positions, posOf, placeOf, stages, group, ideals) {
+			ideals[group[k]].Outfit = outfit
+		}
+	}
 	return ideals, nil
+}
+
+func splitOutfits(positions []optimizer.Position, posOf map[int]int, placeOf map[int]uint16, stages []Stage, group []int, ideals []Ideal) []Outfit {
+	n := len(group)
+	plainRefs, autoRefs := make([]int, n), make([]int, n)
+	for k, i := range group {
+		plainRefs[k], autoRefs[k] = ideals[i].Outfit.Score, ideals[i].Outfit.Auto.Score
+	}
+	space := func(k int, exclude map[int]bool) optimizer.Space {
+		return optimizer.Require(themes.Without(positions, exclude), posOf, stages[group[k]].Require)
+	}
+	plainSolve := func(k int, exclude map[int]bool) optimizer.Result {
+		return space(k, exclude).Best(stages[group[k]].Scoring, nil)
+	}
+	placements := make([]scoring.Placement, n)
+	autoSolve := func(k int, exclude map[int]bool) optimizer.Result {
+		sp := space(k, exclude)
+		st := stages[group[k]].Scoring
+		r, p := sp.BestPlacedFrom(st, sp.Best(st, nil))
+		placements[k] = p
+		return r
+	}
+	plain := themes.Settle(themes.Split(n, plainRefs, plainSolve), plainSolve)
+	auto := themes.Settle(themes.Split(n, autoRefs, autoSolve), autoSolve)
+	out := make([]Outfit, n)
+	for k := range group {
+		out[k] = Outfit{Score: plain[k].Score, Items: placed(plain[k], placeOf),
+			Auto: Auto{Placement: placements[k], Score: auto[k].Score, Items: placed(auto[k], placeOf)}}
+	}
+	return out
 }
 
 func Versions(ideals []Ideal) int {
