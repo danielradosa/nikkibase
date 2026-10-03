@@ -1,5 +1,5 @@
 import type {
-  WorthExample, WorthFilter, WorthNeeded, WorthProgress, WorthRanking, WorthRow, WorthSession, WorthSettings, WorthSuit,
+  WorthBase, WorthExample, WorthFilter, WorthNeeded, WorthProgress, WorthRanking, WorthRow, WorthSession, WorthSettings, WorthSuit,
   WorthVersion,
 } from '../engine/engine'
 import type { Difficulty } from '../outfit/stages'
@@ -452,6 +452,7 @@ export type WorthApi = {
   start: (versions: WorthVersion[], settings: WorthSettings, suits: WorthSuit[]) => Promise<WorthSession>
   run: (session: number, count: number) => Promise<WorthProgress>
   rank: (session: number, filter: WorthFilter, limit: number) => Promise<WorthRanking>
+  bases: (session: number) => Promise<WorthBase[]>
 }
 
 export type WorthPhase = 'idle' | 'running' | 'stopping' | 'stopped' | 'done' | 'failed'
@@ -473,6 +474,7 @@ export function worthRunner(api: WorthApi, chunk = 32, retries = 3) {
   let looping = -1
   let restarts = 0
   let ranks = new Map<string, Promise<WorthRanking>>()
+  let scored: { key: string; pending: Promise<WorthBase[]> } | null = null
   const listeners = new Set<() => void>()
 
   const phase = () => state.phase
@@ -519,6 +521,7 @@ export function worthRunner(api: WorthApi, chunk = 32, retries = 3) {
     if (!request) return
     session = null
     ranks = new Map()
+    scored = null
     versions = request.versions()
     suits = request.suits?.() ?? []
     const run = state.run + 1
@@ -555,6 +558,7 @@ export function worthRunner(api: WorthApi, chunk = 32, retries = 3) {
     versions = []
     suits = []
     ranks = new Map()
+    scored = null
     if (state.key === null && state.phase === 'idle') return
     update({ key: null, run: state.run + 1, phase: 'idle', done: 0, total: 0, error: null })
   }
@@ -578,6 +582,21 @@ export function worthRunner(api: WorthApi, chunk = 32, retries = 3) {
     return pending
   }
 
+  function bases(): Promise<WorthBase[]> {
+    const run = state.run
+    if (session === null || state.done === 0) return Promise.reject(new Error('no stage is checked yet'))
+    const key = `${run}|${state.done}`
+    if (scored?.key !== key) {
+      const asked = api.bases(session)
+      scored = { key, pending: asked }
+      asked.catch((e) => {
+        if (scored?.pending === asked) scored = null
+        if (run === state.run) lost(e)
+      })
+    }
+    return scored.pending
+  }
+
   return {
     get: () => state,
     subscribe: (listener: () => void) => {
@@ -592,6 +611,7 @@ export function worthRunner(api: WorthApi, chunk = 32, retries = 3) {
     retry,
     reset,
     rank,
+    bases,
   }
 }
 

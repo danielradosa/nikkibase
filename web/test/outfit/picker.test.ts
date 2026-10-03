@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { jumpOptions, pickerTree, placeOf, stepStage, type Stage } from '../../src/outfit/stages.ts'
+import { groupTint, jumpOptions, pickerTree, placeOf, scoreBand, stageScores, stepStage, type IdealTable, type Stage } from '../../src/outfit/stages.ts'
 
 const W = [1, 2, 3, 4, 5]
 const A = [0, 1, 2, 3, 4]
@@ -97,4 +97,47 @@ test('jumping lists a few stages at most, and nothing for an empty query', () =>
   assert.deepEqual(labels('Story', '5', 2), ['5-1', '5-2'])
   assert.deepEqual(labels('Story', '  '), [])
   assert.deepEqual(jumpOptions(fixture, 'Story', '6-1')[0], { value: 'Story/6-1', label: '6-1' })
+})
+
+test('a stage scores its best as a share of the best possible, at the chosen difficulty', () => {
+  const list = [story('1-1'), { ...story('2-1'), variants: { maiden: { weights: W, attrs: A } } }, story('3-1'), story('4-1')]
+  const table: IdealTable = {
+    'Story/1-1': { score: 200, items: [] },
+    'Story/2-1': { score: 100, items: [], variants: { maiden: { score: 50, items: [] } } },
+    'Story/3-1': { score: 100, items: [] },
+  }
+  const bases = [
+    { key: 'Story/1-1', score: 190, failing: false },
+    { key: 'Story/2-1', score: 80, failing: false },
+    { key: 'Story/2-1#maiden', score: 50, failing: false },
+    { key: 'Story/3-1', score: 0, failing: true },
+    { key: 'Story/4-1', score: 10, failing: false },
+  ]
+  const princess = stageScores(bases, list, table, 'Princess', 'none')
+  assert.deepEqual([...princess], [
+    ['Story/1-1', { pct: 95, failing: false }],
+    ['Story/2-1', { pct: 80, failing: false }],
+    ['Story/3-1', { pct: 0, failing: true }],
+  ])
+  assert.deepEqual(stageScores(bases, list, table, 'Maiden', 'none').get('Story/2-1'), { pct: 100, failing: false })
+  assert.equal(stageScores([], list, table, 'Princess', 'none').size, 0)
+  const rounded = stageScores([{ key: 'Story/1-1', score: 189, failing: false }], list, table, 'Princess', 'none').get('Story/1-1')
+  assert.deepEqual(rounded, { pct: 95, failing: false }, 'rounded as the score panel rounds it, so 94.5% shows as 95%')
+})
+
+test('scores fall in three bands, and a group takes its weakest stage', () => {
+  assert.equal(scoreBand(100), 'high')
+  assert.equal(scoreBand(90), 'high')
+  assert.equal(scoreBand(89), 'mid')
+  assert.equal(scoreBand(80), 'mid')
+  assert.equal(scoreBand(79), 'low')
+  const scores = new Map([
+    ['a', { pct: 99, failing: false }],
+    ['b', { pct: 85, failing: false }],
+    ['c', { pct: 0, failing: true }],
+  ])
+  assert.deepEqual(groupTint(['a', 'b'], scores), { band: 'mid', failing: false })
+  assert.deepEqual(groupTint(['a', 'c'], scores), { band: 'high', failing: true })
+  assert.deepEqual(groupTint(['c'], scores), { band: null, failing: true })
+  assert.equal(groupTint(['x'], scores), null)
 })

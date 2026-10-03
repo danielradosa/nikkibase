@@ -1,9 +1,12 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
-import { ideals, loadAcquire } from '../boot'
-import { engine, type WorthFilter, type WorthRanking } from '../engine/engine'
-import type { IdealTable } from '../outfit/stages'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { ideals, loadAcquire, version } from '../boot'
+import { engine, type WorthBase, type WorthFilter, type WorthRanking } from '../engine/engine'
+import { worthSettings } from '../outfit/skills'
+import { stageScores, worthVersions, type IdealTable, type Stage, type StageScore } from '../outfit/stages'
+import { useStore } from '../store'
 import {
-  FIRST_ROWS, askSteps, filterSuits, rankReady, rankSteps, worthRunner, type AcquireTable, type WorthRequest, type WorthRun,
+  FIRST_ROWS, askSteps, filterSuits, rankReady, rankSteps, worthKey, worthRunner, worthSuits, type AcquireTable, type WorthRequest,
+  type WorthRun,
 } from './worth'
 
 export const runner = worthRunner(engine.worth)
@@ -96,4 +99,62 @@ export function useAcquire(active: boolean): Acquire {
     }
   }, [active, state.table])
   return state
+}
+
+type Scoreable = { id: number; suit: string; scoreable: boolean }
+
+export function useWorthRequest(stages: readonly Stage[], items: readonly Scoreable[] | null): WorthRequest | null {
+  const ownedIds = useStore((s) => s.owned)
+  const skills = useStore((s) => s.skills)
+  const table = useIdeals()
+  const settings = worthSettings(skills)
+  const settingsKey = JSON.stringify(settings)
+  return useMemo<WorthRequest | null>(
+    () =>
+      ownedIds.length && table && items
+        ? {
+            key: worthKey(version, settings, ownedIds),
+            settings,
+            versions: () => worthVersions(stages, table, settings ? 'max' : 'none'),
+            suits: () => worthSuits(items),
+          }
+        : null,
+    [ownedIds, table, items, stages, settingsKey],
+  )
+}
+
+export type StageScores = { scores: ReadonlyMap<string, StageScore> | null; working: boolean }
+
+export function useStageScores(stages: readonly Stage[], request: WorthRequest | null): StageScores {
+  const run = useSyncExternalStore(runner.subscribe, runner.get)
+  const busy = useStore((s) => s.busy)
+  const difficulty = useStore((s) => s.difficulty)
+  const skills = useStore((s) => s.skills)
+  const table = useIdeals()
+  const [bases, setBases] = useState<{ run: number; list: WorthBase[] } | null>(null)
+
+  useEffect(() => {
+    if (request && !busy) runner.ensure(request)
+  }, [request, busy])
+
+  const current = request !== null && run.key === request.key
+  useEffect(() => {
+    if (!current || run.done === 0) return
+    let live = true
+    runner
+      .bases()
+      .then((list) => live && setBases({ run: run.run, list }))
+      .catch(() => undefined)
+    return () => {
+      live = false
+    }
+  }, [current, run.run, run.done])
+
+  const scored = current && bases !== null && bases.run === run.run && table ? bases.list : null
+  const mode = worthSettings(skills) ? 'max' : 'none'
+  const scores = useMemo(
+    () => (scored && table ? stageScores(scored, stages, table, difficulty, mode) : null),
+    [scored, stages, table, difficulty, mode],
+  )
+  return { scores, working: request !== null && (!current || run.phase === 'running' || run.phase === 'stopping') }
 }

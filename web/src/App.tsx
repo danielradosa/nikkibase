@@ -60,7 +60,6 @@ export default function App() {
           itemsFailed={itemsFailed}
           places={places}
           owned={ownedSet}
-          version={version}
         />
       ),
     },

@@ -366,3 +366,40 @@ export function jumpOptions(stages: readonly Stage[], mode: string, query: strin
     .slice(0, limit)
     .map(([, leaf]) => leaf)
 }
+
+export type StageScore = { pct: number; failing: boolean }
+export type ScoreBand = 'high' | 'mid' | 'low'
+
+export function stageScores(
+  bases: readonly { key: string; score: number; failing: boolean }[],
+  stages: readonly Stage[],
+  table: IdealTable | null,
+  d: Difficulty,
+  skills: 'none' | 'max',
+): Map<string, StageScore> {
+  const byKey = new Map(bases.map((b) => [b.key, b]))
+  const out = new Map<string, StageScore>()
+  for (const s of stages) {
+    const base = byKey.get(placementKey(s, d))
+    const ideal = lookupIdeal(table, s, d, skills)?.score
+    if (!base || !ideal) continue
+    out.set(stageKey(s), base.failing ? { pct: 0, failing: true } : { pct: Math.min(100, Math.round((base.score / ideal) * 100)), failing: false })
+  }
+  return out
+}
+
+export const scoreBand = (pct: number): ScoreBand => (pct >= 90 ? 'high' : pct >= 80 ? 'mid' : 'low')
+
+export function groupTint(keys: readonly string[], scores: ReadonlyMap<string, StageScore>): { band: ScoreBand | null; failing: boolean } | null {
+  let weakest: number | null = null
+  let failing = false
+  let any = false
+  for (const key of keys) {
+    const s = scores.get(key)
+    if (!s) continue
+    any = true
+    if (s.failing) failing = true
+    else weakest = weakest === null ? s.pct : Math.min(weakest, s.pct)
+  }
+  return any ? { band: weakest === null ? null : scoreBand(weakest), failing } : null
+}

@@ -7,22 +7,22 @@ import type { WorthRow } from '../engine/engine'
 import { ANY_SLOT, choiceLabel, placeName, slotChoice, slotOptions, type Item } from '../items/items'
 import Petals from '../components/Petals'
 import Skel from '../components/Skel'
-import { worthSettings, worthSkillsText } from '../outfit/skills'
+import { worthSkillsText } from '../outfit/skills'
 import {
-  modeLabel, orderModes, resolveStage, rulesUnchecked, stageKey, variantStages, worthSkip, worthVersions,
+  modeLabel, orderModes, resolveStage, rulesUnchecked, stageKey, variantStages, worthSkip,
   type Difficulty, type Stage,
 } from '../outfit/stages'
 import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
-import { runner, useAcquire, useIdeals, useWorthRanking, useWorthRun, type Acquire } from './useWorth'
+import { runner, useAcquire, useIdeals, useWorthRanking, useWorthRequest, useWorthRun, type Acquire } from './useWorth'
 import WaitLine from '../components/WaitLine'
 import { ENGINE_DOWN, LIST_FAILED, LIST_WAIT, SCORES_WAIT } from '../wardrobe/wardrobeText'
 import {
   ALL_MODES, FIRST_ROWS, MORE_ROWS, MORE_SUITS, NO_SOURCE, OWNED_KEY, ROW_STEP, SCORE_F, UNLOCK_NOTE, chipText,
   detailsLabel, exampleGain, filterMode, filterSuits, groupPieces, groupTail, hardToGet, hideLabel, howToGet, improvesParts, itemMeta,
   neededLine, nothingText, openRows, openTarget, ownsAnyPart, pastNote, pieceList, piecesText, rankedName, rankingNote, recipeText,
-  rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter, worthKey, worthSuits,
-  type AcquireTable, type OpenTarget, type UnlockRow, type WorthRequest,
+  rowKey, rowName, scoreFNote, stageLabel, suitPieces, unlockRanking, unlockText, worthFilter,
+  type AcquireTable, type OpenTarget, type UnlockRow,
   checkingText, handedOver, keptRows, moreText, rankingText, waitPercent, worthWait,
 } from './worth'
 
@@ -32,7 +32,6 @@ type Props = {
   itemsFailed: boolean
   places: Place[]
   owned: ReadonlySet<number>
-  version: string
 }
 
 const SETTLED_FRAMES = 5
@@ -189,7 +188,7 @@ function FirstWays({ ids, acquire }: { ids: number[]; acquire: Acquire }) {
   )
 }
 
-export default function WorthTab({ stages, items, itemsFailed, places, owned, version }: Props) {
+export default function WorthTab({ stages, items, itemsFailed, places, owned }: Props) {
   const ownedIds = useStore((s) => s.owned)
   const tab = useStore((s) => s.tab)
   const engineState = useStore((s) => s.engine)
@@ -245,20 +244,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
   const [openUnlocks, setOpenUnlocks] = useState<string[]>([])
   const phone = usePhone()
 
-  const settings = worthSettings(skills)
-  const settingsKey = JSON.stringify(settings)
-  const request = useMemo<WorthRequest | null>(
-    () =>
-      ownedIds.length && table && items
-        ? {
-            key: worthKey(version, settings, ownedIds),
-            settings,
-            versions: () => worthVersions(stages, table, settings ? 'max' : 'none'),
-            suits: () => worthSuits(items),
-          }
-        : null,
-    [ownedIds, table, items, version, stages, settingsKey],
-  )
+  const request = useWorthRequest(stages, items)
   const run = useWorthRun(active, request)
 
   const modes = useMemo(() => [ALL_MODES, ...orderModes(stages)], [stages])

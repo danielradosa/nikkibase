@@ -370,6 +370,11 @@ function fakeEngine(total: number, ranked?: { rows: number; held?: boolean }) {
         return { done, total }
       })
     },
+    bases: async (id: number) => {
+      calls.push(`bases ${id}`)
+      if (id !== live) throw new Error('no session')
+      return Array.from({ length: done }, (_, i) => ({ key: `Story/${i}`, score: 10 + i, failing: false }))
+    },
     rank: async (id: number, filter: WorthFilter, limit: number) => {
       calls.push(`rank ${id} ${JSON.stringify(filter)} ${limit}`)
       if (crash) {
@@ -1041,4 +1046,23 @@ test('pieces rerun on one channel in different months are listed together under 
   assert.deepEqual(groupPieces([a, b], table), [
     { key: '1|Abyssal Island', text: 'Abyssal Island', past: true, pieces: [a, b] },
   ])
+})
+
+test('the runner hands back the scores of the stages checked so far, asking the engine once per step', async () => {
+  const fake = fakeEngine(70)
+  const runner = worthRunner(fake.api, 32)
+  await assert.rejects(runner.bases())
+  runner.ensure(request('k1', 70))
+  await fake.release()
+  await fake.release()
+  assert.equal(runner.get().done, 32)
+  assert.equal((await runner.bases()).length, 32)
+  await fake.drive(runner, 'done')
+  const first = await runner.bases()
+  const again = await runner.bases()
+  assert.equal(first.length, 70)
+  assert.equal(first, again)
+  assert.equal(fake.count('bases'), 2)
+  runner.ensure(request('k2', 70))
+  await assert.rejects(runner.bases())
 })
