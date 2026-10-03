@@ -391,7 +391,8 @@ export function stageScores(
 export const scoreBand = (pct: number): ScoreBand => (pct >= 90 ? 'high' : pct >= 80 ? 'mid' : 'low')
 
 export function groupTint(keys: readonly string[], scores: ReadonlyMap<string, StageScore>): { band: ScoreBand | null; failing: boolean } | null {
-  let weakest: number | null = null
+  let total = 0
+  let scored = 0
   let failing = false
   let any = false
   for (const key of keys) {
@@ -399,7 +400,10 @@ export function groupTint(keys: readonly string[], scores: ReadonlyMap<string, S
     if (!s) continue
     any = true
     if (s.failing) failing = true
-    else weakest = weakest === null ? s.pct : Math.min(weakest, s.pct)
+    else {
+      total += s.pct
+      scored++
+    }
   }
-  return any ? { band: weakest === null ? null : scoreBand(weakest), failing } : null
+  return any ? { band: scored ? scoreBand(Math.round(total / scored)) : null, failing } : null
 }

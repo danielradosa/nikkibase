@@ -125,7 +125,7 @@ test('a stage scores its best as a share of the best possible, at the chosen dif
   assert.deepEqual(rounded, { pct: 95, failing: false }, 'rounded as the score panel rounds it, so 94.5% shows as 95%')
 })
 
-test('scores fall in three bands, and a group takes its weakest stage', () => {
+test('scores fall in three bands, and a group takes the average of its scored stages', () => {
   assert.equal(scoreBand(100), 'high')
   assert.equal(scoreBand(90), 'high')
   assert.equal(scoreBand(89), 'mid')
@@ -135,8 +135,11 @@ test('scores fall in three bands, and a group takes its weakest stage', () => {
     ['a', { pct: 99, failing: false }],
     ['b', { pct: 85, failing: false }],
     ['c', { pct: 0, failing: true }],
+    ['d', { pct: 70, failing: false }],
   ])
-  assert.deepEqual(groupTint(['a', 'b'], scores), { band: 'mid', failing: false })
+  assert.deepEqual(groupTint(['a', 'b'], scores), { band: 'high', failing: false })
+  assert.deepEqual(groupTint(['a', 'd'], scores), { band: 'mid', failing: false }, 'an average of 84.5 rounds to 85')
+  assert.deepEqual(groupTint(['b', 'd'], scores), { band: 'low', failing: false })
   assert.deepEqual(groupTint(['a', 'c'], scores), { band: 'high', failing: true })
   assert.deepEqual(groupTint(['c'], scores), { band: null, failing: true })
   assert.equal(groupTint(['x'], scores), null)
