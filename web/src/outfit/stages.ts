@@ -289,3 +289,80 @@ export function stagePlaceholder(mode: string): string {
   const label = modeLabel(mode)
   return `Pick ${/^[AEIOU]/.test(label) ? 'an' : 'a'} ${label} stage${example ? `, e.g. ${example}` : ''}`
 }
+
+export type PickerLeaf = { key: string; label: string; name: string }
+export type PickerGroup = { key: string; label: string; leaves: PickerLeaf[] }
+export type PickerBranch = { key: string; label: string; groups: PickerGroup[] }
+
+const CHIP_MODES = new Set(['Story', 'Commission', 'Dreamweaver'])
+
+function chipPlace(s: Stage): { branch: string; group: string; label: string } {
+  if (s.mode === 'Story') {
+    const p = storyPlace(s.name)
+    if (!p) return { branch: 'Other', group: 'Other', label: s.name }
+    return {
+      branch: ROMAN[p.volume],
+      group: String(p.chapter),
+      label: p.side ? `Side ${p.stage}` : s.name.replace(/^(II|III)-/i, ''),
+    }
+  }
+  if (s.mode === 'Commission') {
+    const p = commissionPlace(s.name)
+    return { branch: '', group: p ? String(p.act) : 'Other', label: s.name }
+  }
+  const cut = s.name.indexOf(' - ')
+  return cut < 0 ? { branch: '', group: s.name, label: s.name } : { branch: '', group: s.name.slice(0, cut), label: s.name.slice(cut + 3) }
+}
+
+export function pickerTree(stages: readonly Stage[], mode: string): PickerBranch[] {
+  if (!CHIP_MODES.has(mode)) return []
+  const out: PickerBranch[] = []
+  for (const s of [...stagesInMode(stages, mode)].sort(compareStages)) {
+    const place = chipPlace(s)
+    let branch = out.find((b) => b.label === place.branch)
+    if (!branch) {
+      branch = { key: `${mode}/${place.branch}`, label: place.branch, groups: [] }
+      out.push(branch)
+    }
+    let group = branch.groups.find((g) => g.label === place.group)
+    if (!group) {
+      group = { key: `${branch.key}/${place.group}`, label: place.group, leaves: [] }
+      branch.groups.push(group)
+    }
+    group.leaves.push({ key: stageKey(s), label: place.label, name: s.name })
+  }
+  return out
+}
+
+export function placeOf(tree: readonly PickerBranch[], key: string): { branch: string; group: string } | null {
+  for (const b of tree) for (const g of b.groups) if (g.leaves.some((l) => l.key === key)) return { branch: b.key, group: g.key }
+  return null
+}
+
+export function stepStage(stages: readonly Stage[], mode: string, key: string, dir: 1 | -1): string | null {
+  const keys = [...stagesInMode(stages, mode)].sort(compareStages).map(stageKey)
+  const at = keys.indexOf(key)
+  if (at < 0) return null
+  return keys[at + dir] ?? null
+}
+
+export function jumpOptions(stages: readonly Stage[], mode: string, query: string, limit = 8): StageLeaf[] {
+  const q = fold(query)
+  if (!q) return []
+  const ranked: [number, StageLeaf][] = []
+  for (const s of [...stagesInMode(stages, mode)].sort(compareStages)) {
+    const leaf = { value: stageKey(s), label: s.name }
+    const name = fold(s.name)
+    const rank =
+      name === q ? 0
+      : name.startsWith(q) ? 1
+      : fold(s.name.replace(/^(II|III)-/i, '')).startsWith(q) ? 2
+      : matches(query, leaf) ? 3
+      : -1
+    if (rank >= 0) ranked.push([rank, leaf])
+  }
+  return ranked
+    .sort((a, b) => a[0] - b[0])
+    .slice(0, limit)
+    .map(([, leaf]) => leaf)
+}
