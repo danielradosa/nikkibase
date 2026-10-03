@@ -252,9 +252,12 @@ function splitKey(key: string) {
   }
 }
 
+const MODE_NAMES: Record<string, string> = { Dreamweaver: 'Dream Weaver' }
+
 export function stageLabel(key: string, variants: ReadonlySet<string> = new Set()): string {
   const { base, variant, mode, name } = splitKey(key)
-  const text = name ? `${mode} ${name}` : mode
+  const label = MODE_NAMES[mode] ?? mode
+  const text = name ? `${label} ${name}` : label
   if (variant === 'maiden') return `${text} (Maiden)`
   return variants.has(base) ? `${text} (Princess)` : text
 }

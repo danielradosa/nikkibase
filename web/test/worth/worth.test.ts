@@ -189,6 +189,7 @@ test('stage labels read like the game, naming the difficulty only where the two 
   const variants = new Set(['Story/6-9'])
   assert.equal(stageLabel('Commission/20-7', variants), 'Commission 20-7')
   assert.equal(stageLabel('Story/1-1', variants), 'Story 1-1')
+  assert.equal(stageLabel('Dreamweaver/Lunar - Hidden String 2', variants), 'Dream Weaver Lunar - Hidden String 2')
   assert.equal(stageLabel('Story/6-9', variants), 'Story 6-9 (Princess)')
   assert.equal(stageLabel('Story/6-9#maiden', variants), 'Story 6-9 (Maiden)')
   assert.equal(stageLabel('Story/II-4-Side 2'), 'Story II-4-Side 2')

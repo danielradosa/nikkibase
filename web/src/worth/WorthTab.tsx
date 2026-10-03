@@ -9,7 +9,7 @@ import Petals from '../components/Petals'
 import Skel from '../components/Skel'
 import { worthSettings, worthSkillsText } from '../outfit/skills'
 import {
-  orderModes, resolveStage, rulesUnchecked, stageKey, variantStages, worthSkip, worthVersions,
+  modeLabel, orderModes, resolveStage, rulesUnchecked, stageKey, variantStages, worthSkip, worthVersions,
   type Difficulty, type Stage,
 } from '../outfit/stages'
 import { useStore } from '../store'
@@ -629,7 +629,7 @@ export default function WorthTab({ stages, items, itemsFailed, places, owned, ve
         <Segmented
           value={mode}
           onChange={(value) => refilter(() => setMode(String(value)))}
-          options={modes}
+          options={modes.map((m) => ({ label: modeLabel(m), value: m }))}
           className="nb-worth-modes"
         />
         {(mode === ALL_MODES || mode === 'Story') && (

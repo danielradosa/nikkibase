@@ -13,13 +13,17 @@ type Scoring = {
 
 export type Stage = Scoring & {
   name: string
-  mode: 'Story' | 'Commission' | 'Co-op' | 'Arena'
+  mode: 'Story' | 'Commission' | 'Dreamweaver' | 'Co-op' | 'Arena'
   variants?: { maiden?: Scoring }
 }
 
 export const stageKey = (s: Stage) => `${s.mode}/${s.name}`
 
-const MODE_ORDER = ['Story', 'Commission', 'Co-op', 'Arena', 'Dreamweaver']
+const MODE_ORDER = ['Story', 'Commission', 'Dreamweaver', 'Co-op', 'Arena']
+
+const MODE_LABELS: Record<string, string> = { Dreamweaver: 'Dream Weaver' }
+
+export const modeLabel = (mode: string) => MODE_LABELS[mode] ?? mode
 
 export function orderModes(stages: readonly Stage[]): string[] {
   const present = new Set<string>(stages.map((s) => s.mode ?? 'Other'))
@@ -273,7 +277,7 @@ export function coverageLabel(stages: readonly Stage[]): string {
 
   const named = ['Story', 'Commission', 'Arena', 'Co-op']
   parts.push(...named.slice(2).filter((m) => modes.has(m)))
-  parts.push(...[...modes].filter((m) => !named.includes(m)).sort())
+  parts.push(...[...modes].filter((m) => !named.includes(m)).sort().map(modeLabel))
 
   return parts.length ? `Has ${list(parts)}. Newer stages aren't in yet.` : ''
 }
@@ -282,5 +286,6 @@ const EXAMPLES: Record<string, string> = { Story: '5-11', Commission: '3-7' }
 
 export function stagePlaceholder(mode: string): string {
   const example = EXAMPLES[mode]
-  return `Pick ${/^[AEIOU]/.test(mode) ? 'an' : 'a'} ${mode} stage${example ? `, e.g. ${example}` : ''}`
+  const label = modeLabel(mode)
+  return `Pick ${/^[AEIOU]/.test(label) ? 'an' : 'a'} ${label} stage${example ? `, e.g. ${example}` : ''}`
 }

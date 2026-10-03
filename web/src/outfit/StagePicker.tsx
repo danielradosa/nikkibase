@@ -5,7 +5,7 @@ import SkillControls from './SkillControls'
 import { useStore } from '../store'
 import { usePhone } from '../hooks/usePhone'
 import {
-  coverageLabel, groupOptions, hasVariants, matches, orderModes, stagePlaceholder, stagesInMode, type Difficulty, type Stage,
+  coverageLabel, groupOptions, hasVariants, matches, modeLabel, orderModes, stagePlaceholder, stagesInMode, type Difficulty, type Stage,
 } from './stages'
 
 type Props = {
@@ -38,7 +38,7 @@ export default function StagePicker({ stages, chosen, mode, onModeChange }: Prop
             onModeChange(String(value))
             set({ stage: null, outfit: null, ideal: null })
           }}
-          options={modes}
+          options={modes.map((m) => ({ label: modeLabel(m), value: m }))}
         />
         {mode === 'Story' && (
           <Segmented<Difficulty>

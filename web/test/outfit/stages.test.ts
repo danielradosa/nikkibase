@@ -9,6 +9,7 @@ import {
   lookupIdeal,
   matches,
   missingMessage,
+  modeLabel,
   orderModes,
   requirementLabel,
   resolveStage,
@@ -408,4 +409,28 @@ test('a stage the table does not cover returns null, so the engine computes it',
   assert.equal(lookupIdeal(table, stage('Story', '1-1'), 'Princess'), null)
   const noVariant: IdealTable = { 'Story/3-10': { score: 237681, items: [] } }
   assert.equal(lookupIdeal(noVariant, idealVariant, 'Maiden'), null)
+})
+
+test('Dream Weaver is offered after Commission and named the way the game writes it', () => {
+  const list = [stage('Arena', 'a'), stage('Dreamweaver', 'Lunar - Millennium Dream 6'), stage('Co-op', 'c'), stage('Story', '1-1')]
+  assert.deepEqual(orderModes(list), ['Story', 'Dreamweaver', 'Co-op', 'Arena'])
+  assert.equal(modeLabel('Dreamweaver'), 'Dream Weaver')
+  assert.equal(modeLabel('Story'), 'Story')
+  assert.equal(stagePlaceholder('Dreamweaver'), 'Pick a Dream Weaver stage')
+})
+
+test('the coverage line names Dream Weaver', () => {
+  assert.equal(
+    coverageLabel([stage('Arena', 'Beach Party'), stage('Dreamweaver', 'Lunar - Hidden String 2'), stage('Co-op', 'Bobo - Pet')]),
+    "Has Arena, Co-op and Dream Weaver. Newer stages aren't in yet.",
+  )
+})
+
+test('Dream Weaver stages keep the order the data gives them', () => {
+  const list = [
+    stage('Dreamweaver', 'Orlando - Immortal Glory 6'),
+    stage('Dreamweaver', 'Lunar - Millennium Dream 6'),
+    stage('Dreamweaver', 'Lunar - Hidden String 2'),
+  ]
+  assert.deepEqual([...list].sort(compareStages).map((s) => s.name), list.map((s) => s.name))
 })
