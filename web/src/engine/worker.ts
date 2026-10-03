@@ -10,7 +10,8 @@ declare const nikkibase: {
   decodeWardrobe(text: string): Reply
   importSelections(text: string): Reply
   setWardrobe(ids: number[]): Reply
-  best(weights: number[], attrs: number[], skills: unknown, tags: unknown, scope: string, require: unknown): Reply
+  best(weights: number[], attrs: number[], skills: unknown, tags: unknown, scope: string, require: unknown, exclude: unknown): Reply
+  split(themes: unknown, scope: string): Reply
   worthStart(versions: unknown, settings: unknown, suits: unknown): Reply
   worthRun(session: unknown, count: unknown): Reply
   worthRank(session: unknown, filter: unknown, limit: unknown): Reply
@@ -94,6 +95,8 @@ function dispatch(type: string, payload: any) {
       return call(() => nikkibase.worthBases(payload.session))
     case 'places':
       return call(() => nikkibase.places())
+    case 'split':
+      return call(() => nikkibase.split(payload.themes, payload.scope))
     default:
       return call(() =>
         nikkibase.best(
@@ -103,6 +106,7 @@ function dispatch(type: string, payload: any) {
           payload.tags ?? null,
           payload.scope ?? 'wardrobe',
           payload.require ?? null,
+          payload.exclude ?? null,
         ),
       )
   }

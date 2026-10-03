@@ -1220,6 +1220,11 @@ h5 {
   min-width: 190px;
 }
 
+.ant-typography.nb-theme-note {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
 .ant-typography.nb-stage-variant {
   display: block;
   font-size: 12px;

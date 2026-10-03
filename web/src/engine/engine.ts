@@ -13,6 +13,7 @@ export type Outfit = {
   ownedPlaces: number[]
   skills?: SkillChoice
   missing?: number[][]
+  taken?: number
 }
 export type StageTags = Record<string, number>
 export type Decoded = { items: number; unresolved: number; known: number; ids: number[] }
@@ -44,6 +45,8 @@ export type WorthRow = {
 export type WorthNeeded = { key: string; missing: number[][] }
 export type WorthRanking = { rows: WorthRow[]; needed: WorthNeeded[] }
 export type WorthBase = { key: string; score: number; failing: boolean }
+export type ThemeSplit = { exclude: number[][]; taken: number[] }
+export type SplitTheme = { weights: number[]; attrs: number[]; tags?: StageTags; skills?: SkillRequest; require?: number[][] }
 
 const send = relay(() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }))
 
@@ -61,7 +64,9 @@ export const engine = {
     scope: 'wardrobe' | 'all' = 'wardrobe',
     skills?: SkillRequest,
     require?: number[][],
-  ) => send<Outfit>('best', { weights, attrs, skills, tags, scope, require }),
+    exclude?: number[],
+  ) => send<Outfit>('best', { weights, attrs, skills, tags, scope, require, exclude }),
+  split: (themes: SplitTheme[], scope: 'wardrobe' | 'all') => send<ThemeSplit>('split', { themes, scope }),
   worth: {
     start: (versions: WorthVersion[], settings: WorthSettings = null, suits: WorthSuit[] = []) =>
       send<WorthSession>('worthStart', { versions, settings, suits }),

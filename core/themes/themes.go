@@ -1,32 +1,27 @@
 package themes
 
 import (
-	"fmt"
 	"maps"
-	"regexp"
 	"slices"
 	"strconv"
+	"strings"
 
 	"github.com/danielradosa/nikkibase/core/optimizer"
 	"github.com/danielradosa/nikkibase/core/scoring"
 )
-
-var themeKey = regexp.MustCompile(`^(Story/(?:II-|III-)?\d+-\d+)-(\d+)(#.+)?$`)
 
 func Groups(keys []string) [][]int {
 	type member struct{ at, theme int }
 	members := map[string][]member{}
 	var order []string
 	for at, key := range keys {
-		m := themeKey.FindStringSubmatch(key)
-		if m == nil {
+		id, theme, ok := themeOf(key)
+		if !ok {
 			continue
 		}
-		id := m[1] + m[3]
-		if _, ok := members[id]; !ok {
+		if _, seen := members[id]; !seen {
 			order = append(order, id)
 		}
-		theme, _ := strconv.Atoi(m[2])
 		members[id] = append(members[id], member{at, theme})
 	}
 	var out [][]int
@@ -43,6 +38,35 @@ func Groups(keys []string) [][]int {
 		out = append(out, group)
 	}
 	return out
+}
+
+func themeOf(key string) (string, int, bool) {
+	base, variant, hasVariant := strings.Cut(key, "#")
+	name, story := strings.CutPrefix(base, "Story/")
+	if !story || hasVariant && variant == "" {
+		return "", 0, false
+	}
+	for _, volume := range []string{"III-", "II-"} {
+		if rest, ok := strings.CutPrefix(name, volume); ok {
+			name = rest
+			break
+		}
+	}
+	parts := strings.Split(name, "-")
+	if len(parts) != 3 {
+		return "", 0, false
+	}
+	for _, p := range parts {
+		if p == "" || strings.Trim(p, "0123456789") != "" {
+			return "", 0, false
+		}
+	}
+	theme, _ := strconv.Atoi(parts[2])
+	id := base[:strings.LastIndex(base, "-")]
+	if hasVariant {
+		id += "#" + variant
+	}
+	return id, theme, true
 }
 
 func Without(positions []optimizer.Position, exclude map[int]bool) []optimizer.Position {
@@ -74,7 +98,13 @@ func Split(n int, refs []int, solve func(theme int, exclude map[int]bool) optimi
 			}
 		}
 		slices.Sort(ids)
-		key := fmt.Sprint(theme, ids)
+		var b strings.Builder
+		b.WriteString(strconv.Itoa(theme))
+		for _, id := range ids {
+			b.WriteByte(',')
+			b.WriteString(strconv.Itoa(id))
+		}
+		key := b.String()
 		if r, ok := seen[key]; ok {
 			return r
 		}

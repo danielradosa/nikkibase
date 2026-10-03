@@ -1,11 +1,11 @@
 import { useLayoutEffect, useMemo } from 'react'
-import { Alert, Empty } from 'antd'
+import { Alert, Empty, Typography } from 'antd'
 import { useStore } from '../store'
 import { ATTRS, SLOTS, type Item } from '../items/items'
 import { FINDING, NAMES_WAIT, bookReads, comparisonRows, outfitText, resultView, type Place } from './comparison'
 import { skillsLine } from './skills'
 import { suitName } from '../worth/worth'
-import { missingMessage, stageKey, type Stage } from './stages'
+import { missingMessage, stageKey, themeGroup, themeNote, type Stage } from './stages'
 import { ENGINE_DOWN, manyUnscored, unscored } from '../wardrobe/wardrobeText'
 import WardrobeImport from '../wardrobe/WardrobeImport'
 import StagePicker from './StagePicker'
@@ -33,6 +33,7 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
   const suits = useMemo(() => new Map((items ?? []).filter((it) => it.suit).map((it) => [it.id, suitName(it.suit)])), [items])
   const naming = items === null && !itemsFailed
   const chosen = stages.find((s) => stageKey(s) === stage)
+  const group = chosen ? themeGroup(stages, chosen) : null
   const reads = bookReads(chosen?.mode, book)
   const rows = useMemo(() => comparisonRows(outfit, ideal, names, places, SLOTS, reads), [outfit, ideal, names, places, reads])
   const copyText = useMemo(
@@ -86,6 +87,11 @@ export default function BestOutfitTab({ stages, items, itemsFailed, tagNames, pl
       )}
 
       {chosen && <StageSummary stage={chosen} tagNames={tagNames} names={names} naming={naming} />}
+      {chosen && group && outfit?.taken !== undefined && (
+        <Typography.Paragraph type="secondary" className="nb-theme-note">
+          {themeNote(group, group.indexOf(chosen), outfit.taken)}
+        </Typography.Paragraph>
+      )}
 
       {view === 'first' && <ScoreWait />}
       {view === 'first' && <WaitLine text={FINDING} className="nb-outfit-wait" />}

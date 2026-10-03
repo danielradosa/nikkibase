@@ -407,3 +407,25 @@ export function groupTint(keys: readonly string[], scores: ReadonlyMap<string, S
   }
   return any ? { band: scored ? scoreBand(Math.round(total / scored)) : null, failing } : null
 }
+
+const THEME_NAME = /^((?:II-|III-)?\d+-\d+)-(\d+)$/
+
+export function themeGroup(stages: readonly Stage[], s: Stage): Stage[] | null {
+  const m = s.mode === 'Story' ? THEME_NAME.exec(s.name) : null
+  if (!m) return null
+  const group = stages
+    .filter((x) => x.mode === 'Story' && THEME_NAME.exec(x.name)?.[1] === m[1])
+    .sort((a, b) => Number(THEME_NAME.exec(a.name)?.[2]) - Number(THEME_NAME.exec(b.name)?.[2]))
+  return group.length > 1 ? group : null
+}
+
+const COUNT_WORDS = ['no', 'one', 'two', 'three', 'four', 'five']
+
+export function themeNote(group: readonly Stage[], at: number, excluded: number): string {
+  const base = THEME_NAME.exec(group[at]?.name ?? '')?.[1] ?? ''
+  const count = COUNT_WORDS[group.length] ?? String(group.length)
+  const others = group.length > 2 ? 'other themes wear' : 'other theme wears'
+  const head = `An item can be worn in only one of ${base}'s ${count} themes`
+  if (excluded === 0) return `${head}. Your ${others} nothing this outfit needs.`
+  return `${head}, so this outfit leaves out ${excluded === 1 ? 'the item' : `the ${excluded} items`} your ${others}.`
+}

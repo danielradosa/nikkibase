@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { groupTint, jumpOptions, pickerTree, placeOf, scoreBand, stageScores, stepStage, type IdealTable, type Stage } from '../../src/outfit/stages.ts'
+import { groupTint, jumpOptions, pickerTree, placeOf, scoreBand, stageScores, stepStage, themeGroup, themeNote, type IdealTable, type Stage } from '../../src/outfit/stages.ts'
 
 const W = [1, 2, 3, 4, 5]
 const A = [0, 1, 2, 3, 4]
@@ -143,4 +143,20 @@ test('scores fall in three bands, and a group takes the average of its scored st
   assert.deepEqual(groupTint(['a', 'c'], scores), { band: 'high', failing: true })
   assert.deepEqual(groupTint(['c'], scores), { band: null, failing: true })
   assert.equal(groupTint(['x'], scores), null)
+})
+
+test('a stage with several themes knows its other themes, in theme order', () => {
+  const list = [story('9-9-2'), story('9-8'), story('9-9-1'), story('9-9-3'), stage('Commission', '9-9'), story('II-4-1-2'), story('II-4-1-1'), story('10-9-1')]
+  assert.deepEqual(themeGroup(list, list[0])?.map((s) => s.name), ['9-9-1', '9-9-2', '9-9-3'])
+  assert.deepEqual(themeGroup(list, list[5])?.map((s) => s.name), ['II-4-1-1', 'II-4-1-2'])
+  assert.equal(themeGroup(list, list[1]), null)
+  assert.equal(themeGroup(list, list[4]), null)
+  assert.equal(themeGroup(list, list[7]), null, 'a lone theme has nothing to share')
+})
+
+test('the theme note says how many themes share the items and how many this outfit leaves out', () => {
+  const group = [story('9-9-1'), story('9-9-2'), story('9-9-3')]
+  assert.equal(themeNote(group, 1, 6), "An item can be worn in only one of 9-9's three themes, so this outfit leaves out the 6 items your other themes wear.")
+  assert.equal(themeNote(group.slice(0, 2), 0, 1), "An item can be worn in only one of 9-9's two themes, so this outfit leaves out the item your other theme wears.")
+  assert.equal(themeNote([story('II-4-1-1'), story('II-4-1-2')], 1, 0), "An item can be worn in only one of II-4-1's two themes. Your other theme wears nothing this outfit needs.")
 })

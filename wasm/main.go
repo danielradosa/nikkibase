@@ -11,6 +11,7 @@ import (
 	"github.com/danielradosa/nikkibase/core/catalogue"
 	"github.com/danielradosa/nikkibase/core/optimizer"
 	"github.com/danielradosa/nikkibase/core/scoring"
+	"github.com/danielradosa/nikkibase/core/themes"
 	"github.com/danielradosa/nikkibase/core/wardrobe"
 	"github.com/danielradosa/nikkibase/core/worth"
 )
@@ -44,6 +45,7 @@ func main() {
 		"worthRun":         js.FuncOf(e.worthRun),
 		"worthRank":        js.FuncOf(e.worthRank),
 		"worthBases":       js.FuncOf(e.worthBases),
+		"split":            js.FuncOf(e.split),
 		"places":           js.FuncOf(e.places),
 	}))
 	select {}
@@ -126,19 +128,15 @@ func (e *engine) setWardrobe(_ js.Value, args []js.Value) any {
 		`,"unresolved":0,"known":` + strconv.Itoa(e.known()) + `}`)
 }
 
-func (e *engine) best(_ js.Value, args []js.Value) any {
-	if e.catalogue == nil {
-		return fail("catalogue not loaded")
-	}
+func stageArg(weights, attrs, tags js.Value) scoring.Stage {
 	var st scoring.Stage
-	weights, attrs := args[0], args[1]
 	for p := range 5 {
 		st.Weights[p] = weights.Index(p).Float()
 		st.Attrs[p] = int8(attrs.Index(p).Int())
 	}
-	if len(args) > 3 && !args[3].IsNull() && !args[3].IsUndefined() {
+	if !tags.IsNull() && !tags.IsUndefined() {
 		st.Tags = map[int]int{}
-		entries := js.Global().Get("Object").Call("entries", args[3])
+		entries := js.Global().Get("Object").Call("entries", tags)
 		for i := range entries.Length() {
 			pair := entries.Index(i)
 			id, err := strconv.Atoi(pair.Index(0).String())
@@ -148,55 +146,96 @@ func (e *engine) best(_ js.Value, args []js.Value) any {
 			st.Tags[id] = pair.Index(1).Int()
 		}
 	}
+	return st
+}
 
-	ownedOnly := true
-	if len(args) > 4 && args[4].String() == "all" {
-		ownedOnly = false
+func requireArg(v js.Value) [][]int {
+	if v.IsNull() || v.IsUndefined() {
+		return nil
 	}
 	var required [][]int
-	if len(args) > 5 && !args[5].IsNull() && !args[5].IsUndefined() {
-		for i := range args[5].Length() {
-			set := args[5].Index(i)
-			ids := make([]int, 0, set.Length())
-			for j := range set.Length() {
-				ids = append(ids, set.Index(j).Int())
-			}
-			required = append(required, ids)
+	for i := range v.Length() {
+		set := v.Index(i)
+		ids := make([]int, 0, set.Length())
+		for j := range set.Length() {
+			ids = append(ids, set.Index(j).Int())
+		}
+		required = append(required, ids)
+	}
+	return required
+}
+
+func idsArg(v js.Value) map[int]bool {
+	if v.IsNull() || v.IsUndefined() {
+		return nil
+	}
+	out := make(map[int]bool, v.Length())
+	for i := range v.Length() {
+		out[v.Index(i).Int()] = true
+	}
+	return out
+}
+
+type skillRequest struct {
+	chosen, auto bool
+	levels       scoring.Levels
+	placement    scoring.Placement
+}
+
+func skillsArg(v js.Value) (skillRequest, bool) {
+	req := skillRequest{levels: scoring.MaxLevels}
+	if v.IsNull() || v.IsUndefined() {
+		return req, true
+	}
+	req.chosen = true
+	var ok bool
+	if req.levels, ok = worthLevels(v.Get("levels")); !ok {
+		return req, false
+	}
+	req.auto = v.Get("auto").Truthy()
+	if !req.auto {
+		req.placement = scoring.Placement{CharmSmile: attrCode(v.Get("charmSmile")), Smile: attrCode(v.Get("smile"))}
+		if req.placement.Smile == req.placement.CharmSmile || req.levels.Smile == 0 {
+			req.placement.Smile = -1
 		}
 	}
+	return req, true
+}
+
+func (req skillRequest) solve(space optimizer.Space, st scoring.Stage) (optimizer.Result, *scoring.Placement, scoring.Skills) {
+	switch {
+	case !req.chosen || req.levels.None():
+		return space.Best(st, scoring.Skills{}), nil, scoring.Skills{}
+	case req.auto:
+		outfit, p := space.BestPlacedAt(st, req.levels)
+		if req.levels.Smile == 0 {
+			p.Smile = -1
+		}
+		return outfit, &p, p.SkillsAt(req.levels)
+	default:
+		p := req.placement
+		skills := p.SkillsAt(req.levels)
+		return space.Best(st, skills), &p, skills
+	}
+}
+
+func (e *engine) best(_ js.Value, args []js.Value) any {
+	if e.catalogue == nil {
+		return fail("catalogue not loaded")
+	}
+	st := stageArg(args[0], args[1], arg(args, 3))
+	ownedOnly := !(len(args) > 4 && args[4].String() == "all")
+	required := requireArg(arg(args, 5))
 	v := e.view(ownedOnly)
-	positions, posOf, placeOf := v.positions, v.posOf, v.placeOf
+	positions, posOf, placeOf := themes.Without(v.positions, idsArg(arg(args, 6))), v.posOf, v.placeOf
 	space := optimizer.Require(positions, posOf, required)
 
-	var outfit optimizer.Result
-	var placement *scoring.Placement
-	skills := scoring.Skills{}
-	chosen := len(args) > 2 && !args[2].IsNull() && !args[2].IsUndefined()
-	levels := scoring.MaxLevels
-	if chosen {
-		var ok bool
-		if levels, ok = worthLevels(args[2].Get("levels")); !ok {
-			return fail("skill levels run from 0 to 9")
-		}
+	req, ok := skillsArg(arg(args, 2))
+	if !ok {
+		return fail("skill levels run from 0 to 9")
 	}
-	switch {
-	case !chosen || levels.None():
-		outfit = space.Best(st, skills)
-	case args[2].Get("auto").Truthy():
-		var p scoring.Placement
-		outfit, p = space.BestPlacedAt(st, levels)
-		if levels.Smile == 0 {
-			p.Smile = -1
-		}
-		placement, skills = &p, p.SkillsAt(levels)
-	default:
-		p := scoring.Placement{CharmSmile: attrCode(args[2].Get("charmSmile")), Smile: attrCode(args[2].Get("smile"))}
-		if p.Smile == p.CharmSmile || levels.Smile == 0 {
-			p.Smile = -1
-		}
-		placement, skills = &p, p.SkillsAt(levels)
-		outfit = space.Best(st, skills)
-	}
+	levels := req.levels
+	outfit, placement, skills := req.solve(space, st)
 	missing := optimizer.Unmet(outfit.Items, required)
 	var met [][]int
 	for _, set := range required {
