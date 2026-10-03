@@ -25,14 +25,14 @@ Calc ships with its maintainer's written permission, on the conditions in
 
 ## Rebuilding the bundle
 
-The bundle `north` rebuilds byte-for-byte from the files below
-(verified 2026-10-01, provenance included, with the build time fixed by
+The bundle `wasteland` rebuilds byte-for-byte from the files below
+(verified 2026-10-03, provenance included, with the build time fixed by
 `SOURCE_DATE_EPOCH`). With the source files in `.ai/research/sources/`, and the
 wiki dump extracted to `/tmp/fandom` and brought up to date by
 `fandom/patch-2026-09-29/merge.py` (see [Love Nikki Wiki](#love-nikki-wiki)):
 
 ```sh
-SOURCE_DATE_EPOCH=1790812800 go run ./cmd/bundle \
+SOURCE_DATE_EPOCH=1790985600 go run ./cmd/bundle \
   -fandom  /tmp/fandom/lovenikki673_pages_current-2026-09-29.xml \
   -stages       .ai/research/sources/community/seal100x/levels.js \
   -stage-values .ai/research/sources/community/aojiao/levels.js \
@@ -45,7 +45,7 @@ SOURCE_DATE_EPOCH=1790812800 go run ./cmd/bundle \
   -calc-grades -calc-recipes \
   -calc-suits .ai/research/sources/nikkicalc/suits-v0.15.json \
   -out     web/public/data \
-  -version north
+  -version wasteland
 ```
 
 A version directory is served as immutable once deployed. Versions are named
@@ -54,6 +54,14 @@ lists them: `apple`, `lilith`, `cloud`, `pigeon`, `north`, `wasteland`,
 `ruin`; after `ruin` the list starts again with a number (`apple-2`,
 `lilith-2`, …). `SOURCE_DATE_EPOCH` is the build day's midnight UTC. Versions
 built before `apple` are named after their build day (`2026-09-29b`).
+
+`wasteland` adds the 12 Dream Weaver battles to `stages.json` (607 stages);
+every other stage is the same. In `items.json` and `items.bin` one name
+changes, 88154 "Nikki's Companionship", now with the wiki's straight
+apostrophe: the wiki pages that write an item's grades as numbered
+parameters (`{{Attributes|1=Gorgeous|2=A|…}}`, 15 of them) are now read, which
+moves 9,737 rows to another place in both files without changing any grade,
+stat, tag or place; `acquire.json` is the same.
 
 `north` changes `items.json` and `acquire.json` from `pigeon`, and only in
 how item names are spelled; every grade, stat, score and stage is the same.

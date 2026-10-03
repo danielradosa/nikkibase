@@ -178,12 +178,27 @@ footer note in the product.
 
 ## Content ceiling
 
-Every stage released on the Global server as of 2026-09-23 is covered: Story
+Every stage released on the Global server as of 2026-10-02 is covered: Story
 Volumes I and II, Volume III chapters 1-2 and the first seven stages of
-chapter 3, Commission Acts 1-20, Arena and Co-op (`data/stage-scope.json`).
-Event and Dream Weaver stages are not. The stage sources are kept against the
-Chinese server, which runs ahead; the scope file is widened by hand as Global
-releases more.
+chapter 3, Commission Acts 1-20, Arena, Co-op and 12 Dream Weaver battles
+(`data/stage-scope.json`). Event stages are not: the stage source's five are
+one 2018 season of Oath Hall, which Global runs only now and then. The stage
+sources are kept against the Chinese server, which runs ahead; the scope file
+is widened by hand as Global releases more.
+
+## Dream Weaver
+
+The 12 Dream Weaver battles are the ones the stage source lists, all in the
+first routes of Lunar, Orlando, Yvette and Chloris, which Global has had since
+2018-19. Battles in their later or time-limited routes, if there are any, are
+not in the source. Their names come from the wiki's Dreamland route pages
+(character, route and chapter, `data/stage-display-names.json`), but the wiki
+gives no weights or tags for them, so those come from the Chinese stage source
+alone. Five chapters' dialogue asks for the style the source scores (Officer &
+Wine 4, Conventional Magic 7, Time Magic 5, Starry Reunion 3, Forest's Watch 2);
+the other seven are matched by their place in the routes. Yvette - Time Magic 5
+and Chloris - Forest's Watch 2 weigh all five attributes the same in the source,
+which may stand in for numbers it does not have.
 
 ## Stage rules
 

@@ -26,7 +26,8 @@ every place it knowingly differs from the game.
   items, gathered from community sources (see [SOURCES.md](SOURCES.md)).
 - Stage weights and style-tag bonuses for every stage released on the Global
   server: Story Volumes I–II and Volume III to chapter 3, Commission Acts 1–20,
-  Arena and Co-op, at Maiden and Princess where the two differ.
+  Arena, Co-op and the 12 styling battles of Dream Weaver's permanent routes,
+  at Maiden and Princess where the two differ.
 - The game's 34 wearable places, including which hand-held items exclude each
   other, and the accessory penalty.
 - The items 82 Story stages require. Every suggested outfit wears them, and the
@@ -61,8 +62,8 @@ another calculator, not against the game.
   not checked.
 - **Whether you pass.** It doesn't know the opponent's score or the B/A/S
   thresholds.
-- **Events.** Event and Dream Weaver stages aren't in the data, and new Global
-  chapters are added as they're released.
+- **Events.** Event stages aren't in the data, and new Global chapters are
+  added as they're released.
 
 ## Importing a wardrobe
 

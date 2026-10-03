@@ -1,4 +1,4 @@
-# Whole-catalogue best score and outfit size for every stage in bundle north.
+# Whole-catalogue best score and outfit size for every stage in bundle wasteland.
 # Regenerate after a deliberate change: go test -tags dataset ./golden/ -run Pinned -update
 Arena	Beach Party	67355	32
 Arena	Where Is Spring	74129	32
@@ -605,3 +605,15 @@ Story	III-3-4	139091	32
 Story	III-3-5	145545	32
 Story	III-3-Side 1	137606	31
 Story	III-3-Side 2	119698	31
+Dreamweaver	Lunar - Millennium Dream 6	140245	32
+Dreamweaver	Lunar - Hidden String 2	143427	32
+Dreamweaver	Lunar - Hidden String 7	163786	32
+Dreamweaver	Lunar - Blue Phoenix's Letter 2	156508	32
+Dreamweaver	Lunar - Blue Phoenix's Letter 11	134717	32
+Dreamweaver	Orlando - Immortal Glory 6	132094	32
+Dreamweaver	Orlando - Officer & Wine 4	185134	31
+Dreamweaver	Yvette - Bunny in March 2	162684	32
+Dreamweaver	Yvette - Conventional Magic 7	188828	31
+Dreamweaver	Yvette - Time Magic 5	119075	31
+Dreamweaver	Chloris - Starry Reunion 3	129539	31
+Dreamweaver	Chloris - Forest's Watch 2	60882	31
