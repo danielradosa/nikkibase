@@ -13,8 +13,8 @@
       "redistribution": "permitted, with attribution and share-alike",
       "status": "redistributable",
       "attributionRequired": true,
-      "attribution": "Adapted from the Love Nikki Wiki's item, suit and event pages (dump of 2026-07-29, with the pages changed up to 2026-09-22 read through the wiki's API) by its editors: names, slots, grades, style tags, suits and how each item is obtained extracted, the last rewritten as short lines, names respaced and some corrected, misnumbered pages read at the item they describe or dropped, pages titled after another item renamed, and merged with the sources below. Each item's page is lovenikki.fandom.com/wiki/<item name>. This wiki-derived data is offered under CC BY-SA 3.0.",
-      "fields": ["item names", "slots and wearable places", "letter grades", "style tags", "style codes (Template:S)", "Maiden tags for Story 5-12, 6-7 and 6-9", "items story stages require, from their quest field", "how each item is obtained (shops and prices, crafting recipes, evolutions, customizations, stage drops, events and packs), from item pages and their categories and, for items without one, suit pages, which also name the event or shop behind the packed table's vaguer lines", "the event behind lines that say only \"Limited event\", \"Recharge\" and the like, from the one event page that lists the item's suit", "the recharge channels items were rerun on, from the Events timeline", "the suit each item belongs to, as its suit page is titled, from the suit pages that list it and its own page's suit field, and the Chinese name of each suit"]
+      "attribution": "Adapted from the Love Nikki Wiki's item, suit, event and Dreamland pages (dump of 2026-07-29, with the pages changed up to 2026-09-22 read through the wiki's API) by its editors: names, slots, grades, style tags, suits and how each item is obtained extracted, the last rewritten as short lines, names respaced and some corrected, misnumbered pages read at the item they describe or dropped, pages titled after another item renamed, and merged with the sources below. Each item's page is lovenikki.fandom.com/wiki/<item name>. This wiki-derived data is offered under CC BY-SA 3.0.",
+      "fields": ["item names", "slots and wearable places", "letter grades", "style tags", "style codes (Template:S)", "Maiden tags for Story 5-12, 6-7 and 6-9", "items story stages require, from their quest field", "how each item is obtained (shops and prices, crafting recipes, evolutions, customizations, stage drops, events and packs), from item pages and their categories and, for items without one, suit pages, which also name the event or shop behind the packed table's vaguer lines", "the event behind lines that say only \"Limited event\", \"Recharge\" and the like, from the one event page that lists the item's suit", "the recharge channels items were rerun on, from the Events timeline", "the suit each item belongs to, as its suit page is titled, from the suit pages that list it and its own page's suit field, and the Chinese name of each suit", "English names of the Dream Weaver stages, from its Dreamland route pages"]
     },
     {
       "id": "aojiao-nikkiup2u3",
@@ -27,7 +27,7 @@
       "status": "permission-required",
       "attributionRequired": false,
       "attribution": "nikkiup2u3 by 傲娇攻略组 (aojiaogongluezu)",
-      "fields": ["every spirit's flat bonus", "letter grades, style tags and places for ~14,800 items no other source has", "exact weights and tag awards for every stage except co-op", "how to get the ~14,600 items the wiki has no page for, from its source column, in English, keeping what an earlier copy of the table gave where a later one moved a time-limited item to the shop or crafting", "the suit each item belongs to where the wiki places it in none, under the English title of the wiki's suit page that gives the same Chinese name, or the suit its other pieces are in", "with Nikki Calc, the grade on the item-page grades both give otherwise", "the base of customizations and evolutions the wiki names none for"]
+      "fields": ["every spirit's flat bonus", "letter grades, style tags and places for ~14,800 items no other source has", "exact weights and tag awards for every stage except co-op and Dream Weaver", "how to get the ~14,600 items the wiki has no page for, from its source column, in English, keeping what an earlier copy of the table gave where a later one moved a time-limited item to the shop or crafting", "the suit each item belongs to where the wiki places it in none, under the English title of the wiki's suit page that gives the same Chinese name, or the suit its other pieces are in", "with Nikki Calc, the grade on the item-page grades both give otherwise", "the base of customizations and evolutions the wiki names none for"]
     },
     {
       "id": "lovenikkiusa-nikkiup2u",
@@ -53,7 +53,7 @@
       "status": "permission-required",
       "attributionRequired": false,
       "attribution": "nikkiup2u3_data by seal100x",
-      "fields": ["the stage list, modes and rules", "co-op stage weights and tag awards", "Maiden notes", "items stages require, where the wiki names none"]
+      "fields": ["the stage list, modes and rules", "co-op and Dream Weaver stage weights and tag awards", "Maiden notes", "items stages require, where the wiki names none"]
     },
     {
       "id": "nikki-calc",

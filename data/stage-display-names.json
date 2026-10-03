@@ -1,4 +1,77 @@
 {
   "note": "The game's English names for stages the stage sources name otherwise. 'stage' is the name the sources give once read ('Lunar 1-6'), 'name' the one the site shows, 'basis' where the name comes from. Once a mode has an entry, every stage of that mode that ships must have one, and every entry must match a stage that ships, or cmd/bundle fails.",
-  "names": []
+  "names": [
+    {
+      "mode": "Dreamweaver",
+      "stage": "Lunar 1-6",
+      "name": "Lunar - Millennium Dream 6",
+      "basis": "Love Nikki Wiki, \"Dreamland - Lunar/Millennium Dream\" (revision 2025-11-13): Lunar's first Dreamland route, chapter 6 \"Youth\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Lunar 2-2",
+      "name": "Lunar - Hidden String 2",
+      "basis": "Love Nikki Wiki, \"Dreamland - Lunar/Hidden String\" (revision 2025-11-14): Lunar's second Dreamland route, chapter 2 \"Elegant Melody\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Lunar 2-7",
+      "name": "Lunar - Hidden String 7",
+      "basis": "Love Nikki Wiki, \"Dreamland - Lunar/Hidden String\" (revision 2025-11-14): Lunar's second Dreamland route, chapter 7 \"One String, One Heart\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Lunar 3-2",
+      "name": "Lunar - Blue Phoenix's Letter 2",
+      "basis": "Love Nikki Wiki, \"Dreamland - Lunar/Blue Phoenix's Letter\" (revision 2025-11-14): Lunar's third Dreamland route, chapter 2 \"Lover in Memory\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Lunar 3-11",
+      "name": "Lunar - Blue Phoenix's Letter 11",
+      "basis": "Love Nikki Wiki, \"Dreamland - Lunar/Blue Phoenix's Letter\" (revision 2025-11-14): Lunar's third Dreamland route, chapter 11 \"Morning of Farewell\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Orlando 1-6",
+      "name": "Orlando - Immortal Glory 6",
+      "basis": "Love Nikki Wiki, \"Dreamland - Orlando/Immortal Glory\" (revision 2025-11-14): Orlando's first Dreamland route, chapter 6 \"Graduation Ceremony\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Orlando 2-4",
+      "name": "Orlando - Officer & Wine 4",
+      "basis": "Love Nikki Wiki, \"Dreamland - Orlando/Officer & Wine\" (revision 2025-11-14): Orlando's second Dreamland route, chapter 4 \"Officer's Invitation\", counting the Trial chapters; the chapter's dialogue asks for an elegant evening gown"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Yvette 1-2",
+      "name": "Yvette - Bunny in March 2",
+      "basis": "Love Nikki Wiki, \"Dreamland - Yvette/Bunny in March\" (revision 2025-11-14): Yvette's first Dreamland route, chapter 2 \"Breakout\", counting the Trial chapters"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Yvette 2-7",
+      "name": "Yvette - Conventional Magic 7",
+      "basis": "Love Nikki Wiki, \"Dreamland - Yvette/Conventional Magic\" (revision 2025-11-14): Yvette's second Dreamland route, chapter 7 \"Regret of Growing Up\", counting the Trial chapters; the chapter's dialogue asks for a cute dress"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Yvette 3-5",
+      "name": "Yvette - Time Magic 5",
+      "basis": "Love Nikki Wiki, \"Dreamland - Yvette/Time Magic\" (revision 2025-11-14): Yvette's third Dreamland route, chapter 5 \"Mother's Message\", counting the Trial chapters; the chapter's dialogue asks for an Office Lady suit"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Chloris 1-3",
+      "name": "Chloris - Starry Reunion 3",
+      "basis": "Love Nikki Wiki, \"Dreamland - Chloris/Starry Reunion\" (revision 2025-11-13): Chloris's first Dreamland route, chapter 3 \"Dance of Fireflies\", counting the Trial chapters; the chapter's dialogue asks for a gorgeous dancing dress"
+    },
+    {
+      "mode": "Dreamweaver",
+      "stage": "Chloris 2-2",
+      "name": "Chloris - Forest's Watch 2",
+      "basis": "Love Nikki Wiki, \"Dreamland - Chloris/Forest's Watch\" (revision 2025-11-13): Chloris's second Dreamland route, chapter 2 \"Challenge in the Library\", counting the Trial chapters; the chapter's dialogue asks for a pure and elegant style"
+    }
+  ]
 }

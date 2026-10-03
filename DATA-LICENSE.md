@@ -55,8 +55,10 @@ item pages, it takes the suit each item belongs to, named as the suit's page is
 titled, for the suit column of `items.json`, and each suit page's Chinese name,
 which gives the English name of the suits nikkiup2u3 names in Chinese. It also
 uses the style codes of Template:S; from the stage pages of Story 5-12, 6-7 and
-6-9, which tags Maiden pays; and, from the quest field of 57 story stage pages,
-the items those stages require. All of this is offered under the same licence,
+6-9, which tags Maiden pays; from the quest field of 57 story stage pages,
+the items those stages require; and, from its Dreamland route pages, the
+English names of the 12 Dream Weaver stages (`data/stage-display-names.json`).
+All of this is offered under the same licence,
 CC BY-SA 3.0.
 Attribution: the Love Nikki Wiki and its editors, who are listed on the site
 under *Credits & licences*; each item's page is
