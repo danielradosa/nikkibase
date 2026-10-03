@@ -13,6 +13,7 @@ type Version struct {
 	Stage   scoring.Stage
 	Require [][]int
 	Ideal   int
+	Exclude []int
 }
 
 type Settings struct {
@@ -86,10 +87,17 @@ type Session struct {
 	pieces   [3][]piece
 	cons     []int32
 	suitRun  *suitRun
+	own      [][][]int32
 }
 
 func NewSession(positions []optimizer.Position, posOf map[int]int, owned func(int32) bool, versions []Version, s Settings) *Session {
 	l := newLayout(positions, posOf, owned)
+	left := map[int]bool{}
+	for _, v := range versions {
+		for _, id := range v.Exclude {
+			left[id] = true
+		}
+	}
 	if prunable(versions) {
 		protected := make([]bool, len(l.items))
 		for _, v := range versions {
@@ -101,7 +109,7 @@ func NewSession(positions []optimizer.Position, posOf map[int]int, owned func(in
 				}
 			}
 		}
-		l.prune(func(i int32) bool { return protected[i] })
+		l.prune(func(i int32) bool { return protected[i] }, func(i int32) bool { return left[l.items[i].ID] })
 	}
 	session := &Session{
 		l:        l,
@@ -112,6 +120,21 @@ func NewSession(positions []optimizer.Position, posOf map[int]int, owned func(in
 		stages:   make([]*stage, len(versions)),
 		paired:   map[[2]int32]bool{},
 		taken:    make([]bool, len(l.items)),
+	}
+	session.own = make([][][]int32, len(versions))
+	for vi, v := range versions {
+		if len(v.Exclude) == 0 {
+			continue
+		}
+		pool := make([][]int32, len(l.ownedIn))
+		for at, mine := range l.ownedIn {
+			for _, i := range mine {
+				if !slices.Contains(v.Exclude, l.items[i].ID) {
+					pool[at] = append(pool[at], i)
+				}
+			}
+		}
+		session.own[vi] = pool
 	}
 	session.addSuits(s.Suits)
 	return session

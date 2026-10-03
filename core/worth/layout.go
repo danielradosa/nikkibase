@@ -110,7 +110,7 @@ func newLayout(positions []optimizer.Position, posOf map[int]int, owned func(int
 	return l
 }
 
-func (l *layout) prune(protected func(int32) bool) {
+func (l *layout) prune(protected, left func(int32) bool) {
 	var buckets [32][]int32
 	fill := make([][]int32, len(l.positions))
 	for at := range l.positions {
@@ -131,7 +131,7 @@ func (l *layout) prune(protected func(int32) bool) {
 			base := l.pattern(i) &^ free
 			for sub := free; ; sub = (sub - 1) & free {
 				for _, j := range buckets[base|sub] {
-					if j != i && l.covers(j, i) && (!owner || j < i) {
+					if j != i && l.covers(j, i) && (!owner || j < i) && (owner || !left(j)) {
 						return true
 					}
 				}
@@ -381,6 +381,18 @@ func (l *layout) withExtras(base [][]int32, extras []int32) [][]int32 {
 		pool[at] = slices.Insert(slices.Clone(pool[at]), k, i)
 	}
 	return pool
+}
+
+func (l *layout) positionsFrom(own [][]int32, extras []int32) []optimizer.Position {
+	if own == nil {
+		return l.positionsWith(extras)
+	}
+	out := slices.Clone(l.positions)
+	pool := l.withExtras(own, extras)
+	for at := range out {
+		out[at].Items = l.itemsOf(pool[at])
+	}
+	return out
 }
 
 func (l *layout) positionsWith(extras []int32) []optimizer.Position {

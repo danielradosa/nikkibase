@@ -8,6 +8,7 @@ import (
 )
 
 type stage struct {
+	own      [][]int32
 	failing  bool
 	missing  [][]int
 	extras   []int32
@@ -71,6 +72,13 @@ func cloneSides(sides []*side) []*side {
 	return out
 }
 
+func (st *stage) fill(l *layout) [][]int32 {
+	if st.own != nil {
+		return st.own
+	}
+	return l.fillIn
+}
+
 func (st *stage) isMember(i int32) bool {
 	_, ok := slices.BinarySearch(st.members, i)
 	return ok
@@ -96,19 +104,20 @@ func (s *Session) process(vi int, extras []int32) *stage {
 
 func (s *Session) examine(vi int, extras []int32) *stage {
 	l, v := s.l, &s.versions[vi]
-	st := &stage{extras: extras}
+	st := &stage{extras: extras, own: s.own[vi]}
+	fill := st.fill(l)
 	switch {
 	case len(v.Require) > 0:
-		space := optimizer.Require(l.positionsWith(extras), l.posOf, v.Require)
-		base := l.withExtras(l.fillIn, extras)
+		space := optimizer.Require(l.positionsFrom(st.own, extras), l.posOf, v.Require)
+		base := l.withExtras(fill, extras)
 		for _, b := range space.Branches() {
 			st.branches = append(st.branches, l.branchOf(b, base))
 		}
 		st.members = s.membersOf(v)
-	case len(extras) == 0:
+	case len(extras) == 0 && st.own == nil:
 		st.branches = []*branch{l.plain}
 	default:
-		st.branches = []*branch{l.newBranch(l.withExtras(l.fillIn, extras), nil)}
+		st.branches = []*branch{l.newBranch(l.withExtras(fill, extras), nil)}
 	}
 
 	st.cU = l.coefOf(v.Stage, nil)
@@ -383,7 +392,7 @@ func (sc *scorer) memberGain(m int32) int32 {
 func (sc *scorer) enginePlaced(items ...int32) (int32, scoring.Placement) {
 	s, st, v := sc.s, sc.st, sc.v
 	extras := append(append(slices.Clone(st.extras), st.added...), items...)
-	space := optimizer.Require(s.l.positionsWith(extras), s.l.posOf, v.Require)
+	space := optimizer.Require(s.l.positionsFrom(st.own, extras), s.l.posOf, v.Require)
 	if s.skills {
 		r, p := space.BestPlacedAt(v.Stage, s.levels)
 		return int32(r.Score - st.base), p
@@ -401,7 +410,7 @@ func (sc *scorer) reachFor(p scoring.Placement) {
 	}
 	c := l.coefOf(sc.v.Stage, p.SkillsAt(s.levels))
 	sd := l.newSide()
-	l.fill(sd, l.withExtras(l.fillIn, st.extras), c)
+	l.fill(sd, l.withExtras(st.fill(l), st.extras), c)
 	for _, i := range st.added {
 		v, f := l.value(c, i)
 		l.put(sd, i, v, f)

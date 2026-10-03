@@ -8,7 +8,9 @@ import (
 	"strings"
 	"syscall/js"
 
+	"github.com/danielradosa/nikkibase/core/optimizer"
 	"github.com/danielradosa/nikkibase/core/scoring"
+	"github.com/danielradosa/nikkibase/core/themes"
 	"github.com/danielradosa/nikkibase/core/worth"
 )
 
@@ -44,6 +46,7 @@ func (e *engine) worthStart(_ js.Value, args []js.Value) any {
 		return fail(msg)
 	}
 	settings.Suits = suits
+	e.splitThemes(versions, settings)
 	v := e.view(false)
 	e.worth = worth.NewSession(v.positions, v.posOf, e.pool(true), versions, settings)
 	if e.session == 0 {
@@ -51,6 +54,32 @@ func (e *engine) worthStart(_ js.Value, args []js.Value) any {
 	}
 	e.session++
 	return result(`{"session":` + strconv.Itoa(e.session) + `,"total":` + strconv.Itoa(len(versions)) + `}`)
+}
+
+func (e *engine) splitThemes(versions []worth.Version, settings worth.Settings) {
+	keys := make([]string, len(versions))
+	for i, v := range versions {
+		keys[i] = v.Key
+	}
+	owned := e.view(true)
+	for _, group := range themes.Groups(keys) {
+		solve := func(k int, exclude map[int]bool) optimizer.Result {
+			v := versions[group[k]]
+			space := optimizer.Require(themes.Without(owned.positions, exclude), owned.posOf, v.Require)
+			if settings.Skills && !settings.Levels.None() {
+				r, _ := space.BestPlacedAt(v.Stage, settings.Levels)
+				return r
+			}
+			return space.Best(v.Stage, nil)
+		}
+		refs := make([]int, len(group))
+		for k := range group {
+			refs[k] = solve(k, nil).Score
+		}
+		for k, ids := range themes.Others(themes.Settle(themes.Split(len(group), refs, solve), solve)) {
+			versions[group[k]].Exclude = ids
+		}
+	}
 }
 
 func (e *engine) worthRun(_ js.Value, args []js.Value) any {

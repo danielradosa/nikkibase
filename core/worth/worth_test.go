@@ -160,7 +160,12 @@ type tally struct {
 func checkGains(t *testing.T, trial int, fx *fixture, s *Session, n *tally) {
 	t.Helper()
 	for vi, v := range fx.versions {
-		base := fx.search(fx.owned2(), v)
+		has := func(extra ...int) func(int) bool {
+			return func(id int) bool {
+				return !slices.Contains(v.Exclude, id) && (fx.owned[id] || slices.Contains(extra, id))
+			}
+		}
+		base := fx.search(has(), v)
 		st := s.stages[vi]
 		if unmet := optimizer.Unmet(base.Items, v.Require); len(unmet) > 0 {
 			if !st.failing {
@@ -175,7 +180,7 @@ func checkGains(t *testing.T, trial int, fx *fixture, s *Session, n *tally) {
 			t.Fatalf("trial %d %s: the session starts from %d, the engine from %d", trial, v.Key, st.base, base.Score)
 		}
 		for _, id := range fx.unowned() {
-			want := fx.search(fx.with(id), v).Score - base.Score
+			want := fx.search(has(id), v).Score - base.Score
 			got := s.gainOf(vi, id)
 			n.pairs++
 			if got == want {
