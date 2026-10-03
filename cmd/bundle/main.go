@@ -20,7 +20,7 @@ import (
 
 type config struct {
 	itemsPath, dumpPath, knownPath, stagesPath            string
-	stageValuesPath, stageNamesPath                       string
+	stageValuesPath, stageNamesPath, stageDisplayPath     string
 	stageScopePath, stageDifficultyPath, stageRulesPath   string
 	packedPath, namesPath, keysPath, subgradesPath        string
 	calcSuitsPath, packedFirstPath                        string
@@ -41,6 +41,7 @@ func main() {
 	flag.StringVar(&c.stagesPath, "stages", "", "path to the stage source's levels.js: the stage list, modes and rules, and weights and tag awards where -stage-values has none")
 	flag.StringVar(&c.stageValuesPath, "stage-values", "", "path to a levels.js whose exact weights and tag awards replace -stages' on every stage it carries")
 	flag.StringVar(&c.stageNamesPath, "stage-names", "", "path to a bilingual levels.js giving English names to stages -stages names in Chinese only")
+	flag.StringVar(&c.stageDisplayPath, "stage-display-names", "data/stage-display-names.json", "the game's English names for stages the sources name otherwise; empty for none")
 	flag.StringVar(&c.stageScopePath, "stage-scope", "data/stage-scope.json", "the stages released on the Global server; empty keeps every stage")
 	flag.StringVar(&c.stageDifficultyPath, "stage-difficulty", "data/stage-difficulty.json", "story stages whose Maiden numbers differ from Princess's; empty for none")
 	flag.StringVar(&c.stageRulesPath, "stage-rules", "data/stage-rules.json", "the items particular stages require; empty for none")
@@ -611,6 +612,15 @@ func readStages(c config, raw []byte, corrections map[string]pipeline.StageCorre
 			return nil, stats, err
 		}
 		if err := pipeline.ApplyStageNames(stages, b); err != nil {
+			return nil, stats, err
+		}
+	}
+	if c.stageDisplayPath != "" {
+		names, err := readOptional(c.stageDisplayPath, pipeline.ReadStageDisplayNames)
+		if err != nil {
+			return nil, stats, err
+		}
+		if err := pipeline.ApplyStageDisplayNames(stages, names); err != nil {
 			return nil, stats, err
 		}
 	}

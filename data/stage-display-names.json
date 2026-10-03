@@ -1,0 +1,4 @@
+{
+  "note": "The game's English names for stages the stage sources name otherwise. 'stage' is the name the sources give once read ('Lunar 1-6'), 'name' the one the site shows, 'basis' where the name comes from. Once a mode has an entry, every stage of that mode that ships must have one, and every entry must match a stage that ships, or cmd/bundle fails.",
+  "names": []
+}
