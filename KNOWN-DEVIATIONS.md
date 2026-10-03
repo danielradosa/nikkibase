@@ -200,6 +200,19 @@ the other seven are matched by their place in the routes. Yvette - Time Magic 5
 and Chloris - Forest's Watch 2 weigh all five attributes the same in the source,
 which may stand in for numbers it does not have.
 
+## Stages with several themes
+
+Story 9-6 and 10-9 have two themes and 9-9 has three, and an item worn in one
+theme can't be worn in another. NikkiBase splits the items between a stage's
+themes: it tries every order of the themes, lets the weakest theme take back
+items another theme wears, and keeps the split in which the weakest theme
+scores the largest share of what it would score alone. This is a search, not a
+proof: on small made-up wardrobes built to make every theme want the same items
+it finds the best split about 97 times in 100, and is at most 7% short of it.
+The best possible outfits use the same split over every item in the game. In
+Worth getting, an item's gain on such a theme is measured with the split held
+as it is, without splitting again for the item.
+
 ## Stage rules
 
 Items a stage requires (`data/stage-rules.json`) are enforced: every best
