@@ -65,6 +65,28 @@ func (e *engine) worthRun(_ js.Value, args []js.Value) any {
 	return result(`{"done":` + strconv.Itoa(done) + `,"total":` + strconv.Itoa(total) + `}`)
 }
 
+func (e *engine) worthBases(_ js.Value, args []js.Value) any {
+	if !e.live(args) {
+		return fail("no session")
+	}
+	var b strings.Builder
+	b.WriteString(`{"bases":[`)
+	for i, base := range e.worth.Bases() {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		b.WriteString(`{"key":`)
+		writeString(&b, base.Key)
+		b.WriteString(`,"score":`)
+		b.WriteString(strconv.Itoa(base.Score))
+		b.WriteString(`,"failing":`)
+		b.WriteString(strconv.FormatBool(base.Failing))
+		b.WriteByte('}')
+	}
+	b.WriteString(`]}`)
+	return result(b.String())
+}
+
 func (e *engine) worthRank(_ js.Value, args []js.Value) any {
 	if !e.live(args) {
 		return fail("no session")

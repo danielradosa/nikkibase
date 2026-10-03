@@ -43,6 +43,7 @@ func main() {
 		"worthStart":       js.FuncOf(e.worthStart),
 		"worthRun":         js.FuncOf(e.worthRun),
 		"worthRank":        js.FuncOf(e.worthRank),
+		"worthBases":       js.FuncOf(e.worthBases),
 		"places":           js.FuncOf(e.places),
 	}))
 	select {}

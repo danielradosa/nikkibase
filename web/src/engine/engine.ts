@@ -43,6 +43,7 @@ export type WorthRow = {
 }
 export type WorthNeeded = { key: string; missing: number[][] }
 export type WorthRanking = { rows: WorthRow[]; needed: WorthNeeded[] }
+export type WorthBase = { key: string; score: number; failing: boolean }
 
 const send = relay(() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' }))
 
@@ -67,5 +68,6 @@ export const engine = {
     run: (session: number, count: number) => send<WorthProgress>('worthRun', { session, count }),
     rank: (session: number, filter: WorthFilter, limit: number) =>
       send<WorthRanking>('worthRank', { session, filter, limit }),
+    bases: (session: number) => send<{ bases: WorthBase[] }>('worthBases', { session }).then((r) => r.bases),
   },
 }

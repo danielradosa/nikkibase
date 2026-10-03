@@ -14,6 +14,7 @@ declare const nikkibase: {
   worthStart(versions: unknown, settings: unknown, suits: unknown): Reply
   worthRun(session: unknown, count: unknown): Reply
   worthRank(session: unknown, filter: unknown, limit: unknown): Reply
+  worthBases(session: unknown): Reply
   places(): Reply
 }
 type Reply = { ok: true; json: string } | { ok: false; error: string }
@@ -89,6 +90,8 @@ function dispatch(type: string, payload: any) {
       return call(() => nikkibase.worthRun(payload.session, payload.count))
     case 'worthRank':
       return call(() => nikkibase.worthRank(payload.session, payload.filter, payload.limit))
+    case 'worthBases':
+      return call(() => nikkibase.worthBases(payload.session))
     case 'places':
       return call(() => nikkibase.places())
     default:

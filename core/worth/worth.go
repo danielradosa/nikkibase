@@ -59,6 +59,12 @@ type Ranking struct {
 	Needed []Needed
 }
 
+type Base struct {
+	Key     string
+	Score   int
+	Failing bool
+}
+
 const examples = 5
 
 type Session struct {
@@ -133,6 +139,15 @@ func (s *Session) Run(n int) (done, total int) {
 		s.done++
 	}
 	return s.done, len(s.versions)
+}
+
+func (s *Session) Bases() []Base {
+	out := make([]Base, s.done)
+	for vi := range s.done {
+		st := s.stages[vi]
+		out[vi] = Base{Key: s.versions[vi].Key, Score: st.base, Failing: st.failing}
+	}
+	return out
 }
 
 func (s *Session) owns(id int) bool {
